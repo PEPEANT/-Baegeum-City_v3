@@ -47,6 +47,8 @@
 - [Restored UI Surface Redesign Plan](plans/restored-ui-surface-redesign.md): Pre-redesign checklist for the restored playable shell, including My Info, home, outside, phone, city, asset, ranking, chat, and online boundaries.
 - [Restored Lover And Relationship System Plan](plans/restored-lover-relationship-system.md): Planning draft for lover/relationship v2, including My Info social summaries, phone relationship app depth, affection/trust/stability/risk, relationship logs, and event boundaries.
 - [Restored Phone App Ecosystem Plan](plans/restored-phone-app-ecosystem.md): Planning draft for the phone OS, app store, BaeTalk messenger, relationship app, virtual community board, and app separation rules.
+- [Restored Stock Market System Plan](plans/restored-stock-market-system.md): Planning draft for the realistic-looking fictional market app, including Domestic, United States, Crypto Spot, Crypto Leverage, Baegeum Electronics V0.1, and DP-only virtual candles.
+- [Restored Life Minigame System Plan](plans/restored-life-minigame-system.md): Planning draft for convenience-store and fast-food work minigames, including deterministic task scoring, DP wage envelopes, condition effects, and relationship hooks.
 - [Restored Feature Plan Template](templates/restored-feature-plan-template.md): Required sections for restored feature plans, including job/occupation impact, ranking impact, chat impact, online authority, assets, and verification.
 
 ## AI Operating Loop

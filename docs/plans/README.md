@@ -29,3 +29,5 @@ Current drafts:
 - `restored-ui-surface-redesign.md`: pre-redesign surface rules, readiness gaps, implementation order, and verification gate for the restored playable shell.
 - `restored-lover-relationship-system.md`: lover/relationship v2 plan for My Info summaries, phone relationship app depth, affection/trust/stability/risk, relationship logs, and economy/gambling event boundaries.
 - `restored-phone-app-ecosystem.md`: phone OS and app-store plan for BaeTalk-style messenger, relationship app, Baegeum Gallery-style community, rankings, finance, and app separation boundaries.
+- `restored-stock-market-system.md`: four-market investment plan for Domestic, United States, Crypto Spot, and Crypto Leverage tabs, starting with a realistic fictional Baegeum Electronics chart.
+- `restored-life-minigame-system.md`: convenience-store and fast-food life minigame plan for task scoring, DP wage envelopes, condition effects, inventory bonuses, and relationship hooks.

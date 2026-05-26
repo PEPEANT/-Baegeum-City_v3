@@ -12,6 +12,7 @@ Conclusion: the phone should become a small in-game OS. Keep the current live ap
 - The `relationships` app view is extracted into `src/restored/phone/relationship-app-view.js`.
 - The `app_store` view is extracted into `src/restored/phone/app-store-view.js` and renders catalog rows without mutating installed-app save data.
 - The restored HTML still owns trade handlers, futures position opening/closing, and market ticks; those should move only after view extraction stays stable.
+- `docs/plans/restored-stock-market-system.md` now owns the next market expansion boundary: Domestic, United States, Crypto Spot, and Crypto Leverage tabs, starting with Baegeum Electronics V0.1.
 - The phone shell already gates apps by owned device. No phone means no phone apps.
 - Folder phone should stay basic. Smartphone should unlock richer chat, app store, community, rankings, and futures.
 

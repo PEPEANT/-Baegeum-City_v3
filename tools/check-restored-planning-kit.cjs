@@ -14,6 +14,8 @@ const loginHomePlanPath = path.join(root, "docs", "plans", "restored-login-home-
 const uiSurfaceRedesignPlanPath = path.join(root, "docs", "plans", "restored-ui-surface-redesign.md");
 const loverRelationshipPlanPath = path.join(root, "docs", "plans", "restored-lover-relationship-system.md");
 const phoneAppEcosystemPlanPath = path.join(root, "docs", "plans", "restored-phone-app-ecosystem.md");
+const stockMarketSystemPlanPath = path.join(root, "docs", "plans", "restored-stock-market-system.md");
+const lifeMinigameSystemPlanPath = path.join(root, "docs", "plans", "restored-life-minigame-system.md");
 const createToolPath = path.join(root, "tools", "create-restored-feature-plan.cjs");
 const packagePath = path.join(root, "package.json");
 const roadmapPath = path.join(root, "docs", "baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md");
@@ -53,6 +55,8 @@ function assertPlanningFilesExist() {
     uiSurfaceRedesignPlanPath,
     loverRelationshipPlanPath,
     phoneAppEcosystemPlanPath,
+    stockMarketSystemPlanPath,
+    lifeMinigameSystemPlanPath,
     createToolPath
   ]) {
     assert(fs.existsSync(filePath), `Missing planning-kit file: ${path.relative(root, filePath)}`);
@@ -71,7 +75,9 @@ function readPlanningDocs() {
     threeCityNavPlan: read(threeCityNavPlanPath),
     uiSurfaceRedesignPlan: read(uiSurfaceRedesignPlanPath),
     loverRelationshipPlan: read(loverRelationshipPlanPath),
-    phoneAppEcosystemPlan: read(phoneAppEcosystemPlanPath)
+    phoneAppEcosystemPlan: read(phoneAppEcosystemPlanPath),
+    stockMarketSystemPlan: read(stockMarketSystemPlanPath),
+    lifeMinigameSystemPlan: read(lifeMinigameSystemPlanPath)
   };
 }
 
@@ -83,6 +89,8 @@ function assertIndexAndPackage({ docsIndex, packageJson }) {
   assertIncludes(docsIndex, "plans/restored-ui-surface-redesign.md", "docs/INDEX.md");
   assertIncludes(docsIndex, "plans/restored-lover-relationship-system.md", "docs/INDEX.md");
   assertIncludes(docsIndex, "plans/restored-phone-app-ecosystem.md", "docs/INDEX.md");
+  assertIncludes(docsIndex, "plans/restored-stock-market-system.md", "docs/INDEX.md");
+  assertIncludes(docsIndex, "plans/restored-life-minigame-system.md", "docs/INDEX.md");
   assertIncludes(docsIndex, "restored-feature-plan-template.md", "docs/INDEX.md");
   assertIncludes(packageJson, "plan:restored", "package.json scripts");
   assertIncludes(packageJson, "check-restored-planning-kit.cjs", "npm run check");
@@ -110,6 +118,8 @@ function assertPlansReadme(plansReadme) {
     "ui-surface-redesign",
     "lover/relationship v2",
     "phone OS",
+    "four-market",
+    "life minigame",
     "not implementation permission"
   ], "docs/plans/README.md");
 }
@@ -176,6 +186,25 @@ function assertPhoneAppEcosystemPlan(phoneAppEcosystemPlan) {
     "Baegeum Gallery",
     "Do not add every planned app directly to the live registry"
   ], "restored phone app ecosystem plan");
+}
+
+function assertStockMarketSystemPlan(stockMarketSystemPlan) {
+  assertRequiredTextList(stockMarketSystemPlan, [
+    "Restored Stock Market System",
+    "Domestic / United States / Crypto Spot / Crypto Leverage",
+    "Baegeum Electronics",
+    "All prices are DP",
+    "generated OHLC data",
+    "AI supercycle",
+    "Crypto Leverage",
+    "Smartphone-only",
+    "Do not implement all four markets at once",
+    "Do not use KRW or USD display"
+  ], "restored stock market system plan");
+}
+
+function assertLifeMinigameSystemPlan(lifeMinigameSystemPlan) {
+  assertRequiredTextList(lifeMinigameSystemPlan, ["Restored Life Minigame System", "job:convenience-store", "job:fast-food", "restored-life-job-001", "economy_ledger_entry", "player_state_patch", "relationship_event_hook", "No direct cash mutation", "No direct partner mutation"], "restored life minigame system plan");
 }
 
 function assertLoginHomePlan(loginHomePlan) {
@@ -250,6 +279,8 @@ function main() {
   assertUiSurfaceRedesignPlan(docs.uiSurfaceRedesignPlan);
   assertLoverRelationshipPlan(docs.loverRelationshipPlan);
   assertPhoneAppEcosystemPlan(docs.phoneAppEcosystemPlan);
+  assertStockMarketSystemPlan(docs.stockMarketSystemPlan);
+  assertLifeMinigameSystemPlan(docs.lifeMinigameSystemPlan);
   assertCreateToolOutput();
 
   console.log("Restored planning kit check passed.");

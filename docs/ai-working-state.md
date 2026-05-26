@@ -63,6 +63,9 @@ Dice City full-restore playable prototype is the active priority:
 42. `src/restored/phone/phone-app-ecosystem-contract.js` now separates the planned phone OS/app-store catalog from the live phone app registry. Planned apps include BaeTalk-style messenger, Baegeum Gallery-style community, rankings, bank/pay, map, and online lobby candidates.
 43. `src/restored/phone/app-store-view.js` now renders the smartphone-only Baegeum Store shell from the ecosystem catalog. It shows installed, locked, planned, and online-prep app rows without mutating save data or adding phone apps to bottom navigation.
 44. `src/restored/phone/news-app-view.js`, `src/restored/phone/stock-app-view.js`, and `src/restored/phone/futures-app-view.js` now own the restored phone news, stock, and futures renderers. The HTML shell mounts returned view HTML and still owns market ticks, trades, and futures open/close handlers.
+45. `docs/plans/restored-stock-market-system.md` now owns the restored market expansion boundary: Domestic, United States, Crypto Spot, and Crypto Leverage tabs, realistic virtual candle charts, DP-only prices, Baegeum Electronics as V0.1, and no live financial data or real-company branding in the first slice.
+46. `src/restored/systems/market-contract.js` now owns the first pure Baegeum Electronics market contract: virtual OHLCV generation, snapshot summary, DP formatting, holding P/L, and buy/sell order previews without DOM, storage, timers, random outcomes, or live money mutation.
+47. `docs/plans/restored-life-minigame-system.md` and `src/restored/jobs/life-job-contract.js` now own the first life-job minigame lane: convenience-store and fast-food deterministic shift scoring, DP wage envelopes, condition effects, relationship hooks, and optional inventory bonuses without live HTML mutation.
 
 Multimap safety remains verified:
 
@@ -117,6 +120,30 @@ Construction UX remains a paused work-queue slice:
 6. Odd-even `bet_reserved` is implemented and smoke-verified; do not settle results yet.
 7. The first 10-minute play loop is now the product north star for deciding whether new slices belong in v0.
 
+Date: 2026-05-27
+Observed: The human approved starting the stock-market direction after defining four market classes: Domestic, United States, Crypto Spot, and Crypto Leverage. The live restored app already has stock/futures phone views, but market ticks and trade handlers remain in the HTML shell and should not expand without a contract.
+Changed: Added `docs/plans/restored-stock-market-system.md`, linked it from `docs/INDEX.md` and `docs/plans/README.md`, referenced it from the phone app ecosystem plan, and guarded it in `tools/check-restored-planning-kit.cjs`. The plan fixes Baegeum Electronics as V0.1, DP-only prices, virtual OHLCV candles, no live financial data, and a staged path for United States, Crypto Spot, and Crypto Leverage.
+Verified: `node tools/check-restored-planning-kit.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: No market runtime code changed. Baegeum Electronics catalog fields, virtual candle generation, order/effect envelopes, and DP-only stock UI are still pending.
+Next: Add a pure restored market contract/simulator for Baegeum Electronics before changing the live phone stock app or moving money through new handlers.
+Do not: Implement all four markets at once, use real-company branding or live data, show KRW/USD in restored market UI, or add leverage outside the Crypto Leverage market.
+
+Date: 2026-05-27
+Observed: The stock-market plan called for a pure Baegeum Electronics simulator before any live phone UI or money mutation changed. The restored HTML still owns legacy stock/futures handlers, so the first code slice needed to stay isolated.
+Changed: Added `src/restored/systems/market-contract.js` with the restored market contract version, four market ids, Baegeum Electronics metadata, deterministic virtual OHLCV generation, snapshot summaries, DP formatting, holding P/L quotes, and buy/sell order previews. Added `tools/check-restored-market-contract.cjs`, wired it into `npm run check`, and updated the stock-market plan.
+Verified: `node tools/check-restored-market-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: The live phone stock app still renders the old catalog and the HTML still mutates cash for current stock trades. No UI wiring or save migration was attempted in this slice.
+Next: Build a non-mutating phone stock-app adapter/view that can render the Baegeum Electronics snapshot and DP text from the market contract before replacing legacy trade handlers.
+Do not: Wire the order preview to live cash, add market tabs, or rename the current saved stock fields until a save-compatible adapter exists.
+
+Date: 2026-05-27
+Observed: The human asked to add the other minigames and job experiences, including convenience store, pawnshop, and fast-food. Dice City gambling, pawnshop, and loan-office contracts already existed, while ordinary work minigames had no contract boundary yet.
+Changed: Added `docs/plans/restored-life-minigame-system.md`, `src/restored/jobs/life-job-contract.js`, and `tools/check-restored-life-job-contract.cjs`. The new contract covers convenience-store and fast-food shifts with deterministic task decks, S/A/B/C/D/F scoring, DP wage envelopes, player condition effects, relationship hooks, and high-grade inventory bonus envelopes. It is wired into `npm run check` and the planning-kit guard.
+Verified: `node tools/check-restored-life-job-contract.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: No live UI adapter was wired. Job results still need to flow through the existing action/effect ledger path before the restored HTML can mutate cash, energy, inventory, or relationship logs.
+Next: Build a convenience-store UI adapter first, then fast-food, using `createRestoredLifeJobResult()` as the only wage/condition source.
+Do not: Recreate job rewards as direct HTML cash buttons or mutate partner state directly from job minigame handlers.
+
 ## Next Loop Candidate
 
 Recommended next autonomous loop:
@@ -127,6 +154,20 @@ Restored phone app ecosystem:
 2. Build BaeTalk partner DM and Baegeum Gallery community as separate apps; do not merge community posts with realtime chat.
 3. Add install-state persistence to Baegeum Store only after the live registry and save contract can represent optional installs safely.
 4. Move stock/futures action handlers only after their state/effect contract is documented.
+
+Restored stock market system:
+
+1. Start with the documented V0.1 slice: Baegeum Electronics in the Domestic tab.
+2. Use `src/restored/systems/market-contract.js` as the source for Baegeum Electronics virtual candles, DP display, holding quote, and order previews.
+3. The next market slice can be a non-mutating phone stock-app adapter that renders the Baegeum Electronics snapshot.
+4. Do not add United States, Crypto Spot, or Crypto Leverage tabs until the Baegeum Electronics chart, holding, and P/L loop is stable.
+
+Restored life minigames:
+
+1. Build the convenience-store adapter before fast-food because it has lower wage, lower energy cost, and simpler early-game pressure.
+2. Feed UI performance into `createRestoredLifeJobResult()` and consume returned effects instead of calculating wages in the HTML shell.
+3. Route `relationship_event_hook` through the relationship event runtime before showing partner reactions.
+4. Keep pawnshop/loan-office in the Dice City contract lane; do not mix collateral/debt state into ordinary job rewards.
 
 Restored lover/relationship v2:
 
