@@ -160,7 +160,7 @@ export class WorldRenderer {
     this.ctx.save();
     this.ctx.font = "bold 22px 'Malgun Gothic', sans-serif";
     const width = Math.max(92, this.ctx.measureText(label).width + 28);
-    this.ctx.fillStyle = building.venueType === "support" ? "rgba(14, 48, 42, 0.94)" : "rgba(48, 18, 28, 0.94)";
+    this.ctx.fillStyle = building.infrastructure ? "rgba(34, 56, 48, 0.94)" : building.venueType === "support" ? "rgba(14, 48, 42, 0.94)" : "rgba(48, 18, 28, 0.94)";
     this.ctx.strokeStyle = "rgba(255, 215, 102, 0.9)";
     this.ctx.lineWidth = 3;
     this.ctx.beginPath();

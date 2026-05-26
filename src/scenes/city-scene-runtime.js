@@ -70,7 +70,7 @@ function createBuildingLinks(map) {
   const buildingObstacles = (map.obstacles || []).filter((item) => item.kind === "building" && item.objectKind !== "building_shell");
   if (!buildingObstacles.length) return map.buildings || [];
   const stored = new Map(readStoredVenueMetadata().map((item) => [item.id, item]));
-  return buildingObstacles.map((obstacle, index) => {
+  const generatedVenues = buildingObstacles.map((obstacle, index) => {
     const venue = gamblingVenues[index % gamblingVenues.length];
     const base = createVenueMetadata(venue, obstacle, index);
     const meta = mergeVenueMetadata(base, stored.get(base.id));
@@ -91,6 +91,7 @@ function createBuildingLinks(map) {
       doors: [{ id: meta.doorId, x: doorX, y: doorY, targetSceneId: meta.interiorId, returnSpawn: { x: doorX, y: doorY + 42 } }]
     };
   });
+  return [...(map.buildings || []), ...generatedVenues];
 }
 
 function genericInterior(id, building) {

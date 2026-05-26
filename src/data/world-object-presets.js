@@ -1,4 +1,5 @@
 import { BUILDING_TYPE_IDS, DISTRICT_IDS } from "./city-district-contract.js";
+import { INFRASTRUCTURE_WORLD_OBJECT_PRESETS } from "./world-object-infrastructure-presets.js";
 
 const BREAK_BY_COMMON = ["vehicleImpact", "explosion", "weapon"];
 
@@ -82,6 +83,7 @@ export const WORLD_OBJECT_PRESETS = [
     visual: { kind: "building", objectKind: "building_shell", capabilities: ["collidable"], variant: "checkpoint", w: 240, h: 150 },
     collision: { kind: "solid-building", shape: "rect", w: 240, h: 150, blocksPlayers: true, blocksVehicles: true }
   }),
+  ...INFRASTRUCTURE_WORLD_OBJECT_PRESETS,
   buildingPreset({
     id: "building-casino-shell",
     label: "빈 카지노",

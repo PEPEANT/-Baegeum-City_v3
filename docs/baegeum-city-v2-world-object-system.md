@@ -13,7 +13,7 @@
 - `src/tools/baegeum-world-editor-build.js`는 건설 카드를 이 프리셋에서 만든다.
 - `src/data/world-placement-validation.js`는 새 오브젝트 배치 시 맵 경계, 보호구역, 건물/벽, 다른 충돌 오브젝트, 도로 점유를 검사한다.
 - 에디터에서 새로 배치한 장식물은 `presetId`, `objectLayer`, `collision`, `destructibleSpec`, `buildRules`를 함께 저장한다.
-- 에디터의 `빈 상가`, `빈 카지노`, `골목 상가` 건물 카드 v0는 `objectLayer: "obstacle"`, `kind: "building"`, `objectKind: "building_shell"`로 저장되며, 입장/실내/경제 동작은 아직 만들지 않는다.
+- 에디터의 `도시` 인프라 카드와 `빈 상가`, `빈 카지노`, `골목 상가` 건물 카드 v0는 `objectLayer: "obstacle"`, `kind: "building"`, `objectKind: "building_shell"`로 저장되며, 입장/실내/경제 동작은 아직 만들지 않는다.
 - `building_shell` 크기 편집은 기존 `w/h`와 `collision.w/h`만 바꾸며, doors/channels/interior/economy/online 필드는 만들지 않는다.
 - 건물 쉘 스모크 검증은 `createWorldEditorDraft` 이후에도 건물 카드가 `obstacles`에 남고, `building:*` 계약 ID와 `building_shell` 분류를 유지하며, venue/economy 필드를 갖지 않는지 확인한다.
 - 광고판은 오브젝트 위치와 충돌은 그대로 두고, `adId`만 바꿔 광고 내용을 교체한다.
@@ -151,6 +151,7 @@ objectRuntimeState = {
 ## Current Implementation Note
 
 - Current building shell presets are split by city role. `baegeum-city` shows `building-shop-shell`, `building-home-shell`, and `building-civic-shell`; `dice-city` shows `building-casino-shell`, `building-alley-shell`, `building-loan-shell`, and `building-motel-shell`.
+- `baegeum-city` also exposes a `도시` build category with placement-only infrastructure shells for home, luxury home, convenience store, fast food, car dealer, gas station, department store, logistics center, police station, real estate, stock market, bus stop, and intercity bus terminal.
 - These cards are placement-only `building_shell` objects and must not carry doors, channels, interiors, economy, or online metadata.
 - City role placement now has a separate contract in `src/data/city-district-contract.js`. `src/tools/baegeum-world-editor-build.js` filters build presets with `canPlaceNewBuildingType(typeId, mapId)`. Existing baegeum casino anchors are only `legacy_preserved`, not permission to create new baegeum casino shells.
 - Building shell size editability currently cycles compact, standard, and large dimensions while preserving the object center and collision rectangle.

@@ -27,6 +27,8 @@ function load(relativePath) {
 
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.HOME, "baegeum-city"), true);
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.POLICE_STATION, "baegeum-city"), true);
+  assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.GAS_STATION, "baegeum-city"), true);
+  assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.LOGISTICS_CENTER, "baegeum-city"), true);
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.BLACKJACK_CASINO, "baegeum-city"), false);
   assert.equal(districts.buildingTypeStatusForMap(districts.BUILDING_TYPE_IDS.BLACKJACK_CASINO, "baegeum-city"), "legacy_preserved");
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.LOAN_OFFICE, "baegeum-city"), false);
@@ -35,6 +37,7 @@ function load(relativePath) {
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.LOAN_OFFICE, "dice-city"), true);
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.HOME, "dice-city"), false);
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.POLICE_STATION, "dice-city"), false);
+  assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.DEPARTMENT_STORE, "dice-city"), false);
   assert.equal(districts.canPlaceNewBuildingType(districts.BUILDING_TYPE_IDS.INTERCITY_BUS_TERMINAL, "dice-city"), true);
 
   assert.equal(districts.defaultDistrictForBuildingType(districts.BUILDING_TYPE_IDS.CONVENIENCE_STORE, "baegeum-city"), districts.DISTRICT_IDS.BAEGEUM_RESIDENTIAL);

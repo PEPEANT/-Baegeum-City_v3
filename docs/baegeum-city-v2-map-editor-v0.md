@@ -10,7 +10,8 @@
 - `장식물`, `건설`, `건물`, `도로`, `보기` 모드를 제공한다.
 - `장식물` 모드에서는 `world.scenery` 항목을 선택하고 드래그해 옮긴다.
 - `건설` 모드에서는 하단 건설 목록을 잠깐 열고, 카드를 선택하면 목록을 숨긴 뒤 맵 위 고스트 미리보기로 새 오브젝트를 배치한다.
-- 건설 목록은 `고정`, `건물`, `자연물`, `거리 시설`, `광고/간판` 접이식 그룹으로 나뉘며, 가로등/광고판/벤치를 상단 고정 프리셋으로 보여준다.
+- 건설 목록은 `고정`, `도시`, `건물`, `자연물`, `거리 시설`, `광고/간판` 접이식 그룹으로 나뉘며, 가로등/광고판/벤치를 상단 고정 프리셋으로 보여준다.
+- `도시` 그룹은 배금시티 전용 인프라 배치 카드로 집, 고급집, 편의점, 패스트푸드점, 자동차매장, 주유소, 백화점, 물류센터, 경찰서, 부동산, 주식시장, 버스정류장, 시외버스터미널을 제공한다.
 - 배치 중에는 작은 상태바만 남기고, 필요할 때 `목록` 버튼으로 건설 목록을 다시 연다.
 - 현재 건설 카드는 빈 상가, 빈 카지노, 골목 상가, 활엽수, 침엽수, 가로등, 광고판, 벤치, 수풀을 제공한다.
 - 건설 카드로 생성한 새 장식물과 배치 전용 건물은 `presetId`, `objectLayer`, `collision`, `destructibleSpec`, `buildRules`를 함께 가진다.
@@ -93,7 +94,7 @@
 - NavGraph 노드가 `37`개인가
 - NavGraph 엣지가 `49`개인가
 
-Project-owned runtime/editor behavior then applies `baegeum-city-compact-layout-v1` from `src/data/baegeum-city-compact-layout.js`, so baegeum editing and gameplay use the compact height `4600` while the raw vendored Iron Line source remains fixed at `5600`.
+Project-owned runtime/editor behavior then applies `baegeum-city-compact-layout-v2` from `src/data/baegeum-city-compact-layout.js`, so baegeum editing and gameplay use the compact height `2800` while the raw vendored Iron Line source remains fixed at `5600`.
 
 ## 실행
 
@@ -112,7 +113,7 @@ http://127.0.0.1:4173/editor.html
 - 원본 `vendor/iron-line` 파일은 수정하지 않는다.
 - 현재 드래프트 저장은 브라우저 `localStorage` 기준이며, 맵별 draft key로 분리한다.
 - 새 장식물 배치와 선택 항목 회전/복제/삭제, 건설 목록 카테고리 접기는 가능하다.
-- 건물 카드 v1는 `activeMapId`와 `buildingType` 계약으로 필터링된다. 배금시티에서는 `빈 상가`, `빈 주택`, `빈 공공건물`만 보이고, 다이스시티에서는 `빈 카지노`, `골목 상가`, `빈 사채업소`, `빈 모텔`만 보인다.
+- 건물 카드 v1는 `activeMapId`와 `buildingType` 계약으로 필터링된다. 배금시티에서는 `도시` 인프라 카드와 `빈 상가`, `빈 주택`, `빈 공공건물`이 보이고, 다이스시티에서는 `빈 카지노`, `골목 상가`, `빈 사채업소`, `빈 모텔`만 보인다.
 - 모든 건물 카드는 배치 전용 `building_shell` 장애물이며, 선택 후 소형/기본/대형 크기 편집만 지원한다. 아직 입장, 실내, 경제, venue 메타데이터는 붙이지 않는다.
 - `dice-city-v0` 기본 맵은 도로, 스폰, 빈 건물 셸, 장식물과 복사된 카지노 venue anchor 3개를 가진다. 현재 월드 에디터 draft는 도로/장식물/장애물 중심이며, 복사 카지노의 venue 메타데이터 편집은 별도 slice로 남긴다.
 - 충돌/파괴 레이어는 현재 새 월드 오브젝트 프리셋 기반 장식물에 우선 적용된다.

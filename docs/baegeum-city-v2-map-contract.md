@@ -35,7 +35,7 @@
   savedAt: "2026-05-26T12:00:00.000Z",
   summary: {
     width: 8200,
-    height: 4600,
+    height: 2800,
     roads: 6,
     roadPoints: 37,
     obstacles: 36,
@@ -53,7 +53,7 @@
 
 ## Compact layout note
 
-Current `baegeum-city` editor/runtime maps apply `baegeum-city-compact-layout-v1` after loading the fixed Iron Line vendor source. Raw vendor verification still expects `8200 x 5600`, but project-owned baegeum drafts should now summarize height `4600` after the compact transform.
+Current `baegeum-city` editor/runtime maps apply `baegeum-city-compact-layout-v2` after loading the fixed Iron Line vendor source. Raw vendor verification still expects `8200 x 5600`, but project-owned baegeum drafts should now summarize height `2800` after the compact transform.
 
 ## Urban visual note
 
@@ -63,6 +63,8 @@ The urban layer:
 
 - Replaces the dark battle-green terrain with muted pavement/soil tones.
 - Uses warmer asphalt road styling.
+- Places a layout-owned city infrastructure block set: 집, 고급집, 편의점, 패스트푸드점, 자동차매장, 주유소, 백화점, 물류센터, 경찰서, 부동산, 주식시장, 버스정류장, 시외버스터미널.
+- Keeps those infrastructure buildings as `building_shell` obstacles plus sign-only runtime labels; they do not add doors, venue channels, interiors, or economy behavior.
 - Removes combat `capturePoints`, red/blue `safeZones`, and old base exit markers from the city view.
 - Replaces legacy `base-wall` obstacles with `city-boundary` outer wall/tunnel obstacles.
 - Removes battlefield scenery types `sandbag`, `barricade`, and `rubble`.

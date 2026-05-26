@@ -1,3 +1,5 @@
+import { applyBaegeumCityInfrastructureLayout } from "./baegeum-city-infrastructure-layout.js";
+
 export const BAEGEUM_CITY_URBAN_LAYOUT_VERSION = "baegeum-city-urban-layout-v1";
 
 const COMBAT_SCENERY_TYPES = new Set(["sandbag", "barricade", "rubble"]);
@@ -10,6 +12,7 @@ export function applyBaegeumCityUrbanLayout(map) {
   removeCombatMapMarks(map);
   replaceBaseWallsWithCityEdges(map);
   replaceCombatScenery(map);
+  applyBaegeumCityInfrastructureLayout(map);
   map.urbanLayoutVersion = BAEGEUM_CITY_URBAN_LAYOUT_VERSION;
   return map;
 }

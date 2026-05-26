@@ -15,13 +15,14 @@ export const BUILD_PRESETS = buildableWorldObjectPresets().map((preset) => ({
   districtId: preset.editor.districtId
 }));
 export const BUILD_CATEGORY_LABELS = {
+  city: "도시",
   building: "건물",
   nature: "자연물",
   street: "거리 시설",
   signage: "광고/간판",
   misc: "기타"
 };
-const BUILD_CATEGORY_ORDER = ["building", "nature", "street", "signage", "misc"];
+const BUILD_CATEGORY_ORDER = ["city", "building", "nature", "street", "signage", "misc"];
 
 export function buildPresetsForMap(mapId = null, presets = BUILD_PRESETS) {
   return presets.filter((preset) => !mapId || !preset.buildingType || canPlaceNewBuildingType(preset.buildingType, mapId));

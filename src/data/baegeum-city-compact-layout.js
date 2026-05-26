@@ -1,7 +1,7 @@
 import { applyBaegeumCityUrbanLayout } from "./baegeum-city-urban-layout.js";
 
-export const BAEGEUM_COMPACT_LAYOUT_VERSION = "baegeum-city-compact-layout-v1";
-export const BAEGEUM_COMPACT_HEIGHT = 4600;
+export const BAEGEUM_COMPACT_LAYOUT_VERSION = "baegeum-city-compact-layout-v2";
+export const BAEGEUM_COMPACT_HEIGHT = 2800;
 
 export function compactBaegeumMapLayout(map) {
   if (!map || map.mapId === "dice-city" || map.id === "dice-city-v0") return map;

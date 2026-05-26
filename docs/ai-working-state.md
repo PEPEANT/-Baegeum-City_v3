@@ -2,7 +2,7 @@
 
 Conclusion: system redesign baseline is active after the human asked to restart design. `dice-city-v0`, multimap safety, and economy-loop guards remain verified, but the current work should close the first playable economy loop before adding unrelated gameplay features.
 
-Current verified building shell presets: baegeum-city uses `building-shop-shell`, `building-home-shell`, and `building-civic-shell`; dice-city uses `building-casino-shell`, `building-alley-shell`, `building-loan-shell`, and `building-motel-shell`.
+Current verified building shell presets: baegeum-city uses the `도시` infrastructure shells plus `building-shop-shell`, `building-home-shell`, and `building-civic-shell`; dice-city uses `building-casino-shell`, `building-alley-shell`, `building-loan-shell`, and `building-motel-shell`.
 Current verified horse-racing interior sections: `horse-scoreboard`, `horse-track`, `horse-grandstand`, `horse-betting-station`, and `exchange-atm`.
 
 ## Last Known Project Shape
@@ -39,11 +39,11 @@ Multimap safety remains verified:
 11. Browser verification confirmed the copied dice blackjack venue door, interior entry, venue channel, and online room state.
 12. `src/renderers/simple-scenery-renderer.js` renders dice-city trees, brush, streetlights, and billboards.
 13. `dice-city` building shells are intentionally not converted into enterable casinos by runtime generation.
-14. `src/data/baegeum-city-compact-layout.js` applies `baegeum-city-compact-layout-v1` to runtime/editor maps. The browser Iron Line map is compacted from height 5600 to 4600 by scaling y positions, object heights/radii, spawns, bus terminal anchor inputs, scenery, roads, and nav nodes together.
+14. `src/data/baegeum-city-compact-layout.js` applies `baegeum-city-compact-layout-v2` to runtime/editor maps. The browser Iron Line map is compacted from height 5600 to 2800 by scaling y positions, object heights/radii, spawns, bus terminal anchor inputs, scenery, roads, and nav nodes together.
 15. `src/data/city-district-contract.js` now defines `life_hub` for `baegeum-city` and `gambling_night` for `dice-city`, including allowed new building types, district ids, and `legacy_preserved` status for current baegeum casino originals.
 16. Do not shrink `baegeum-city` further by changing only `height`. `tools/smoke-baegeum-map-shrink-readiness.cjs` still guards that any future shrink must keep roads, walls, spawn, terminal, scenery, and nav inside the target height.
 17. `src/data/baegeum-city-urban-layout.js` applies `baegeum-city-urban-layout-v1` to runtime/editor baegeum maps. It mutes the ground away from battlefield green, removes red/blue base overlays and legacy `base-wall` objects, replaces them with `city-boundary` outer tunnel/wall objects, and removes battlefield scenery such as sandbags, barricades, and rubble.
-18. The map editor build palette is now city-role aware. `baegeum-city` exposes lifestyle/civic `building_shell` presets, while `dice-city` exposes casino/back-alley/nightlife `building_shell` presets.
+18. The map editor build palette is now city-role aware. `baegeum-city` exposes a `도시` tab for infrastructure shells plus lifestyle/civic `building_shell` presets, while `dice-city` exposes casino/back-alley/nightlife `building_shell` presets.
 
 Current bug-first economy/code-health audit state:
 
@@ -71,7 +71,7 @@ Construction UX remains a paused work-queue slice:
 
 1. Pinned construction presets are implemented.
 2. Construction palette category folding is implemented.
-3. Current categories are `고정`, `건물`, `자연물`, `거리 시설`, and `광고/간판`.
+3. Current categories are `고정`, `도시`, `건물`, `자연물`, `거리 시설`, and `광고/간판`.
 4. World-object taxonomy now separates `building_shell` from `venue_anchor`.
 5. Building shell cards are implemented as placement-only `빈 상가`, `빈 카지노`, and `골목 상가`, with 소형/기본/대형 size cycling.
 6. Odd-even `bet_reserved` is implemented and smoke-verified; do not settle results yet.
@@ -100,7 +100,7 @@ City role aware map-editor visual tuning:
 
 If the human wants to shrink `baegeum-city` further, treat it as another relayout slice, not a numeric height edit:
 
-1. Pick a target bottom boundary below 4600 and backup/export the current baegeum draft first.
+1. Pick a target bottom boundary below 2800 and backup/export the current baegeum draft first.
 2. Move or scale the baegeum spawn, bus terminal anchor, bottom roads, base walls, scenery, and nav nodes together.
 3. Keep vendored Iron Line source untouched; apply project-owned layout transforms after vendor load.
 4. Browser-verify spawn, terminal transition, minimap, NPC pathing, and editor loading.
@@ -132,6 +132,14 @@ Paused loops:
 - `docs/ai-spaghetti-bug-root-cause.md` explains why the spaghetti/bug pattern emerged and now fixes the next audit sequence around persistence, silent failures, and browser workflows.
 
 ## Loop Record
+
+Date: 2026-05-26
+Observed: The human asked to compress baegeum-city vertically and make it a clearer lifestyle/infrastructure city before continuing gameplay systems.
+Changed: Updated `baegeum-city` compact relayout to height `2800`, added layout-owned infrastructure building shells and sign labels for 집, 고급집, 편의점, 패스트푸드점, 자동차매장, 주유소, 백화점, 물류센터, 경찰서, 부동산, 주식시장, 버스정류장, and 시외버스터미널. Added a `도시` build palette group and matching baegeum-only infrastructure presets while preserving all as non-enterable `building_shell` objects with no doors, interiors, economy, venue channels, or online metadata.
+Verified: `node tools/check-size.cjs`, `node tools/smoke-city-district-contract.cjs`, `node tools/smoke-world-editor-build-palette.cjs`, `node tools/smoke-baegeum-map-shrink-readiness.cjs`, `node tools/smoke-baegeum-city-urban-layout.cjs`, `npm run check`, and `git diff --check` passed. Browser navigation to `index.html?map=baegeum-city&infra-layout=20260526` and `editor.html?infra-layout=20260526` loaded with zero console errors.
+Blocked: Browser click automation was limited to navigation/console in this session, so build-card opening was verified by smoke tests rather than a live click capture. Infrastructure buildings are visual/collision shells only; no store, vehicle, stock, home, or bus gameplay is attached.
+Next: Visually tune baegeum-city block spacing in the editor/browser if needed, then continue with clean/stale browser workflow or the first ledger-backed lifestyle slice.
+Do not: Convert infrastructure shells into enterable venues or add economy behavior without a separate interaction/ledger contract.
 
 Date: 2026-05-26
 Observed: The next spaghetti/root-cause risk was that browser workflow failures could still be caused by stale localStorage rather than current gameplay code.

@@ -34,6 +34,10 @@ worldChannelId: world:dice-city
 - `luxury_home`: 고급집
 - `convenience_store`: 편의점
 - `fast_food`: 패스트푸드점
+- `car_dealer`: 자동차매장
+- `gas_station`: 주유소
+- `department_store`: 백화점
+- `logistics_center`: 물류센터
 - `police_station`: 경찰서
 - `real_estate`: 부동산
 - `stock_market`: 주식시장
@@ -79,8 +83,8 @@ worldChannelId: world:dice-city
 
 - `baegeum-residential`: 집, 고급집, 편의점
 - `baegeum-civic`: 경찰서, 부동산, 주식시장
-- `baegeum-commerce`: 편의점, 패스트푸드점, 부동산
-- `baegeum-transport`: 버스정류장, 시외버스터미널
+- `baegeum-commerce`: 편의점, 패스트푸드점, 부동산, 자동차매장, 주유소, 백화점
+- `baegeum-transport`: 버스정류장, 시외버스터미널, 물류센터
 
 다이스시티 구역:
 

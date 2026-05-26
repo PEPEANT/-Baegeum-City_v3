@@ -17,19 +17,21 @@ const vendorFiles = [
 (async () => {
   const { cityMap } = await import(pathToFileURL("src/data/city-map.js"));
   const compact = await import(pathToFileURL("src/data/baegeum-city-compact-layout.js"));
+  const infrastructure = await import(pathToFileURL("src/data/baegeum-city-infrastructure-layout.js"));
   const urban = await import(pathToFileURL("src/data/baegeum-city-urban-layout.js"));
   const validation = await import(pathToFileURL("src/data/world-map-validation-report.js"));
   const browserMap = compact.compactBaegeumMapLayout(loadIronLineBrowserMap());
   const fallbackMap = compact.compactBaegeumMapLayout(clone(cityMap));
 
-  assertUrbanized(browserMap, urban.BAEGEUM_CITY_URBAN_LAYOUT_VERSION, validation);
-  assertUrbanized(fallbackMap, urban.BAEGEUM_CITY_URBAN_LAYOUT_VERSION, validation);
+  assertUrbanized(browserMap, urban.BAEGEUM_CITY_URBAN_LAYOUT_VERSION, infrastructure, validation);
+  assertUrbanized(fallbackMap, urban.BAEGEUM_CITY_URBAN_LAYOUT_VERSION, infrastructure, validation);
 
   console.log("Baegeum city urban layout smoke passed.");
 })();
 
-function assertUrbanized(map, expectedVersion, validation) {
+function assertUrbanized(map, expectedVersion, infrastructure, validation) {
   assert.equal(map.urbanLayoutVersion, expectedVersion, "baegeum map should have the urban layout version");
+  assert.equal(map.infrastructureLayoutVersion, infrastructure.BAEGEUM_CITY_INFRASTRUCTURE_LAYOUT_VERSION, "baegeum map should place infrastructure shells");
   assert.equal(map.safeZones.length, 0, "combat safe zones should be removed from city view");
   assert.equal(map.capturePoints.length, 0, "combat capture points should be removed from city view");
   assert.equal(Object.keys(map.baseExitPoints || {}).length, 0, "combat base exit markers should be removed from city view");
@@ -41,8 +43,27 @@ function assertUrbanized(map, expectedVersion, validation) {
   assert.ok(!map.scenery.some((item) => ["sandbag", "barricade", "rubble"].includes(item.type)), "combat scenery should be removed");
   assert.ok(map.scenery.some((item) => item.id === "billboard:9001"), "city edge billboard should be present");
   assert.ok(maxBottom(map) <= map.height, "urbanized map content should fit inside map height");
+  assertInfrastructureBuildings(map, infrastructure);
   assertNoCombatOverlayLabels(map);
   assertNoCityBoundaryWarnings(map, validation);
+  assertNoInfrastructureCollisionWarnings(map, validation);
+}
+
+function assertInfrastructureBuildings(map, infrastructure) {
+  const ids = infrastructure.baegeumInfrastructureBuildingIds();
+  const obstacles = new Map((map.obstacles || []).map((item) => [item.id, item]));
+  for (const id of ids) {
+    const item = obstacles.get(id);
+    assert.ok(item, `missing infrastructure obstacle ${id}`);
+    assert.equal(item.objectKind, "building_shell", `${id} should stay a placement shell`);
+    assert.equal(item.kind, "building", `${id} should render as a city building`);
+    assert.equal(item.doors, undefined, `${id} must not become enterable in this slice`);
+    assert.equal(item.channels, undefined, `${id} must not own online channels in this slice`);
+  }
+  const signs = new Set((map.buildings || []).filter((item) => item.infrastructure).map((item) => item.sign));
+  for (const label of ["편의점", "자동차매장", "주유소", "백화점", "물류센터", "경찰서", "주식시장", "시외버스터미널"]) {
+    assert.ok(signs.has(label), `missing infrastructure sign ${label}`);
+  }
 }
 
 function assertNoCombatOverlayLabels(map) {
@@ -59,6 +80,12 @@ function assertNoCityBoundaryWarnings(map, validation) {
   const report = validation.createWorldMapValidationReport(map);
   const cityBoundaryWarning = report.warnings.find((issue) => issue.code === "collision_overlap" && String(issue.target || "").includes("wall:900"));
   assert.ok(!cityBoundaryWarning, "city boundary corner joins should not create editor overlap warnings");
+}
+
+function assertNoInfrastructureCollisionWarnings(map, validation) {
+  const report = validation.createWorldMapValidationReport(map);
+  const warning = report.warnings.find((issue) => issue.code === "collision_overlap" && String(issue.target || "").includes("building:91"));
+  assert.ok(!warning, "infrastructure buildings should not overlap existing blockers");
 }
 
 function maxBottom(map) {

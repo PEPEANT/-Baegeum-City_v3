@@ -1,6 +1,21 @@
 const assert = require("assert");
 
 const VENUE_KEYS = ["doors", "channels", "interiorId", "gameType", "venueId", "onlineRoomId"];
+const CITY_PRESET_IDS = [
+  "city-home-shell",
+  "city-luxury-home-shell",
+  "city-convenience-shell",
+  "city-fast-food-shell",
+  "city-car-dealer-shell",
+  "city-gas-station-shell",
+  "city-department-store-shell",
+  "city-logistics-shell",
+  "city-police-shell",
+  "city-real-estate-shell",
+  "city-stock-market-shell",
+  "city-bus-stop-shell",
+  "city-terminal-shell"
+];
 
 (async () => {
   const modules = await loadModules();
@@ -34,9 +49,10 @@ function assertPinnedPresets(build) {
 
 function assertBuildGroups(build) {
   const groups = build.groupBuildPresets(build.BUILD_PRESETS);
-  assert.deepStrictEqual(groups.map((group) => group.label), ["고정", "건물", "자연물", "거리 시설", "광고/간판"]);
-  assert.deepStrictEqual(groups.map((group) => group.open), [true, false, false, false, false]);
-  assert.deepStrictEqual(groups[1].presets.map((preset) => preset.id), [
+  assert.deepStrictEqual(groups.map((group) => group.label), ["고정", "도시", "건물", "자연물", "거리 시설", "광고/간판"]);
+  assert.deepStrictEqual(groups.map((group) => group.open), [true, false, false, false, false, false]);
+  assert.deepStrictEqual(groups[1].presets.map((preset) => preset.id), CITY_PRESET_IDS);
+  assert.deepStrictEqual(groups[2].presets.map((preset) => preset.id), [
     "building-shop-shell",
     "building-home-shell",
     "building-civic-shell",
@@ -45,17 +61,19 @@ function assertBuildGroups(build) {
     "building-loan-shell",
     "building-motel-shell"
   ]);
-  assert.deepStrictEqual(groups[2].presets.map((preset) => preset.id), ["tree-broadleaf", "tree-pine", "brush"]);
-  assert.deepStrictEqual(groups[3].presets.map((preset) => preset.id), ["streetlight", "bench"]);
-  assert.deepStrictEqual(groups[4].presets.map((preset) => preset.id), ["billboard"]);
-  assert.deepStrictEqual(groups.map((group) => [group.key, group.open]), [["pinned", true], ["building", false], ["nature", false], ["street", false], ["signage", false]]);
+  assert.deepStrictEqual(groups[3].presets.map((preset) => preset.id), ["tree-broadleaf", "tree-pine", "brush"]);
+  assert.deepStrictEqual(groups[4].presets.map((preset) => preset.id), ["streetlight", "bench"]);
+  assert.deepStrictEqual(groups[5].presets.map((preset) => preset.id), ["billboard"]);
+  assert.deepStrictEqual(groups.map((group) => [group.key, group.open]), [["pinned", true], ["city", false], ["building", false], ["nature", false], ["street", false], ["signage", false]]);
 }
 
 function assertRoleAwareGroups(build) {
+  assert.deepStrictEqual(cityPresetIdsForMap(build, "baegeum-city"), CITY_PRESET_IDS);
   assert.deepStrictEqual(buildingPresetIdsForMap(build, "baegeum-city"), ["building-shop-shell", "building-home-shell", "building-civic-shell"]);
   assert.deepStrictEqual(buildingPresetIdsForMap(build, "dice-city"), ["building-casino-shell", "building-alley-shell", "building-loan-shell", "building-motel-shell"]);
   assert.equal(build.findBuildPreset("building-casino-shell", "baegeum-city"), null);
   assert.equal(build.findBuildPreset("building-home-shell", "dice-city"), null);
+  assert.equal(build.findBuildPreset("city-police-shell", "dice-city"), null);
 }
 
 function assertBuildingShell({ build, objects }) {
@@ -122,6 +140,10 @@ function assertCategoryOpenState(build) {
 
 function buildingPresetIdsForMap(build, mapId) {
   return build.buildPresetsForMap(mapId).filter((preset) => preset.category === "building").map((preset) => preset.id);
+}
+
+function cityPresetIdsForMap(build, mapId) {
+  return build.buildPresetsForMap(mapId).filter((preset) => preset.category === "city").map((preset) => preset.id);
 }
 
 function assertNoVenueKeys(item, label) {

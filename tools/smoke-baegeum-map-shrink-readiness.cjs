@@ -20,14 +20,15 @@ const vendorFiles = [
   const runtime = await import(pathToFileURL("src/scenes/city-scene-runtime.js"));
   const browserMap = compact.compactBaegeumMapLayout(loadIronLineBrowserMap());
   const browserReport = summarizeMap("iron-line-browser", browserMap);
-  const fallbackReport = summarizeMap("fallback-city-map", cityMap);
+  const fallbackReport = summarizeMap("fallback-city-map", compact.compactBaegeumMapLayout(clone(cityMap)));
   const runtimeMap = runtime.createRuntimeMap(browserMap);
 
   assertMapFits(browserReport);
   assertMapFits(fallbackReport);
   assert.equal(browserReport.height, compact.BAEGEUM_COMPACT_HEIGHT, "browser baegeum map should use the compact height");
+  assert.equal(fallbackReport.height, compact.BAEGEUM_COMPACT_HEIGHT, "fallback baegeum map should use the compact height");
   assert.equal(browserReport.maxBottom, browserReport.height, "browser map content reaches the lower edge");
-  assert.ok(browserReport.playerSpawnY < 4300, "baegeum player spawn should move inside the compact map");
+  assert.ok(browserReport.playerSpawnY < 2700, "baegeum player spawn should move inside the compact map");
   assertRuntimeTransitionFits(runtimeMap);
 
   console.log("Baegeum map shrink readiness: compact relayout fits target height.");
@@ -58,6 +59,10 @@ function loadIronLineBrowserMap() {
 
 function readVendor(relativePath) {
   return fs.readFileSync(path.join(vendorRoot, relativePath), "utf8");
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
 function summarizeMap(label, map) {
