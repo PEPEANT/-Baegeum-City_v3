@@ -251,6 +251,7 @@ async function assertSelectorsContract() {
   state.stocks.NASDAQ.qty = 2;
   state.luxury.phone.price = 5;
   state.luxury.phone.count = 1;
+  state.luxury.energy_drink.count = 2;
   state.realEstate.oneroom.price = 1000;
   state.realEstate.oneroom.count = 1;
 
@@ -259,6 +260,8 @@ async function assertSelectorsContract() {
   assert(selectors.getRestoredTotalAsset(state) === 125, "restored selectors must preserve current total asset behavior.");
   assert(selectors.getRestoredRank(state, ranks).title === "mid", "restored selectors must resolve rank from total asset.");
   assert(selectors.getRestoredRankIndex(state, ranks) === 1, "restored selectors must expose rank index.");
+  assert(selectors.listRestoredInventoryItems(state).some((item) => item.id === "energy_drink" && item.type === "consumable"), "restored selectors must list shop consumables in inventory.");
+  assert(!selectors.listRestoredInventoryItems(state).some((item) => item.id === "oneroom"), "restored inventory must exclude real estate.");
   assert(selectors.hasRestoredPhone(state), "restored selectors must detect phone ownership.");
   assert(!selectors.hasRestoredSmartPhone(state), "restored selectors must keep smartphone gate separate from phone gate.");
   state.luxury.smartphone.count = 1;

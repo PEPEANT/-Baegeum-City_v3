@@ -17,8 +17,8 @@ Conclusion: rankings should become a phone app with local preview boards first, 
 
 - Current playable behavior: the restored build has local wealth titles through selectors, but no ranking app and no job/occupation state.
 - Current files involved: `src/restored/state/selectors.js`, `src/restored/ui/shell-contract.js`, `baegeum-city-v2-dice.html`.
-- Current gates: phone apps stay inside the `phone` bottom tab; online boards are unavailable until online snapshots exist.
-- Existing blockers: ranks, assets, markets, and partner archetypes still need catalog extraction before ranking UI implementation.
+- Current gates: phone apps open through the owned phone surface/dock, not a permanent bottom-nav item; online boards are unavailable until online snapshots exist.
+- Existing blockers: ranking app UI, job catalog, and ranking selectors still need separate contracts before implementation.
 
 ## Intended Player Loop
 
@@ -35,7 +35,7 @@ player buys or owns a phone
 ## UI Surface Plan
 
 - Top bar impact: optional future display of current job title; no leaderboard rank in the top bar.
-- Bottom nav impact: none. Keep `myinfo / phone / realestate / casino / shop`.
+- Bottom nav impact: none. Keep the location-aware nav; rankings belong inside the phone surface.
 - Phone app impact: add a future `rankings` app with board tabs and locked online badges.
 - My info impact: show local wealth title separately from current job.
 - Modal or panel impact: board details can open as a phone subview, not a full-page modal.

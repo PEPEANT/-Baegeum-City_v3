@@ -25,9 +25,9 @@ Dice City full-restore playable prototype is the active priority:
 5. `docs/baegeum-city-v2-restored-growth-architecture.md` is the current growth architecture for AI lovers, emotion, gambling, ownership, conversation, and illustrations.
 6. Near-term code changes should continue extracting runtime contracts under `src/restored/` instead of adding more inline script to the restored HTML.
 7. Asset additions for mp3 files, partner illustrations, phone art, casino art, and item images should go through `src/restored/assets/asset-manifest.js` and `docs/baegeum-city-v2-restored-asset-pipeline.md` before runtime use.
-8. Restored read-only selectors for total asset, rank, ownership value, phone ownership, and smartphone ownership now live in `src/restored/state/selectors.js`.
+8. Restored read-only selectors for total asset, rank, ownership value, phone ownership, smartphone ownership, and carried inventory now live in `src/restored/state/selectors.js`.
 9. Human-provided files, links, design drafts, and raw notes now have an intake lane: raw files in `assets/inbox/`, reference cards in `refs/intake/`, and classification through `tools/intake-restored-material.cjs`.
-10. Restored UI, online expansion, ranking, and chat growth are now planned in `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md`; phone remains the hub for news, markets, rankings, and chat, while future bottom navigation should become location-aware instead of a permanent feature list.
+10. Restored UI, online expansion, ranking, and chat growth are now planned in `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md`; phone remains the hub for news, markets, rankings, and chat, while current bottom navigation is location-aware instead of a permanent feature list.
 11. New restored features should get a draft plan through `npm run plan:restored -- <slug> --write` before implementation. The plan template includes job/occupation impact so rankings can include jobs without mixing them into wealth rank.
 12. `docs/plans/restored-ranking-job-system.md` is the first concrete restored feature plan. It keeps wealth title, leaderboard position, and job/occupation rank separate.
 13. `docs/plans/restored-three-city-home-navigation.md` is the current navigation plan: start inside the player home, move to house-front, and expand through Baegeum City, Dice City, and Seosan City with location-aware tabs.
@@ -40,6 +40,7 @@ Dice City full-restore playable prototype is the active priority:
 20. `src/restored/phone/phone-app-contract.js` now owns phone app ids, labels, icons, and phone/smartphone gates, including the `relationships` app. The HTML still renders the app views, but visible app buttons are derived from the contract.
 21. `docs/plans/restored-ui-surface-redesign.md` now owns the immediate pre-redesign checklist for the restored shell: My Info, home, outside/home-front, phone, city, ranking, chat, online, and asset boundaries.
 22. The partner/lover list now belongs to the phone relationship app, not to My Info. My Info only shows a compact relationship summary, and the current playable phone tab exposes the `인연` app beside news/stock for folder phones. The MammonCity2-style phone registry/router/app-stage pattern remains the reference for relationship, market, ranking, chat, and online apps.
+23. My Info now has a carried-item inventory preview for shop-owned devices, luxury goods, and consumables. Registered consumables can show a `사용` button through `src/restored/inventory/consumable-contract.js`; real estate remains excluded, and `docs/baegeum-city-v2-restored-inventory.md` records the restored inventory boundary.
 
 Multimap safety remains verified:
 
@@ -150,6 +151,30 @@ Paused loops:
 - `docs/ai-spaghetti-bug-root-cause.md` explains why the spaghetti/bug pattern emerged and now fixes the next audit sequence around persistence, silent failures, and browser workflows.
 
 ## Loop Record
+
+Date: 2026-05-27
+Observed: The human asked for a final bug pass and a check that the canonical docs still cover the conversation requirements before moving deeper into redesign.
+Changed: Reconciled the restored recomposition, UI/online/ranking/chat roadmap, UI redesign, and ranking/job planning docs so they no longer describe the old fixed five-tab shell as current. The current docs now state that location-aware navigation is live, partner lists belong in the phone relationship app, My Info has carried inventory, and consumable use is owned by restored inventory modules.
+Verified: `git diff --check`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-restored-ui-online-ranking-chat-roadmap.cjs`, `node tools/check-restored-planning-kit.cjs`, and `npm run check` passed. Browser smoke on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` verified home/outside/Dice City navigation, My Info inventory, capped energy-drink use, phone apps, relationship app placement, and zero captured runtime errors.
+Blocked: None.
+Next: Commit/push a backup when the human explicitly asks, or continue by moving shop purchases and phone app rendering toward restored action/effect modules.
+Do not: Reintroduce permanent global tabs for news/stock/futures/relationships or put partner lists back into My Info.
+
+Date: 2026-05-26
+Observed: The previous inventory slice had display-only consumables, and the next safe step was to make energy drink usable without one-off My Info state mutation.
+Changed: Added `src/restored/inventory/consumable-contract.js` for registered consumable effects, `src/restored/inventory/inventory-view.js` for the carried-item preview renderer, and wired the My Info `사용` button to `projectRestoredConsumableUse()`. Energy drink now consumes one item and restores `profile.stats.energy` by 20, capped at max. Updated restored inventory docs and module README.
+Verified: `node tools/check-restored-player-profile.cjs`, `node tools/check-restored-growth-architecture.cjs`, `git diff --check`, `node tools/check-size.cjs`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed `에너지 드링크` showed `사용`, changed energy from `72/100` to `92/100`, removed the consumed item, and showed `에너지 +20`.
+Blocked: None.
+Next: Promote shop purchases and consumable use toward a restored ledger/action envelope when the restored economy path is ready.
+Do not: Add direct per-item button mutations in HTML; new consumables should register effects in the inventory contract.
+
+Date: 2026-05-26
+Observed: The human wanted an inventory document and a My Info place to check bought items at once, especially convenience-store consumables like energy drinks, while excluding houses and real estate.
+Changed: Added `docs/baegeum-city-v2-restored-inventory.md`, linked it from `docs/INDEX.md`, added `energy_drink` as the first restored consumable item, added `listRestoredInventoryItems()` to restored selectors, and rendered a compact My Info inventory panel. Consumables are shown in inventory but excluded from restored net-worth value preservation.
+Verified: `node tools/check-restored-growth-architecture.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` bought `에너지 드링크` through the house-front convenience shop and confirmed My Info inventory showed `폴더폰` plus `에너지 드링크` with no real-estate item names.
+Blocked: None.
+Next: Move inventory use effects, gifting, or convenience-store item actions through the action/economy contracts before adding consume buttons.
+Do not: Put real estate, cash, stocks, crypto/futures, or direct item mutation controls into the My Info inventory panel.
 
 Date: 2026-05-26
 Observed: The human pointed at the live DiceLand page as a stronger visual/game reference and suggested splitting Dice City into separate venues such as pawnshop, loan office, roulette casino, and blackjack casino.

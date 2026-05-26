@@ -115,23 +115,9 @@
                             </div>
                         </div>
 
-                        <div class="mt-5 border-t border-gray-100 pt-5">
-                            <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-black text-gray-800">캐릭터 능력치</h3>
-                                <span class="text-[10px] font-bold text-gray-400">생활/직업/대화 확장 기준</span>
-                            </div>
-                            <div id="profile-stat-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-                        </div>
-
-                        <div class="mt-5 border-t border-gray-100 pt-4">
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    <h3 class="text-sm font-bold text-gray-800">계정</h3>
-                                    <p id="account-display-name" class="text-xs text-slate-400 mt-1">로컬 게스트</p>
-                                </div>
-                                <span id="account-online-status" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">OFFLINE</span>
-                            </div>
-                        </div>
+                        <div class="mt-5 border-t border-gray-100 pt-5"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-black text-gray-800">캐릭터 능력치</h3><span class="text-[10px] font-bold text-gray-400">생활/직업/대화 확장 기준</span></div><div id="profile-stat-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div></div>
+                        <div class="mt-5 border-t border-gray-100 pt-5"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-black text-gray-800">인벤토리</h3><span id="profile-inventory-summary" class="text-[10px] font-bold text-gray-400">0개</span></div><div id="profile-inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div></div>
+                        <div class="mt-5 border-t border-gray-100 pt-4"><div class="flex justify-between items-center"><div><h3 class="text-sm font-bold text-gray-800">계정</h3><p id="account-display-name" class="text-xs text-slate-400 mt-1">로컬 게스트</p></div><span id="account-online-status" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">OFFLINE</span></div></div>
                     </div>
                 </div>
 
@@ -464,7 +450,9 @@
         import { getRestoredLocationContext, RESTORED_LOCATION_CONTEXT_IDS } from './src/restored/data/location-catalog.js';
         import { getRestoredLocationNavAction, listRestoredLocationNavActions } from './src/restored/ui/location-nav-contract.js';
         import { RESTORED_PLACE_BUTTON_TONES, RESTORED_PLACE_SURFACE_COPY } from './src/restored/ui/place-surface-copy.js';
-        import { getRestoredRank, getRestoredRankIndex, getRestoredTotalAsset, hasRestoredPhone, hasRestoredSmartPhone } from './src/restored/state/selectors.js';
+        import { getRestoredRank, getRestoredRankIndex, getRestoredTotalAsset, hasRestoredPhone, hasRestoredSmartPhone, listRestoredInventoryItems } from './src/restored/state/selectors.js';
+        import { projectRestoredConsumableUse } from './src/restored/inventory/consumable-contract.js';
+        import { renderRestoredInventoryPreviewHtml } from './src/restored/inventory/inventory-view.js';
         import { RESTORED_CRASH_EXTERNAL as CRASH_EXTERNAL, RESTORED_CRASH_INTERNAL as CRASH_INTERNAL, RESTORED_MARKET_CYCLE_ORDER as CYCLE_ORDER, RESTORED_MARKET_CYCLES as CYCLES, RESTORED_MARKET_NEWS_MESSAGES as NEWS_MESSAGES } from './src/restored/data/market-catalog.js';
         import { createRestoredPartnerFromArchetype, pickRestoredPartnerArchetype } from './src/restored/data/partner-catalog.js';
         import { RESTORED_RANKS as RANKS } from './src/restored/data/rank-catalog.js';
@@ -890,6 +878,7 @@
             const loverCount = gameState.partners.filter(p => p.isLover).length;
             document.getElementById('relationship-status').innerText = loverCount > 0 ? `연인 ${loverCount}명` : "솔로";
             renderProfileStats(profile);
+            renderInventoryPreview();
         }
         function renderProfileStats(profile) {
             const grid = document.getElementById('profile-stat-grid');
@@ -899,17 +888,21 @@
                 return `<div class="space-y-1"><div class="flex justify-between text-xs font-bold text-gray-600"><span>${stat.label}</span><span>${stat.value}/${stat.max}</span></div><div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full ${barClass} transition-all" style="width:${percent}%"></div></div></div>`;
             }).join('');
         }
+        function renderInventoryPreview() { const items = listRestoredInventoryItems(gameState); document.getElementById('profile-inventory-summary').innerText = `${items.length}종 / ${items.reduce((sum, item) => sum + item.count, 0)}개`; document.getElementById('profile-inventory-list').innerHTML = renderRestoredInventoryPreviewHtml(items); }
         function renderShopTab() {
             const eList = document.getElementById('shop-essential-list'); eList.innerHTML = '';
             const aList = document.getElementById('shop-asset-list'); aList.innerHTML = '';
             Object.keys(gameState.luxury).forEach(k => {
                 const item = gameState.luxury[k];
                 const isEssential = item.type === 'essential';
+                const isConsumable = item.type === 'consumable';
                 const target = isEssential ? eList : aList;
                 let btnHtml = '';
                 if (isEssential) {
                     if (item.count > 0) btnHtml = `<button class="px-4 py-1.5 text-xs font-bold text-white bg-gray-400 rounded-lg cursor-not-allowed" disabled>보유중</button>`;
                     else btnHtml = `<button onclick="buyAsset('luxury','${k}')" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg active:scale-95">구매</button>`;
+                } else if (isConsumable) {
+                    btnHtml = `<button onclick="buyAsset('luxury','${k}')" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg active:scale-95">구매</button>`;
                 } else {
                     btnHtml = `<button onclick="sellAsset('luxury','${k}')" class="px-3 py-1.5 text-xs font-bold text-gray-500 border rounded-lg active:scale-95" ${item.count<=0?'disabled opacity-50':''}>매도</button><button onclick="buyAsset('luxury','${k}')" class="px-4 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-lg active:scale-95">구매</button>`;
                 }
@@ -1248,6 +1241,7 @@
             gameState.cash += ret; i.count--;
             showToast(`${i.name} 매도 (+${fmt(ret)})`); saveGame(); renderAll();
         }
+        function useInventoryItem(itemId) { const result = projectRestoredConsumableUse(gameState, itemId); if(!result.ok) return showToast(result.message); gameState = result.nextState; showToast(result.message); saveGame(); renderAll(); }
         function setBetPercent(p) {
             const amt = Math.floor(gameState.cash*p);
             document.getElementById('bet-amount').value = amt;
@@ -1489,6 +1483,7 @@
             toggleBGM,
             tryGetNumber,
             updateCasinoBetDisplay,
+            useInventoryItem,
             updateLeverageUI
         });
     </script>

@@ -24,9 +24,11 @@ Current pre-split contracts:
 - `data/market-catalog.js`: stock/crypto seeds, market cycles, news messages, and crash messages.
 - `data/asset-catalog.js`: real-estate and luxury/item seeds for initial state.
 - `data/partner-catalog.js`: first partner archetypes for walk encounters.
+- `inventory/consumable-contract.js`: restored consumable item use effects, starting with energy drink energy recovery.
+- `inventory/inventory-view.js`: My Info carried-item preview renderer.
 - `state/initial-state.js`: live restored initial state used by `baegeum-city-v2-dice.html`.
 - `state/storage.js`: live save/load and cash-only save-code helpers.
-- `state/selectors.js`: total asset, rank, ownership value, phone, and smartphone selectors.
+- `state/selectors.js`: total asset, rank, ownership value, phone, smartphone, and carried-inventory selectors.
 - `actors/actor-contract.js`: AI actor identity, location, and memory-event shape.
 - `ui/shell-contract.js`: bottom tabs, phone apps, and major UI surfaces.
 - `ui/location-nav-contract.js`: location-aware actions for home, house-front, travel, and first city contexts.

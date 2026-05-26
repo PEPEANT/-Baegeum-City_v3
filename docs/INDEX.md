@@ -39,6 +39,7 @@
 - [Baegeum City V2 Restored UI, Online, Ranking, And Chat Roadmap](baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md): Forward plan for restored UI surfaces, phone-first design, online expansion, rankings, and chat growth.
 - [Baegeum City V2 Restored Asset Pipeline](baegeum-city-v2-restored-asset-pipeline.md): Asset folder roles, manifest ids, mp3/image classification, and checks for future illustrations, phone art, casino art, and audio.
 - [Baegeum City V2 Restored Intake](baegeum-city-v2-restored-intake.md): Receiving lane for human-provided files, links, drafts, character ideas, and reference material before manifest/catalog promotion.
+- [Baegeum City V2 Restored Inventory](baegeum-city-v2-restored-inventory.md): My Info carried-item inventory rules for shop goods, phones, bags, and consumables while excluding houses and real estate.
 - [Restored Planning Drafts](plans/README.md): Folder rules for feature-plan drafts that must exist before restored UI, ranking, job, chat, online, relationship, or casino implementation.
 - [Restored Ranking And Job System Plan](plans/restored-ranking-job-system.md): Concrete planning draft for phone rankings, local preview leaderboards, job/occupation boards, and online authority boundaries.
 - [Restored Three City Home Navigation Plan](plans/restored-three-city-home-navigation.md): Planning draft for starting inside the player home, moving to house-front, and expanding through Baegeum City, Dice City, and Seosan City with location-aware tabs.

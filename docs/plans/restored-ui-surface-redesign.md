@@ -23,10 +23,13 @@ Current playable entry:
 index.html -> baegeum-city-v2-dice.html
 ```
 
-Current bottom nav is still the transitional restored shell:
+Current bottom nav is now the location-aware restored shell:
 
 ```text
-myinfo / phone / realestate / casino / shop
+home_inside -> myinfo / home / go_out
+home_front -> fast_food / labor_office / convenience_store / bus_stop / go_home
+travel -> baegeum-city / dice-city / seosan-city
+city -> current city places and travel actions
 ```
 
 Current guarded preparation:
@@ -34,9 +37,11 @@ Current guarded preparation:
 - `src/restored/player/profile-contract.js` owns the My Info profile, job, residence, condition, and core stat shape.
 - `src/restored/phone/phone-app-contract.js` owns phone app ids, labels, icons, and phone/smartphone gates.
 - `src/restored/data/location-catalog.js` owns `home_inside`, `home_front`, travel, and first city contexts.
-- `src/restored/ui/location-nav-contract.js` owns future location-aware actions.
+- `src/restored/ui/location-nav-contract.js` owns current location-aware actions consumed by the playable shell.
 - `src/restored/account/session-contract.js` owns local guest account state.
 - `src/restored/online/online-adapter-contract.js` keeps online unavailable by default.
+- `src/restored/inventory/consumable-contract.js` owns registered consumable effects such as energy drink recovery.
+- `src/restored/inventory/inventory-view.js` owns the My Info inventory preview renderer.
 - `src/restored/assets/asset-manifest.js` owns current audio/image manifest ids.
 
 ## Redesign Goal
@@ -72,14 +77,14 @@ Top bar:
 My Info:
 
 - Is a character sheet.
-- Shows identity, rank, relationship summary, job, residence, condition, stats, and account.
+- Shows identity, rank, relationship summary, job, residence, condition, stats, carried inventory, and account.
 - Must not show duplicated cash/net-worth rows.
 - Must not hold action buttons such as hunting, going home, city travel, or job entry.
 - Must not render the full partner/lover list; that list belongs in the phone relationship app.
 
 Home:
 
-- Owns rest, recovery, inventory preview, home flavor, and future private partner calls.
+- Owns rest, recovery, home flavor, and future private partner calls.
 - Can later use profile stats such as energy, health, mental, and comfort.
 
 Outside / Home Front:

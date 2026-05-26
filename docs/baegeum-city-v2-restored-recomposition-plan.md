@@ -73,6 +73,8 @@ Current contract files:
 - `src/restored/player/profile-contract.js`
 - `src/restored/online/online-adapter-contract.js`
 - `src/restored/phone/phone-app-contract.js`
+- `src/restored/inventory/consumable-contract.js`
+- `src/restored/inventory/inventory-view.js`
 - `src/restored/ui/shell-contract.js`
 - `src/restored/ui/location-nav-contract.js`
 - `src/restored/assets/asset-manifest.js`
@@ -132,13 +134,16 @@ world tick / route choice
 
 ## UI Redesign Direction
 
-The current restored runtime still uses five bottom tabs:
+The current restored runtime now consumes location-aware bottom navigation:
 
 ```text
-내정보 / 휴대폰 / 부동산 / 도박 / 상점
+home_inside -> myinfo / home / go_out
+home_front -> fast_food / labor_office / convenience_store / bus_stop / go_home
+travel -> baegeum-city / dice-city / seosan-city
+city -> current city places and travel actions
 ```
 
-The next UI direction is location-aware navigation. The player should start inside the house, step outside to a house-front location, then expand into city districts and city travel.
+This keeps the earlier direction: the player starts inside the house, steps outside to a house-front location, then expands into city districts and city travel.
 
 ```text
 home_inside -> home_front -> baegeum-city | dice-city | seosan-city
@@ -190,12 +195,13 @@ Examples:
 2. Add `actor`, `place`, and `ui shell` contracts under `src/restored/`.
 3. Extract `INITIAL_STATE`, storage key, and save envelope from the HTML. Current status: initial state and storage are now live in `src/restored/state/`.
 4. Extract static catalogs: ranks, assets, markets, partner archetypes. Current status: live in `src/restored/data/`.
-5. Extract selectors: total asset, rank, phone ownership, smartphone ownership. Current status: restored selectors are now live in `src/restored/state/selectors.js`.
-6. Add location navigation contracts for house, house-front, city districts, and travel. Current status: location catalog and location-nav contract are guarded; runtime shell is not consuming them yet.
+5. Extract selectors: total asset, rank, phone ownership, smartphone ownership, and carried inventory. Current status: restored selectors are now live in `src/restored/state/selectors.js`.
+6. Add location navigation contracts for house, house-front, city districts, and travel. Current status: location catalog and location-nav contract are guarded and the playable shell consumes them.
 7. Add an online adapter contract that returns `unavailable` by default and never opens a fake lobby. Current status: guarded in `src/restored/online/online-adapter-contract.js`.
 8. Keep My Info as a profile/character sheet, not a money/action dump. Current status: profile stats are guarded in `src/restored/player/profile-contract.js`.
 9. Extract phone apps: news, stock, futures rendering and access gates. Current status: app ids and phone/smartphone gates are guarded in `src/restored/phone/phone-app-contract.js`; full render extraction is still pending.
-10. Add the relationship/lover list as a phone app entry instead of a My Info section.
+10. Add the relationship/lover list as a phone app entry instead of a My Info section. Current status: implemented in the playable phone surface.
+10a. Add carried inventory preview and basic consumable use. Current status: My Info inventory preview is rendered from `src/restored/inventory/inventory-view.js`, and energy drink use routes through `src/restored/inventory/consumable-contract.js`.
 11. Extract gambling systems: odd-even and blackjack result helpers.
 12. Add relationship/emotion state v2 beside old `love`, with migration.
 13. Add conversation catalog and event-driven dialogue selection.
@@ -217,6 +223,7 @@ The architecture check should fail when:
 - Place contracts stop exposing actor slots for future roaming AI.
 - New mp3 or image files appear under `assets/` without manifest ids.
 - Total asset, rank, phone, or smartphone ownership selectors move back into the HTML.
+- Inventory preview rendering or consumable effect logic moves back into the HTML.
 
 ## Do Not
 
@@ -230,4 +237,4 @@ The architecture check should fail when:
 
 ## Next Safe Slice
 
-State, storage, selectors, profile stats, phone app gates, static catalogs, city/place/location contracts, shell contracts, location-nav contracts, online adapter contract, asset manifest, intake, planning kit, and the UI/online/ranking/chat roadmap are now guarded. The next coding slice should move more phone app rendering under `src/restored/phone/` or adapt the playable shell to read location-aware navigation in a reversible way.
+State, storage, selectors, profile stats, phone app gates, static catalogs, city/place/location contracts, shell contracts, location-nav contracts, online adapter contract, inventory consumables, asset manifest, intake, planning kit, and the UI/online/ranking/chat roadmap are now guarded. The next coding slice should move more phone app rendering under `src/restored/phone/` or move shop purchases toward a restored action/effect contract.

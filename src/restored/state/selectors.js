@@ -8,12 +8,18 @@ function sumCollectionValue(collection, valueOf) {
   return Object.values(collection).reduce((total, item) => total + valueOf(item), 0);
 }
 
+function isValuePreservingItem(item) {
+  return item?.type !== "consumable";
+}
+
 export function getRestoredStockValue(state) {
   return sumCollectionValue(state?.stocks, (stock) => numeric(stock.price) * numeric(stock.qty));
 }
 
 export function getRestoredLuxuryValue(state) {
-  return sumCollectionValue(state?.luxury, (item) => numeric(item.price) * numeric(item.count));
+  return sumCollectionValue(state?.luxury, (item) => (
+    isValuePreservingItem(item) ? numeric(item.price) * numeric(item.count) : 0
+  ));
 }
 
 export function getRestoredRealEstateValue(state) {
@@ -35,6 +41,20 @@ export function getRestoredRank(state, ranks) {
 
 export function getRestoredRankIndex(state, ranks) {
   return ranks.indexOf(getRestoredRank(state, ranks));
+}
+
+export function listRestoredInventoryItems(state) {
+  return Object.entries(state?.luxury || {})
+    .filter(([, item]) => numeric(item?.count) > 0)
+    .map(([id, item]) => ({
+      id,
+      name: item.name,
+      count: numeric(item.count),
+      img: item.img,
+      type: item.type || "asset",
+      desc: item.desc || "",
+      price: numeric(item.price)
+    }));
 }
 
 export function hasRestoredPhone(state) {

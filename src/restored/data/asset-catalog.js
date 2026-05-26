@@ -1,4 +1,4 @@
-export const RESTORED_ASSET_CATALOG_VERSION = "restored-asset-catalog-001";
+export const RESTORED_ASSET_CATALOG_VERSION = "restored-asset-catalog-002";
 
 export const RESTORED_REAL_ESTATE_CATALOG = Object.freeze([
   Object.freeze({ id: "oneroom", name: "원룸", price: 80000, rent: 300, img: "🏠" }),
@@ -23,6 +23,7 @@ export const RESTORED_LUXURY_CATALOG = Object.freeze([
     type: "essential",
     desc: "코인 시세 확인"
   }),
+  Object.freeze({ id: "energy_drink", name: "에너지 드링크", price: 8, img: "🥤", type: "consumable", desc: "에너지 회복", fixedPrice: true }),
   Object.freeze({
     id: "gold",
     name: "금괴 1kg",

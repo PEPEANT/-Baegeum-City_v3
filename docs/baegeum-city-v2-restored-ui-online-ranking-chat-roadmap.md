@@ -23,13 +23,7 @@ Related source documents:
 
 ## Current Restored Baseline
 
-Current runtime navigation is still the restored five-tab shell:
-
-```text
-myinfo / phone / realestate / casino / shop
-```
-
-Future navigation should become location-aware instead of feature-tab-driven:
+Current runtime navigation is location-aware instead of feature-tab-driven:
 
 ```text
 home_inside
@@ -48,18 +42,20 @@ Current split status:
 
 - `src/restored/state/initial-state.js` owns initial state.
 - `src/restored/state/storage.js` owns save/load and cash-only restore helpers.
-- `src/restored/state/selectors.js` owns total asset, rank, phone ownership, and smartphone ownership calculations.
+- `src/restored/state/selectors.js` owns total asset, rank, phone ownership, smartphone ownership, and carried inventory calculations.
 - `src/restored/account/session-contract.js` owns the restored login/account and online availability state shape.
 - `src/restored/online/online-adapter-contract.js` owns the restored online adapter snapshot, unavailable default, and lobby availability guard.
 - `src/restored/player/profile-contract.js` owns the player profile, job title, residence label, condition label, and core stats that the My Info surface renders.
 - `src/restored/phone/phone-app-contract.js` owns phone app ids, labels, icons, and phone/smartphone gates before chat, ranking, or online lobby apps are added.
-- The partner/lover list is a planned phone app entry. My Info should only show a compact relationship summary.
+- The partner/lover list is a phone app entry. My Info only shows a compact relationship summary.
+- `src/restored/inventory/consumable-contract.js` owns registered consumable use effects, starting with energy drink energy recovery.
+- `src/restored/inventory/inventory-view.js` owns the My Info carried-item preview rendering.
 - Static catalogs for ranks, markets, assets, partners, the first three city ids, and the first location contexts now live under `src/restored/data/`.
-- `src/restored/ui/location-nav-contract.js` owns the planned home, house-front, travel, and city action sets before the runtime shell consumes them.
+- `src/restored/ui/location-nav-contract.js` owns the home, house-front, travel, and city action sets consumed by the playable shell.
 
 ## Login Home Transition
 
-The restored build is moving from a save-code start screen to a login home.
+The restored build has moved from a visible save-code start screen to a local login home.
 
 Rules:
 
@@ -266,7 +262,7 @@ Minimum message shape:
 2. Add UI surface contracts for top bar, bottom nav, phone shell, relationship panel, dialogue modal, casino surface, and ranking screen.
 3. Move phone app rendering into `src/restored/phone/`. Current status: app ids and device gates live in `src/restored/phone/phone-app-contract.js`.
 4. Add a relationship/lover phone app id and move the partner list entry point out of My Info.
-5. Adapt the runtime shell to consume the location navigation contract for `home_inside`, `home_front`, `baegeum-city`, `dice-city`, and `seosan-city`.
+5. Keep the runtime shell consuming the location navigation contract for `home_inside`, `home_front`, `baegeum-city`, `dice-city`, and `seosan-city`.
 6. Add local ranking snapshot selectors and a phone ranking app.
 7. Add relationship/emotion v2 state beside legacy `love`.
 8. Add partner DM catalog and message history contract.
