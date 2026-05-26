@@ -8,6 +8,7 @@ const INDEX_PATH = path.join(ROOT, "docs", "INDEX.md");
 const MANIFEST_PATH = path.join(ROOT, "src", "restored", "assets", "asset-manifest.js");
 const ASSETS_ROOT = path.join(ROOT, "assets");
 const TRACKED_EXTENSIONS = new Set([".mp3", ".ogg", ".wav", ".png", ".jpg", ".jpeg", ".webp", ".svg"]);
+const INBOX_PREFIX = "assets/inbox/";
 
 function normalizeRelative(filePath) {
   return path.relative(ROOT, filePath).replace(/\\/g, "/");
@@ -30,6 +31,10 @@ function walkFiles(dir) {
   return files;
 }
 
+function isInboxFile(filePath) {
+  return normalizeRelative(filePath).startsWith(INBOX_PREFIX);
+}
+
 async function main() {
   const errors = [];
 
@@ -50,6 +55,7 @@ async function main() {
   for (const requiredText of [
     "assets/restored/audio",
     "assets/restored/images",
+    "assets/inbox/",
     "src/restored/assets/asset-manifest.js",
     "tools/check-restored-asset-pipeline.cjs"
   ]) {
@@ -80,6 +86,7 @@ async function main() {
     }
 
     const trackedFiles = walkFiles(ASSETS_ROOT)
+      .filter((filePath) => !isInboxFile(filePath))
       .filter((filePath) => TRACKED_EXTENSIONS.has(path.extname(filePath).toLowerCase()))
       .map(normalizeRelative)
       .sort();

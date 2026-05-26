@@ -62,6 +62,8 @@ Primary roots:
 - `assets/restored/audio`
 - `assets/restored/images`
 
+Raw human-provided files can first land in `assets/inbox/`. That folder is quarantine and is intentionally excluded from runtime manifest coverage until a file is promoted.
+
 Do not create a new one-off folder for a single feature. If the asset does not fit one of these roles, add the role here first and guard it in the manifest check.
 
 ## Asset Ids
@@ -161,6 +163,7 @@ Future illustration and conversation systems should store only `assetId` values.
 The check should fail when:
 
 - A `.mp3`, `.png`, `.jpg`, `.jpeg`, `.webp`, or `.svg` file exists under `assets/` but is not listed in `src/restored/assets/asset-manifest.js`.
+- Exception: `assets/inbox/` is allowed to contain raw unpromoted files and must not be referenced at runtime.
 - A manifest path does not exist.
 - An audio file uses an image role, or an image file uses an audio role.
 - Asset ids are duplicated.

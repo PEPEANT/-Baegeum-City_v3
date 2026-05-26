@@ -21,3 +21,21 @@ Current pre-split contracts:
 - `actors/actor-contract.js`: AI actor identity, location, and memory-event shape.
 - `ui/shell-contract.js`: bottom tabs, phone apps, and major UI surfaces.
 - `assets/asset-manifest.js`: restored mp3/image ids and legacy asset registration.
+
+Planning docs:
+
+- `docs/baegeum-city-v2-restored-recomposition-plan.md`: split order and bottleneck rules.
+- `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md`: UI surface, online, ranking, and chat expansion order.
+- `docs/baegeum-city-v2-restored-asset-pipeline.md`: mp3/image folder roles and manifest rules.
+- `docs/plans/README.md`: generated feature-plan drafts before implementation.
+- `docs/templates/restored-feature-plan-template.md`: feature plan shape, including job and occupation ranking impact.
+
+Planning command:
+
+- `npm run plan:restored -- <slug> --title="Feature Title" --surface=phone --domain=ranking --write`
+
+Intake lane:
+
+- Raw human-provided files start in `assets/inbox/`.
+- Links and notes start in `refs/intake/`.
+- Use `node tools/intake-restored-material.cjs` to create intake cards before promotion.

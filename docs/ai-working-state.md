@@ -26,6 +26,10 @@ Dice City full-restore playable prototype is the active priority:
 6. Near-term code changes should start extracting state/storage/catalog modules under `src/restored/` instead of adding more inline script to the restored HTML.
 7. Asset additions for mp3 files, partner illustrations, phone art, casino art, and item images should go through `src/restored/assets/asset-manifest.js` and `docs/baegeum-city-v2-restored-asset-pipeline.md` before runtime use.
 8. Restored read-only selectors for total asset, rank, ownership value, phone ownership, and smartphone ownership now live in `src/restored/state/selectors.js`.
+9. Human-provided files, links, design drafts, and raw notes now have an intake lane: raw files in `assets/inbox/`, reference cards in `refs/intake/`, and classification through `tools/intake-restored-material.cjs`.
+10. Restored UI, online expansion, ranking, and chat growth are now planned in `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md`; phone remains the hub for news, markets, rankings, and chat, while bottom nav stays `myinfo / phone / realestate / casino / shop`.
+11. New restored features should get a draft plan through `npm run plan:restored -- <slug> --write` before implementation. The plan template includes job/occupation impact so rankings can include jobs without mixing them into wealth rank.
+12. `docs/plans/restored-ranking-job-system.md` is the first concrete restored feature plan. It keeps wealth title, leaderboard position, and job/occupation rank separate.
 
 Multimap safety remains verified:
 
@@ -136,6 +140,38 @@ Paused loops:
 - `docs/ai-spaghetti-bug-root-cause.md` explains why the spaghetti/bug pattern emerged and now fixes the next audit sequence around persistence, silent failures, and browser workflows.
 
 ## Loop Record
+
+Date: 2026-05-26
+Observed: The human asked to catch bugs first and, if the current work was done, move to the next step.
+Changed: Ran the full check first, then created `docs/plans/restored-ranking-job-system.md` as the next planning draft. The plan defines phone-based ranking boards, local preview snapshots, job/occupation board ids, starter job candidates, online authority boundaries, and the rule that job rank must not merge with wealth rank. Linked the plan from `docs/INDEX.md` and strengthened `tools/check-restored-planning-kit.cjs` so the concrete plan stays present.
+Verified: Initial `npm run check`, `node tools/check-restored-planning-kit.cjs`, final `npm run check`, and `git diff --check` passed.
+Blocked: No runtime UI or gameplay changed, so browser verification is not expected for this planning slice.
+Next: Extract restored static catalogs for ranks, assets, markets, and partner archetypes before any ranking/job UI implementation.
+Do not: Implement rankings or jobs inside `baegeum-city-v2-dice.html`; do not show fake global rankings while offline.
+
+Date: 2026-05-26
+Observed: The human clarified that features should not be built first; the project needs a planning script or draft foundation first, and rankings should include jobs/occupations.
+Changed: Added `docs/plans/README.md`, `docs/templates/restored-feature-plan-template.md`, `tools/create-restored-feature-plan.cjs`, and `tools/check-restored-planning-kit.cjs`. Added `npm run plan:restored` so future restored features can generate a planning draft before implementation. Updated the restored ranking roadmap to include job boards such as `jobRank`, `jobIncome`, and `jobReputation`, and strengthened roadmap checks to guard job ranking language.
+Verified: `node tools/check-restored-planning-kit.cjs`, `node tools/check-restored-ui-online-ranking-chat-roadmap.cjs`, generated job-ranking draft preview, `node tools/check-size.cjs`, and `npm run check` passed.
+Blocked: No runtime UI or gameplay changed, so browser verification is not expected for this planning-tool slice.
+Next: Generate a concrete `restored-ranking-job-system` plan before any ranking or job implementation, then continue catalog extraction.
+Do not: Implement job rankings directly in `baegeum-city-v2-dice.html` or merge job rank with wealth rank.
+
+Date: 2026-05-26
+Observed: The human asked to prepare the overall UI/design improvement plan plus future online expansion, ranking system, and chat expansion before more restored features are added.
+Changed: Added `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md` with UI surfaces, phone-first design draft, online authority rules, ranking split between local rank and online boards, and chat expansion from partner DM to public channels. Linked it from `docs/INDEX.md`, referenced it from `src/restored/README.md` and the recomposition plan, and added `tools/check-restored-ui-online-ranking-chat-roadmap.cjs` to guard the roadmap through `npm run check`.
+Verified: `node tools/check-restored-ui-online-ranking-chat-roadmap.cjs` and `npm run check` passed.
+Blocked: No runtime UI changed, so browser verification is not expected for this docs/guard slice.
+Next: Extract static catalogs for ranks, assets, markets, and partner archetypes before implementing ranking, chat, relationship, online, or illustration behavior.
+Do not: Put news, stocks, futures, rankings, or chat back into bottom navigation; do not add fake offline lobby or client-authoritative online rankings.
+
+Date: 2026-05-26
+Observed: The human asked to make the project ready so that when they provide material, Codex can immediately receive it and turn it into usable project inputs.
+Changed: Added `docs/baegeum-city-v2-restored-intake.md`, `assets/inbox/README.md`, and `refs/intake/README.md`. Added `tools/intake-restored-material.cjs`, which classifies provided files/URLs into asset, GitHub reference, or note intake cards and emits manifest/reference candidates. Added `tools/check-restored-intake.cjs`, linked the intake doc and reference intake index, added `npm run intake`, and wired intake checks into `npm run check`. Updated the asset pipeline so `assets/inbox/` is quarantine and excluded from runtime asset-manifest coverage until promotion.
+Verified: `node tools/intake-restored-material.cjs --help`, asset sample classification, GitHub sample classification, `node tools/check-restored-intake.cjs`, `node tools/check-restored-asset-pipeline.cjs`, `node tools/check-reference-systems.cjs`, `npm run check`, and `git diff --check` passed.
+Blocked: No runtime UI changed, so no browser verification was needed for this slice.
+Next: When the human provides a file/link, place raw files in `assets/inbox/` or create a `refs/intake/` card, then promote approved material into asset manifest or restored catalogs.
+Do not: Reference `assets/inbox/` from runtime code or copy GitHub/open-source code/assets into runtime folders before review.
 
 Date: 2026-05-26
 Observed: The human clarified that the blackjack request was not to wire blackjack into the active restored game, but to create a separate design-test prototype.

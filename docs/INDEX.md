@@ -36,7 +36,12 @@
 - [배금도시 v2 기능 감각 검증](baegeum-city-v2-feature-affordance-audit.md): 건물/입구/간판/앱이 실제 작동 단위인지 숫자로 확인하는 런타임 검증 패널과 구현 기준.
 
 - [Baegeum City V2 Restored Recomposition Plan](baegeum-city-v2-restored-recomposition-plan.md): Bottleneck audit and split order for the Dice City-derived restored build, including AI roaming actors, city/place contracts, phone UI, and future UI surfaces.
+- [Baegeum City V2 Restored UI, Online, Ranking, And Chat Roadmap](baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md): Forward plan for restored UI surfaces, phone-first design, online expansion, rankings, and chat growth.
 - [Baegeum City V2 Restored Asset Pipeline](baegeum-city-v2-restored-asset-pipeline.md): Asset folder roles, manifest ids, mp3/image classification, and checks for future illustrations, phone art, casino art, and audio.
+- [Baegeum City V2 Restored Intake](baegeum-city-v2-restored-intake.md): Receiving lane for human-provided files, links, drafts, character ideas, and reference material before manifest/catalog promotion.
+- [Restored Planning Drafts](plans/README.md): Folder rules for feature-plan drafts that must exist before restored UI, ranking, job, chat, online, relationship, or casino implementation.
+- [Restored Ranking And Job System Plan](plans/restored-ranking-job-system.md): Concrete planning draft for phone rankings, local preview leaderboards, job/occupation boards, and online authority boundaries.
+- [Restored Feature Plan Template](templates/restored-feature-plan-template.md): Required sections for restored feature plans, including job/occupation impact, ranking impact, chat impact, online authority, assets, and verification.
 
 ## AI Operating Loop
 

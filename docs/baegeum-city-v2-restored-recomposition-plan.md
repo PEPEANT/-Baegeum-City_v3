@@ -144,6 +144,8 @@ Long-term UI surfaces should be separated by job:
 
 Do not redesign the visuals broadly before these surfaces are named in code. Otherwise later AI, illustration, and city movement work will keep fighting the layout.
 
+`docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md` owns the broader UI/design, online, ranking, and chat expansion plan that builds on these surfaces.
+
 ## Event Boundaries
 
 Money, ownership, gambling, and relationship should not write into each other directly.
@@ -205,4 +207,4 @@ The architecture check should fail when:
 
 ## Next Safe Slice
 
-State, storage, selectors, city/place contracts, shell contracts, and asset manifest are now guarded. The next coding slice should extract static catalogs for ranks, assets, markets, and partner archetypes before relationship, conversation, or illustration behavior expands.
+State, storage, selectors, city/place contracts, shell contracts, asset manifest, intake, and the UI/online/ranking/chat roadmap are now guarded. The next coding slice should extract static catalogs for ranks, assets, markets, and partner archetypes before relationship, conversation, ranking, chat, online, or illustration behavior expands.
