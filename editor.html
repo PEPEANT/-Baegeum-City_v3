@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>배금도시 v2 - 월드 에디터</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="src/styles/baegeum-world-editor.css">
+  </head>
+  <body>
+    <canvas id="worldEditorCanvas" tabindex="0" aria-label="배금도시 월드 에디터 캔버스"></canvas>
+
+    <aside class="world-editor-panel" aria-label="월드 에디터 컨트롤">
+      <header class="editor-head">
+        <div>
+          <span>배금도시 v2</span>
+          <h1>월드 에디터</h1>
+        </div>
+        <a href="index.html">게임</a>
+      </header>
+
+      <section class="control-section">
+        <label><span>편집 맵</span><select id="activeMapSelect" aria-label="편집할 도시"></select></label>
+        <span class="change-detail" id="activeMapDraftKey">draft: -</span>
+      </section>
+
+      <section class="control-section">
+        <div class="segmented" role="group" aria-label="편집 모드">
+          <button type="button" class="active" data-mode="scenery">장식물</button>
+          <button type="button" data-mode="build">건설</button>
+          <button type="button" data-mode="obstacle">건물</button>
+          <button type="button" data-mode="road">도로</button>
+          <button type="button" data-mode="view">보기</button>
+        </div>
+      </section>
+
+      <section class="build-section" id="buildSection" hidden>
+        <div class="section-title">
+          <strong>건설 목록</strong>
+          <button type="button" id="closeBuildListButton">닫기</button>
+        </div>
+        <div class="build-grid" id="buildPalette" aria-label="건설 카드"></div>
+      </section>
+
+      <section class="control-section selected-card">
+        <strong id="selectionTitle">선택 없음</strong>
+        <span id="selectionMeta">장식물, 건물, 도로를 클릭해서 이동합니다.</span>
+        <div class="two-col">
+          <label><span>X</span><input id="selectedXInput" type="number" step="1"></label>
+          <label><span>Y</span><input id="selectedYInput" type="number" step="1"></label>
+        </div>
+      </section>
+
+      <section class="control-section">
+        <label class="check-row">
+          <input id="snapToggle" type="checkbox" checked>
+          <span>40px 격자에 맞춤</span>
+        </label>
+        <label class="check-row">
+          <input id="handleToggle" type="checkbox" checked>
+          <span>편집 핸들 표시</span>
+        </label>
+        <label class="check-row">
+          <input id="ruleToggle" type="checkbox">
+          <span>충돌/파괴 레이어</span>
+        </label>
+      </section>
+
+      <section class="control-section">
+        <div class="section-title">
+          <strong>작업 기록</strong>
+          <span class="change-state" id="changeStateLabel">저장됨</span>
+        </div>
+        <div class="button-row">
+          <button type="button" id="undoButton">되돌리기</button>
+          <button type="button" id="redoButton">다시 실행</button>
+        </div>
+        <div class="button-row">
+          <button type="button" id="fitButton">전체 보기</button>
+          <button type="button" id="saveButton">저장</button>
+        </div>
+        <span class="change-detail" id="changeDetailLabel">저장 기준과 동일</span>
+        <div class="contract-grid" aria-label="맵 계약 정보">
+          <span>map</span><strong id="contractMapLabel">-</strong>
+          <span>schema</span><strong id="contractSchemaLabel">-</strong>
+          <span>revision</span><strong id="contractRevisionLabel">rev 0</strong>
+          <span>summary</span><strong id="contractSummaryLabel">-</strong>
+        </div>
+        <div class="validation-report" id="validationReport" aria-label="저장 전 검증 리포트">
+          <strong id="validationTitle">검증 통과</strong>
+          <span id="validationDetail">ID, 충돌, 입구 이상 없음</span>
+          <ul id="validationList"></ul>
+        </div>
+      </section>
+
+      <details class="control-section advanced-section">
+        <summary>고급</summary>
+        <div class="button-row">
+          <button type="button" id="resetButton">초기화</button>
+          <button type="button" id="copyButton">JSON 복사</button>
+        </div>
+        <textarea id="exportOutput" spellcheck="false" aria-label="월드 에디터 JSON"></textarea>
+      </details>
+
+      <footer class="editor-status" id="statusText"></footer>
+    </aside>
+
+    <section class="selection-action-strip" id="selectionActionStrip" hidden>
+      <strong id="selectionActionLabel">선택 없음</strong>
+      <button type="button" id="rotateSelectionButton">회전</button>
+      <button type="button" id="lockSelectionButton">좌표잠금</button>
+      <button type="button" id="lockLayerSelectionButton">레이어잠금</button>
+      <button type="button" id="resetSelectionButton">원위치</button>
+      <button type="button" id="resizeBuildingShellButton" hidden>크기</button>
+      <button type="button" id="duplicateSelectionButton">복제</button>
+      <button type="button" id="deleteSelectionButton">삭제</button>
+      <button type="button" id="openBillboardAdButton" hidden>광고 변경</button>
+    </section>
+
+    <section class="ad-palette" id="billboardAdPalette" hidden>
+      <div class="section-title">
+        <strong>광고판 선택</strong>
+        <button type="button" id="closeBillboardAdButton">닫기</button>
+      </div>
+      <div class="ad-grid" id="billboardAdGrid" aria-label="광고판 광고 카드"></div>
+    </section>
+
+    <section class="build-active-strip" id="buildActiveStrip" hidden>
+      <strong id="buildActiveLabel">배치 중</strong>
+      <button type="button" id="openBuildListButton">목록</button>
+      <button type="button" id="completeBuildButton">배치 완료</button>
+    </section>
+
+    <script src="vendor/iron-line/src/core/math.js"></script>
+    <script src="vendor/iron-line/src/data/constants.js"></script>
+    <script src="vendor/iron-line/src/data/scenery-catalog.js"></script>
+    <script src="vendor/iron-line/src/data/map01.js"></script>
+    <script src="vendor/iron-line/src/data/map01-custom-layout.js"></script>
+    <script src="vendor/iron-line/src/systems/renderer.js"></script>
+    <script src="vendor/iron-line/src/systems/renderer-scenery.js"></script>
+    <script type="module" src="src/tools/baegeum-world-editor.js"></script>
+  </body>
+</html>

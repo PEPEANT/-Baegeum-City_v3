@@ -1,0 +1,62 @@
+:root {
+  --phone-shell-width: clamp(220px, 20vw, 264px);
+  --phone-panel-width: calc(var(--phone-shell-width) + 28px);
+}
+
+#phone-panel,
+#phone-stage,
+#phone-focus-dim {
+  position: fixed;
+}
+
+#city-map-toggle-btn {
+  display: none !important;
+}
+
+body.phone-focus-active #phone-panel {
+  z-index: 24;
+}
+
+body.phone-stage-active #phone-stage {
+  top: 34px;
+  left: 50%;
+  right: auto;
+  bottom: 92px;
+  width: min(560px, calc(100% - 40px));
+  transform: translateX(-50%);
+  z-index: 22;
+}
+
+body.phone-stage-active #phone-stage.has-fullbleed-app {
+  width: min(860px, calc(100% - 40px));
+}
+
+body.phone-stage-active.phone-safe-layout #phone-stage {
+  top: 28px;
+  bottom: 86px;
+  width: min(500px, calc(100% - 56px));
+}
+
+body.phone-stage-active.phone-safe-layout #phone-stage.has-fullbleed-app {
+  width: min(780px, calc(100% - 56px));
+}
+
+#phone-app-screen .phone-job-empty {
+  margin-top: 12px;
+}
+
+@media (max-width: 600px) {
+  :root {
+    --phone-shell-width: clamp(156px, 38vw, 188px);
+    --phone-panel-width: calc(var(--phone-shell-width) + 18px);
+  }
+
+  body.phone-stage-active #phone-stage.has-fullbleed-app {
+    top: 8px;
+    left: 4px;
+    right: auto;
+    bottom: 78px;
+    width: calc(100% - 8px);
+    transform: none;
+  }
+}

@@ -1,0 +1,326 @@
+/* MammonCity HUD adapter: keeps the original HUD ids/classes, scoped for the canvas build. */
+[hidden] {
+  display: none !important;
+}
+
+#hud-left,
+#hud-right {
+  position: fixed;
+  top: 10px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(8, 10, 20, 0.58);
+  color: #f7f8fb;
+  backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+#hud-left {
+  left: 12px;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+#hud-right {
+  right: 190px;
+  gap: 10px;
+  padding: 5px 14px;
+}
+
+#hud-left .hud-sep {
+  color: rgba(255, 255, 255, 0.50);
+  font-weight: 400;
+}
+
+#day-display {
+  color: #ffd98a;
+}
+
+.hud-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.hud-label {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hud-val {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hud-val.money { color: #7fff7f; }
+.hud-val.bank { color: #7ee0ff; }
+.hud-val.chip { color: #ffd36b; }
+.hud-val.stamina { color: #87ceeb; }
+.hud-val.energy { color: #ffb36b; }
+.hud-val.hunger { color: #ff8f6b; }
+
+.hud-divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.20);
+  flex-shrink: 0;
+}
+
+#side-toolbar {
+  position: fixed;
+  top: 132px;
+  right: 12px;
+  z-index: 12;
+  display: flex;
+  min-width: 60px;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: stretch;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 16px;
+  background: rgba(8, 10, 20, 0.60);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(10px);
+}
+
+#side-toolbar button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(240, 240, 240, 0.9);
+  font-family: inherit;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+#side-toolbar button:hover,
+#side-toolbar button[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.10);
+  color: #ffffff;
+}
+
+.toolbar-badge {
+  display: inline-flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(240, 240, 240, 0.9);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+#inventory-panel {
+  position: fixed;
+  top: 132px;
+  right: 84px;
+  z-index: 13;
+  display: flex;
+  width: min(320px, calc(100vw - 108px));
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 22px;
+  background: rgba(8, 11, 22, 0.92);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(12px);
+}
+
+#inventory-panel[hidden],
+body.phone-focus-active #hud-left,
+body.phone-stage-active #hud-left,
+body.phone-focus-active #hud-right,
+body.phone-stage-active #hud-right,
+body.phone-focus-active #side-toolbar,
+body.phone-stage-active #side-toolbar,
+body.phone-focus-active #inventory-panel,
+body.phone-stage-active #inventory-panel {
+  display: none;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-kicker {
+  color: rgba(200, 210, 230, 0.60);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.panel-title {
+  margin-top: 2px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.panel-close-button {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(240, 240, 240, 0.88);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.panel-close-button:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.inventory-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.inventory-summary-chip,
+.inventory-empty,
+.inventory-item {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.inventory-summary-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 11px;
+  border-radius: 14px;
+}
+
+.inventory-summary-label {
+  color: rgba(201, 213, 225, 0.68);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.inventory-summary-value {
+  color: #f8fbff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.inventory-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.inventory-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(233, 238, 245, 0.86);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.inventory-tab.is-active {
+  border-color: rgba(122, 214, 255, 0.44);
+  background: rgba(122, 214, 255, 0.14);
+  color: #ffffff;
+}
+
+.inventory-tab-count {
+  display: inline-flex;
+  min-width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+}
+
+.inventory-list {
+  display: flex;
+  overflow: auto;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 2px;
+}
+
+.inventory-empty,
+.inventory-item {
+  padding: 12px;
+  border-radius: 16px;
+}
+
+.inventory-empty-title,
+.inventory-item strong {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.inventory-empty-body,
+.inventory-item span {
+  margin-top: 6px;
+  color: rgba(218, 222, 230, 0.76);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  #hud-left {
+    right: 58px;
+    overflow: hidden;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  #hud-right {
+    top: 48px;
+    right: 82px;
+    gap: 6px;
+    padding: 5px 9px;
+  }
+
+  #side-toolbar {
+    top: 148px;
+    right: 10px;
+  }
+
+  #inventory-panel {
+    top: 148px;
+    right: 74px;
+    width: min(292px, calc(100vw - 92px));
+  }
+}

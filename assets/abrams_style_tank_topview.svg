@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Abrams style tank top-view game asset</title>
+  <desc id="desc">A redesigned top-view main battle tank SVG asset with Abrams-inspired proportions for a modern 2D game.</desc>
+  <defs>
+    <linearGradient id="hullSand" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d9c28b"/>
+      <stop offset="50%" stop-color="#b79255"/>
+      <stop offset="100%" stop-color="#75603e"/>
+    </linearGradient>
+    <linearGradient id="panelGold" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ead59d"/>
+      <stop offset="100%" stop-color="#a77d42"/>
+    </linearGradient>
+    <linearGradient id="armorOlive" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#5f6a4b"/>
+      <stop offset="100%" stop-color="#303826"/>
+    </linearGradient>
+    <linearGradient id="trackDark" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#4a4f4e"/>
+      <stop offset="100%" stop-color="#171a1b"/>
+    </linearGradient>
+    <linearGradient id="gunMetal" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#d8c08a"/>
+      <stop offset="45%" stop-color="#9b7742"/>
+      <stop offset="100%" stop-color="#503b24"/>
+    </linearGradient>
+    <filter id="drop" x="-12%" y="-15%" width="124%" height="130%">
+      <feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#060708" flood-opacity="0.35"/>
+    </filter>
+    <style>
+      .outline { stroke: #211c14; stroke-width: 6; stroke-linejoin: round; stroke-linecap: round; }
+      .thin { stroke: #332a1b; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+      .detail { fill: none; stroke: #6b5431; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .track-mark { stroke: #868a86; stroke-width: 7; stroke-linecap: round; opacity: 0.45; }
+      .bolt { fill: #5c472b; }
+    </style>
+  </defs>
+
+  <g filter="url(#drop)">
+    <ellipse cx="600" cy="438" rx="395" ry="206" fill="#020303" opacity="0.18"/>
+
+    <g id="left-track">
+      <path d="M206 274 C198 286 194 314 194 400 C194 486 198 514 206 526 L316 576 C330 582 352 570 352 552 L352 248 C352 230 330 218 316 224 Z" fill="url(#trackDark)" class="outline"/>
+      <path d="M228 304 C222 330 221 472 228 496" class="track-mark"/>
+      <path d="M260 290 C252 326 252 474 260 510" class="track-mark"/>
+      <path d="M292 276 C284 324 284 476 292 524" class="track-mark"/>
+      <g fill="#1f2223" stroke="#777b77" stroke-width="5">
+        <circle cx="304" cy="300" r="24"/>
+        <circle cx="304" cy="356" r="24"/>
+        <circle cx="304" cy="412" r="24"/>
+        <circle cx="304" cy="468" r="24"/>
+        <circle cx="304" cy="524" r="24"/>
+      </g>
+    </g>
+
+    <g id="right-track">
+      <path d="M884 224 C870 218 848 230 848 248 L848 552 C848 570 870 582 884 576 L994 526 C1002 514 1006 486 1006 400 C1006 314 1002 286 994 274 Z" fill="url(#trackDark)" class="outline"/>
+      <path d="M972 304 C978 330 979 472 972 496" class="track-mark"/>
+      <path d="M940 290 C948 326 948 474 940 510" class="track-mark"/>
+      <path d="M908 276 C916 324 916 476 908 524" class="track-mark"/>
+      <g fill="#1f2223" stroke="#777b77" stroke-width="5">
+        <circle cx="896" cy="300" r="24"/>
+        <circle cx="896" cy="356" r="24"/>
+        <circle cx="896" cy="412" r="24"/>
+        <circle cx="896" cy="468" r="24"/>
+        <circle cx="896" cy="524" r="24"/>
+      </g>
+    </g>
+
+    <g id="hull">
+      <path
+        d="M346 232
+           L436 166
+           L764 166
+           L854 232
+           L880 400
+           L854 568
+           L764 634
+           L436 634
+           L346 568
+           L320 400
+           Z"
+        fill="url(#hullSand)"
+        class="outline"
+      />
+      <path
+        d="M404 234
+           L468 196
+           L732 196
+           L796 234
+           L818 400
+           L796 566
+           L732 604
+           L468 604
+           L404 566
+           L382 400
+           Z"
+        fill="#000000"
+        opacity="0.22"
+      />
+      <path d="M436 166 L468 604" class="detail" opacity="0.45"/>
+      <path d="M764 166 L732 604" class="detail" opacity="0.45"/>
+      <path d="M344 400 H856" class="detail" opacity="0.36"/>
+      <path d="M468 196 H732" stroke="#f1dda5" stroke-width="8" opacity="0.34" stroke-linecap="round"/>
+      <path d="M468 604 H732" stroke="#4d3d26" stroke-width="8" opacity="0.28" stroke-linecap="round"/>
+
+      <g id="front-armor">
+        <path d="M436 166 L600 118 L764 166 L732 214 L468 214 Z" fill="url(#panelGold)" class="outline"/>
+        <path d="M484 186 H716" stroke="#f0dca5" stroke-width="8" opacity="0.38" stroke-linecap="round"/>
+        <path d="M528 130 L488 212" class="detail" opacity="0.42"/>
+        <path d="M672 130 L712 212" class="detail" opacity="0.42"/>
+      </g>
+
+      <g id="rear-armor">
+        <path d="M468 586 H732 L764 634 H436 Z" fill="#8f6f3f" class="thin"/>
+        <rect x="500" y="604" width="82" height="18" rx="6" fill="#30342e" class="thin"/>
+        <rect x="618" y="604" width="82" height="18" rx="6" fill="#30342e" class="thin"/>
+      </g>
+
+      <g id="side-modules">
+        <rect x="372" y="272" width="86" height="86" rx="12" fill="url(#armorOlive)" class="thin"/>
+        <rect x="742" y="272" width="86" height="86" rx="12" fill="url(#armorOlive)" class="thin"/>
+        <rect x="372" y="442" width="86" height="86" rx="12" fill="#a9854d" class="thin"/>
+        <rect x="742" y="442" width="86" height="86" rx="12" fill="#a9854d" class="thin"/>
+        <path d="M390 314 H440" stroke="#c8ba82" stroke-width="7" opacity="0.55" stroke-linecap="round"/>
+        <path d="M760 314 H810" stroke="#c8ba82" stroke-width="7" opacity="0.55" stroke-linecap="round"/>
+        <path d="M392 486 H438" stroke="#5d6347" stroke-width="7" opacity="0.65" stroke-linecap="round"/>
+        <path d="M762 486 H808" stroke="#5d6347" stroke-width="7" opacity="0.65" stroke-linecap="round"/>
+      </g>
+
+      <g id="bolts">
+        <circle class="bolt" cx="500" cy="246" r="5"/>
+        <circle class="bolt" cx="700" cy="246" r="5"/>
+        <circle class="bolt" cx="486" cy="554" r="5"/>
+        <circle class="bolt" cx="714" cy="554" r="5"/>
+        <circle class="bolt" cx="408" cy="400" r="5"/>
+        <circle class="bolt" cx="792" cy="400" r="5"/>
+      </g>
+    </g>
+
+    <g id="turret">
+      <path
+        d="M474 356
+           C488 286 540 250 600 250
+           C660 250 712 286 726 356
+           L704 474
+           C680 522 640 544 600 544
+           C560 544 520 522 496 474
+           Z"
+        fill="url(#panelGold)"
+        class="outline"
+      />
+      <path
+        d="M518 360
+           C530 318 560 296 600 296
+           C640 296 670 318 682 360
+           L668 452
+           C650 482 626 496 600 496
+           C574 496 550 482 532 452
+           Z"
+        fill="#86663c"
+        opacity="0.3"
+      />
+      <path d="M520 358 C540 322 562 306 600 306 C638 306 660 322 680 358" stroke="#f3dfa9" stroke-width="8" opacity="0.38" fill="none" stroke-linecap="round"/>
+      <rect x="562" y="274" width="76" height="34" rx="12" fill="#8c6939" class="thin"/>
+      <circle cx="600" cy="398" r="68" fill="#b1864b" class="thin"/>
+      <circle cx="600" cy="398" r="44" fill="#cfad70" class="thin"/>
+      <rect x="584" y="352" width="32" height="92" rx="12" fill="#7c5c34" class="thin"/>
+      <path d="M534 454 H666" stroke="#5e4728" stroke-width="10" opacity="0.42" stroke-linecap="round"/>
+
+      <g id="sensors">
+        <circle cx="502" cy="338" r="14" fill="#25292a" stroke="#bfb89f" stroke-width="5"/>
+        <circle cx="698" cy="338" r="14" fill="#25292a" stroke="#bfb89f" stroke-width="5"/>
+        <rect x="654" y="294" width="70" height="28" rx="10" fill="url(#armorOlive)" class="thin"/>
+        <rect x="476" y="294" width="70" height="28" rx="10" fill="#5b6250" class="thin"/>
+      </g>
+    </g>
+
+    <g id="main-gun">
+      <path d="M584 105 H616 L624 352 H576 Z" fill="url(#gunMetal)" class="outline"/>
+      <rect x="570" y="82" width="60" height="38" rx="12" fill="#7d5e35" class="outline"/>
+      <path d="M580 82 L600 54 L620 82 Z" fill="#5f472b" class="outline"/>
+      <path d="M600 110 V334" stroke="#e8d096" stroke-width="7" opacity="0.36" stroke-linecap="round"/>
+      <rect x="590" y="196" width="20" height="48" rx="8" fill="#5d4427" class="thin"/>
+    </g>
+
+    <g id="weapon-details">
+      <path d="M526 248 L488 204" stroke="#4d5143" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="482" cy="198" r="10" fill="#272a2b" stroke="#b9b29a" stroke-width="5"/>
+      <path d="M674 248 L712 204" stroke="#4d5143" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="718" cy="198" r="10" fill="#272a2b" stroke="#b9b29a" stroke-width="5"/>
+      <rect x="574" y="642" width="52" height="22" rx="8" fill="#30342e" class="thin"/>
+      <rect x="450" y="638" width="66" height="18" rx="7" fill="#5a6047" class="thin"/>
+      <rect x="684" y="638" width="66" height="18" rx="7" fill="#5a6047" class="thin"/>
+    </g>
+  </g>
+</svg>

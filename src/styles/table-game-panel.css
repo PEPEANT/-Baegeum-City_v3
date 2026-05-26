@@ -1,0 +1,102 @@
+.table-game-panel {
+  position: fixed;
+  left: 50%;
+  bottom: 88px;
+  z-index: 9;
+  display: grid;
+  width: min(360px, calc(100vw - 32px));
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid rgba(255, 211, 107, 0.28);
+  border-radius: 18px;
+  background: rgba(19, 14, 16, 0.86);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.26);
+  color: #fff6d2;
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+}
+
+.table-game-panel[hidden],
+body.phone-focus-active .table-game-panel,
+body.phone-stage-active .table-game-panel {
+  display: none;
+}
+
+.table-game-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.table-game-head strong {
+  display: block;
+  margin-top: 2px;
+  color: #ffffff;
+  font-size: 17px;
+}
+
+.table-game-kicker,
+.table-game-hint {
+  color: rgba(255, 246, 210, 0.68);
+  font-size: 11px;
+}
+
+.table-game-chip {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 211, 107, 0.14);
+  color: #ffd36b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.table-game-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.table-game-bets {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.table-game-choice,
+.table-game-bet,
+.table-game-start {
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-family: inherit;
+  font-weight: 800;
+}
+
+.table-game-choice,
+.table-game-bet {
+  height: 38px;
+  cursor: pointer;
+}
+
+.table-game-choice.is-active,
+.table-game-bet.is-active {
+  border-color: rgba(255, 211, 107, 0.62);
+  background: rgba(255, 211, 107, 0.18);
+  color: #ffffff;
+}
+
+.table-game-start {
+  min-height: 38px;
+  color: rgba(255, 246, 210, 0.52);
+}
+
+.table-game-hint {
+  margin: 0;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .table-game-panel {
+    bottom: 82px;
+  }
+}

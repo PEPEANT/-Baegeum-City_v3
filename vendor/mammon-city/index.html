@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>배금도시</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/layout.css?v=20260325-version2">
+  <link rel="stylesheet" href="css/components.css?v=20260325-lottoscratch1">
+  <link rel="stylesheet" href="css/city-map.css?v=20260325-mapmobile2">
+  <link rel="stylesheet" href="css/phone.css?v=20260325-mapquick1">
+  <link rel="stylesheet" href="css/market.css?v=20260323-assets1">
+  <link rel="stylesheet" href="css/ranking.css?v=20260326-rankinghappy1">
+  <link rel="stylesheet" href="css/settlement.css?v=20260326-ending1">
+</head>
+<body>
+  <div id="dev-panel" style="display:none">
+    <div class="dev-title">DEV PANEL</div>
+
+    <div class="dev-section days">
+      <div class="dev-section-label">턴 이동</div>
+    </div>
+
+    <div class="dev-section stats">
+      <div class="dev-section-label">행동 / 스탯</div>
+    </div>
+
+    <div class="dev-section state-dump">
+      <div class="dev-section-label">현재 상태</div>
+    </div>
+  </div>
+
+  <div id="game">
+    <div id="main-area">
+      <div id="bg" class="room"></div>
+      <div id="buildings"></div>
+      <div id="outside-goal"></div>
+      <div id="actors-layer" aria-hidden="true"></div>
+      <div id="character"></div>
+      <div id="money-effect"></div>
+      <div id="trash-game-layer" class="is-hidden" aria-hidden="true">
+        <div id="trash-game-hud">
+          <span id="trash-game-title">방청소</span>
+          <span id="trash-remaining">0 / 0</span>
+        </div>
+        <div id="trash-items"></div>
+      </div>
+      <div id="job-minigame-layer" class="is-hidden" aria-hidden="true">
+        <div id="job-minigame-hud">
+          <div class="job-minigame-copy">
+            <span id="job-minigame-title">알바 미니게임</span>
+            <span id="job-minigame-note">핵심 업무 카드만 빠르게 정리하세요.</span>
+          </div>
+          <span id="job-minigame-progress">0 / 0</span>
+        </div>
+        <div id="job-minigame-items"></div>
+      </div>
+
+      <!-- 좌상단 HUD: 턴 · 시간 · 현금 -->
+      <div id="hud-left">
+        <span id="day-display">1/12</span>
+        <span class="hud-sep">·</span>
+        <span id="time-display">06:30</span>
+        <span class="hud-sep">·</span>
+        <span id="money-display" class="hud-val money">현금 0원</span>
+        <span class="hud-sep">·</span>
+        <span id="bank-display" class="hud-val bank">계좌 0원</span>
+      </div>
+
+      <!-- 우상단 HUD: 체력 / 에너지 / 배고픔 -->
+      <div id="hud-right">
+        <div class="hud-stat">
+          <span class="hud-label">체력</span>
+          <span id="stamina-display" class="hud-val stamina">100</span>
+        </div>
+        <span class="hud-divider"></span>
+        <div class="hud-stat">
+          <span class="hud-label">에너지</span>
+          <span id="energy-display" class="hud-val energy">100</span>
+        </div>
+        <span class="hud-divider"></span>
+        <div class="hud-stat">
+          <span class="hud-label">배고픔</span>
+          <span id="hunger-display" class="hud-val hunger">100/100</span>
+        </div>
+      </div>
+
+      <!-- JS 호환용 숨김 요소 -->
+      <span id="player-display" hidden>부모님집</span>
+      <div hidden><div id="progressbar"></div></div>
+
+      <div id="headline-strip">
+        <span id="headline-badge" class="headline-badge">구인 속보</span>
+        <span id="headline-text" class="headline-text">동네 구인 앱이 오늘 공고를 다시 밀어 올린다.</span>
+      </div>
+
+      <div id="gameplay-feedback" hidden aria-hidden="true"></div>
+
+      <!-- 우측 세로 툴바 -->
+      <div id="side-toolbar">
+        <button id="character-button" type="button" aria-expanded="false" aria-label="정보">👤</button>
+        <div class="toolbar-divider"></div>
+        <button id="inventory-button" type="button" aria-expanded="false" aria-label="가방">
+          🎒<span id="inventory-count" class="toolbar-badge">0</span>
+        </button>
+        <div class="toolbar-divider"></div>
+        <button id="memory-button" type="button" aria-expanded="false" aria-label="기억">
+          🧠<span id="memory-count" class="toolbar-badge">0</span>
+        </button>
+      </div>
+
+      <!-- 패널들 (툴바 밖, 독립 위치) -->
+      <div id="character-panel" hidden aria-hidden="true">
+        <div class="panel-header">
+          <div>
+            <div class="panel-kicker">CHARACTER</div>
+            <div class="panel-title">내 정보</div>
+          </div>
+          <button id="character-close-button" class="panel-close-button" type="button" aria-label="정보 닫기">닫기</button>
+        </div>
+        <div id="character-stats" class="character-stats"></div>
+      </div>
+
+      <div id="inventory-panel" hidden aria-hidden="true">
+        <div class="panel-header">
+          <div>
+            <div class="panel-kicker">INVENTORY</div>
+            <div class="panel-title">가방</div>
+          </div>
+          <button id="inventory-close-button" class="panel-close-button" type="button" aria-label="가방 닫기">닫기</button>
+        </div>
+        <div id="inventory-summary" class="inventory-summary"></div>
+        <div id="inventory-tabs" class="inventory-tabs"></div>
+        <div id="inventory-list" class="inventory-list"></div>
+      </div>
+
+      <div id="memory-panel" hidden aria-hidden="true">
+        <div class="panel-header">
+          <div>
+            <div class="panel-kicker">MEMORY LOG</div>
+            <div class="panel-title">기억</div>
+          </div>
+          <button id="memory-close-button" class="panel-close-button" type="button" aria-label="기억 닫기">닫기</button>
+        </div>
+        <div id="memory-list" class="memory-list"></div>
+      </div>
+
+      <div id="phone-stage" hidden aria-hidden="true"></div>
+      <div id="phone-focus-dim" hidden aria-hidden="true"></div>
+
+      <div id="phone-panel">
+        <div class="phone-shell">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="phone-status-row">
+              <span id="phone-time-display" class="phone-status-time">08:00</span>
+              <span id="phone-status-signal" class="phone-status-signal">TURN 01</span>
+            </div>
+
+            <div id="phone-day-chip" class="phone-day-chip" hidden>TURN 01</div>
+
+            <div id="phone-apps" class="phone-apps"></div>
+
+            <div id="phone-app-screen" class="phone-app-screen" hidden></div>
+          </div>
+
+          <div id="phone-controls" aria-label="Phone controls">
+            <button id="phone-stage-btn" class="phone-control-btn" type="button" aria-pressed="false">
+              <span class="phone-control-icon" aria-hidden="true">⛶</span>
+              <span class="phone-control-label"></span>
+            </button>
+            <button id="city-map-toggle-btn" class="phone-control-btn is-map" type="button" aria-expanded="false" aria-label="지도 열기">
+              <span class="phone-control-icon" aria-hidden="true"></span>
+              <span class="phone-control-label"></span>
+            </button>
+            <button id="phone-home-btn" class="phone-control-btn is-home" type="button" aria-expanded="false">
+              <span class="phone-control-icon" aria-hidden="true"></span>
+              <span class="phone-control-label"></span>
+            </button>
+            <button id="phone-back-btn" class="phone-control-btn" type="button">
+              <span class="phone-control-icon" aria-hidden="true">↩</span>
+              <span class="phone-control-label"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="textbox">
+        <div class="textbox-top">
+          <div id="speaker">구인 속보</div>
+          <div id="scene-tags" class="scene-tags"></div>
+        </div>
+        <div id="message"></div>
+        <div id="choices"></div>
+      </div>
+    </div>
+
+    <div id="start-screen">
+      <div class="start-version-badge">V0.4</div>
+      <button
+        id="ranking-preview-button"
+        class="start-ranking-trigger"
+        type="button"
+        aria-label="랭킹 보기"
+        title="랭킹 보기"
+      >
+        <span class="start-ranking-trigger-icon" aria-hidden="true">&#x1F3C6;</span>
+      </button>
+      <div class="start-card">
+        <div class="start-kicker">현재 12턴 프로토타입</div>
+        <div class="start-title">배금도시</div>
+        <div class="start-sub">
+          폰 공고를 뒤지고, 다음 턴 출근을 예약하고, 버틴 하루를 현금으로 바꾸는 도시 생존 시뮬레이션.
+        </div>
+        <div class="start-body">
+          1턴 프롤로그와 방청소, 스마트폰 공고 지원, 예약 출근, 바깥 이동, 기억 로그, 마지막 정산 랭킹까지 이어집니다.
+        </div>
+        <div class="start-highlights" aria-hidden="true">
+          <span class="start-highlight">스마트폰 공고</span>
+          <span class="start-highlight">예약 근무</span>
+          <span class="start-highlight">기억 로그</span>
+          <span class="start-highlight">최종 정산</span>
+        </div>
+
+        <div class="start-login-section">
+          <button id="start-google-login-button" class="start-google-btn" type="button">
+            <svg class="start-google-icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+              <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853"/>
+              <path d="M3.964 10.706A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+              <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+            </svg>
+            <span id="start-google-login-label">Google로 로그인</span>
+          </button>
+          <div class="start-login-divider" aria-hidden="true">
+            <span class="start-login-divider-line"></span>
+            <span class="start-login-divider-text">또는</span>
+            <span class="start-login-divider-line"></span>
+          </div>
+          <button id="start-email-login-button" class="start-login-btn" type="button">이메일로 로그인</button>
+          <button id="start-guest-start-button" class="start-guest-btn" type="button">게스트로 바로 시작</button>
+          <p id="start-login-status" class="start-login-status" hidden></p>
+          <p id="start-guest-note" class="start-guest-note">게스트 진행은 현재 브라우저에만 저장됩니다.</p>
+        </div>
+
+        <input id="name-input" class="name-input" type="text" maxlength="10" placeholder="닉네임">
+        <div class="start-actions">
+          <button id="continue-button" class="start-btn start-btn-secondary" type="button" hidden>이어하기</button>
+          <button id="start-button" class="start-btn" type="button">시작하기</button>
+        </div>
+
+        <p class="start-privacy-notice">
+          로그인하면 <a class="start-privacy-link" href="#" tabindex="-1">개인정보 처리방침</a> 및
+          <a class="start-privacy-link" href="#" tabindex="-1">이용약관</a>에 동의한 것으로 간주됩니다.<br>
+          수집 항목: 닉네임·점수. 목적: 랭킹 표시. 보유: 서비스 종료 시까지.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div id="auth-modal" class="start-auth-modal" hidden aria-hidden="true">
+    <div class="start-auth-modal-backdrop" data-auth-dismiss="backdrop"></div>
+    <div class="start-auth-dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <button id="auth-modal-close-button" class="start-auth-close" type="button" aria-label="로그인 창 닫기">닫기</button>
+      <div class="start-auth-tabs" role="tablist" aria-label="이메일 인증 방식">
+        <button id="auth-tab-login-button" class="start-auth-tab" type="button" role="tab" aria-selected="true">로그인</button>
+        <button id="auth-tab-signup-button" class="start-auth-tab" type="button" role="tab" aria-selected="false">회원가입</button>
+      </div>
+      <div class="start-auth-copy">
+        <div id="auth-modal-title" class="start-auth-title">이메일 로그인</div>
+        <div id="auth-modal-subtitle" class="start-auth-subtitle">이메일과 비밀번호로 로그인하거나 새 계정을 만들 수 있습니다.</div>
+      </div>
+      <form id="auth-modal-form" class="start-auth-form">
+        <label class="start-auth-field">
+          <span class="start-auth-label">이메일</span>
+          <input id="auth-email-input" class="start-auth-input" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </label>
+        <label class="start-auth-field">
+          <span class="start-auth-label">비밀번호</span>
+          <input id="auth-password-input" class="start-auth-input" type="password" autocomplete="current-password" placeholder="비밀번호" minlength="6" required>
+        </label>
+        <label id="auth-confirm-wrap" class="start-auth-field" hidden>
+          <span class="start-auth-label">비밀번호 확인</span>
+          <input id="auth-confirm-input" class="start-auth-input" type="password" autocomplete="new-password" placeholder="비밀번호 다시 입력" minlength="6">
+        </label>
+        <p id="auth-modal-message" class="start-auth-message" hidden></p>
+        <button id="auth-modal-submit-button" class="start-auth-submit" type="submit">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 수저 뽑기 오버레이 -->
+  <div id="spoon-draw-overlay" hidden aria-hidden="true">
+    <div class="spd-bg"></div>
+    <div class="spd-surface">
+      <div class="spd-header" id="spd-header">
+        <div class="spd-eyebrow">출생 패키지</div>
+        <div class="spd-title">수저를 뽑아라</div>
+        <div class="spd-desc">결과에 따라 손 현금, 계좌, 시작 자산과 첫 방 분위기가 달라집니다</div>
+      </div>
+      <div class="spd-stage">
+        <div class="spd-ring" id="spd-ring"></div>
+        <div class="spd-capsule" id="spd-capsule">
+          <span class="spd-emblem" id="spd-emblem">?</span>
+          <span class="spd-spoon-icon">🥄</span>
+        </div>
+        <div class="spd-pedestal"></div>
+      </div>
+      <div class="spd-result-area" id="spd-result-area" hidden>
+        <div class="spd-result-bracket" id="spd-result-bracket"></div>
+        <div class="spd-result-name" id="spd-result-name"></div>
+        <div class="spd-result-summary" id="spd-result-summary"></div>
+        <div class="spd-result-chips" id="spd-result-chips"></div>
+      </div>
+      <div class="spd-odds" id="spd-odds">
+        <span class="spd-odd spd-odd-gold">금 5%</span>
+        <span class="spd-odd spd-odd-silver">은 25%</span>
+        <span class="spd-odd spd-odd-dirt">흙 70%</span>
+      </div>
+      <div class="spd-actions">
+        <button id="spd-draw-btn" class="spd-draw-btn" type="button">🥄 수저 뽑기</button>
+        <button id="spd-start-btn" class="spd-start-btn" type="button" hidden>이 수저로 시작하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 최종 정산 애니메이션 화면 -->
+  <div id="settlement-screen" class="settlement-screen" hidden aria-modal="true" role="dialog" aria-label="최종 정산">
+    <div class="settlement-inner">
+      <div class="settlement-header">
+        <div class="settlement-badge">FINAL</div>
+        <div class="settlement-title-text" id="settlement-title-text">12턴 최종 정산</div>
+      </div>
+      <div class="settlement-rows" id="settlement-rows"></div>
+      <div class="settlement-rank-area" id="settlement-rank-area"></div>
+      <div class="settlement-actions" id="settlement-actions"></div>
+    </div>
+  </div>
+
+  <!-- 랭킹 전체화면 오버레이 -->
+  <div id="ranking-screen" hidden aria-hidden="true">
+    <div class="ranking-inner">
+      <div class="ranking-header">
+        <div class="ranking-title">배금도시</div>
+        <div class="ranking-subtitle">12턴 결산 · 전국 랭킹</div>
+      </div>
+      <div class="ranking-my-card" id="ranking-my-card"></div>
+      <div class="ranking-list-wrap">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th>순위</th>
+              <th>이름</th>
+              <th>현금</th>
+              <th>직업 · 출신</th>
+              <th>행복도</th>
+              <th>랭크</th>
+            </tr>
+          </thead>
+          <tbody id="ranking-list"></tbody>
+        </table>
+      </div>
+      <div class="ranking-actions">
+        <button id="ranking-close-btn" class="ranking-btn ranking-btn-secondary" type="button" hidden>닫기</button>
+        <button id="ranking-restart-btn" class="ranking-btn" type="button">다음 12턴 시작</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Firebase 설정 — Firebase Console에서 발급받은 값으로 교체하세요
+    // https://console.firebase.google.com → 프로젝트 생성 → 웹 앱 등록 → config 복사
+    let firebaseConfigOverride = null;
+    try {
+      const rawFirebaseConfig = localStorage.getItem("mammoncity.firebaseConfig");
+      firebaseConfigOverride = rawFirebaseConfig ? JSON.parse(rawFirebaseConfig) : null;
+    } catch (error) {
+      console.warn("[ranking] 저장된 Firebase 설정을 읽지 못했습니다.", error);
+    }
+    try {
+      const storedFirebaseAppId = localStorage.getItem("mammoncity.firebaseAppId");
+      if (!window.__MAMMONCITY_FIREBASE_APP_ID__ && storedFirebaseAppId) {
+        window.__MAMMONCITY_FIREBASE_APP_ID__ = String(storedFirebaseAppId || "").trim();
+      }
+    } catch (error) {
+      console.warn("[ranking] Firebase app id를 읽지 못했습니다.", error);
+    }
+    const firebaseConfig = window.__MAMMONCITY_FIREBASE_CONFIG__ || firebaseConfigOverride || {
+      apiKey: "AIzaSyA1rS4hMdzIInEyaKjsMkJxPOi8ihPeuxs",
+      authDomain: "mammoncity.firebaseapp.com",
+      projectId: "mammoncity",
+      storageBucket: "mammoncity.firebasestorage.app",
+      messagingSenderId: "85158535723",
+      appId: "1:85158535723:web:e77f5d3abeed8d97ad006e",
+      measurementId: "G-BJSJTGR1MF",
+    };
+    if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+      firebase.initializeApp(firebaseConfig);
+      window.__FIREBASE_CONFIG_SET__ = true;
+    }
+  </script>
+
+  <script src="js/data/jobs/jobs-data.js?v=20260324-officework1"></script>
+  <script src="js/data/jobs/job-workplaces-data.js?v=20260323-jobs-work1"></script>
+  <script src="js/data/jobs/job-headlines-data.js"></script>
+  <script src="js/data/jobs/service-job-events-data.js"></script>
+  <script src="js/data/jobs/labor-job-events-data.js"></script>
+  <script src="js/data/jobs/advanced-job-events-data.js"></script>
+  <script src="js/data/jobs/job-events-data.js?v=20260323-market6"></script>
+  <script src="js/data/constants.js?v=20260324-hunger100b"></script>
+  <script src="js/data/characters.js?v=20260325-passerby1"></script>
+  <script src="js/data/npcs/npc-data.js?v=20260325-passerby1"></script>
+  <script src="js/data/npcs/npc-dialogue-data.js?v=20260325-passerby1"></script>
+  <script src="js/data/npcs/romance-call-dialogues.js?v=20260325-romancecall1"></script>
+  <script src="js/data/days/day01/story.js?v=20260324-homefix1"></script>
+  <script src="js/data/days/day01/events.js"></script>
+  <script src="js/data/days/day01/world.js?v=20260325-passerby1"></script>
+  <script src="js/data/days/day01/index.js"></script>
+  <script src="js/data/days/day02/index.js"></script>
+  <script src="js/data/days/day03/index.js"></script>
+  <script src="js/data/days/day04/index.js"></script>
+  <script src="js/data/days/day05/index.js"></script>
+  <script src="js/data/days/day06/index.js"></script>
+  <script src="js/data/days/day07/index.js"></script>
+  <script src="js/data/days/index.js"></script>
+  <script src="js/systems/world/world-service.js"></script>
+  <script src="js/systems/world/world-runtime-service.js?v=20260325-passerby1"></script>
+  <script src="js/systems/world/city-map-service.js?v=20260325-mapmobile1"></script>
+  <script src="js/systems/progression/meta-state-service.js"></script>
+  <script src="js/systems/progression/happiness-service.js"></script>
+  <script src="js/systems/progression/spoon-start-service.js?v=20260325-silverintro1"></script>
+  <script src="js/systems/progression/hunger-service.js?v=20260324-hunger100b"></script>
+  <script src="js/systems/progression/player-stats-service.js?v=20260324-hunger100b"></script>
+  <script src="js/systems/presentation/presentation-service.js?v=20260325-homeinvite1"></script>
+  <script src="js/systems/npc/romance-service.js?v=20260325-homeinvite1"></script>
+  <script src="js/systems/npc/romance-call-session.js?v=20260325-romancecall1"></script>
+  <script src="js/systems/npc/social-scam-service.js?v=20260325-socialscam1"></script>
+  <script src="js/data/search/search-route-registry.js?v=20260324-digglelive1"></script>
+  <script src="js/data/market/market-listings.js?v=20260323-market6"></script>
+  <script src="js/data/economy/economy-calendar.js?v=20260323-markethost1"></script>
+  <script src="js/systems/economy/wallet-service.js"></script>
+  <script src="js/systems/economy/bank-loan-service.js?v=20260323-assets1"></script>
+  <script src="js/systems/economy/economy-service.js?v=20260325-coincycle2"></script>
+  <script src="js/systems/economy/market-cycle-service.js?v=20260326-stocktargets1"></script>
+  <script src="js/systems/economy/inventory-service.js?v=20260324-feedback2"></script>
+  <script src="js/systems/actions/action-runner.js?v=20260323-assets1"></script>
+  <script src="js/systems/jobs/jobs-requirement-service.js?v=20260323-gates1"></script>
+  <script src="js/systems/jobs/jobs-action-service.js?v=20260323-gates1"></script>
+  <script src="js/systems/market/market-service.js?v=20260323-assets1"></script>
+  <script src="js/systems/memory/memory-service.js"></script>
+  <script src="js/systems/npc/dialogue-service.js?v=20260325-dialoguefix1"></script>
+  <script src="js/systems/ranking-service.js?v=20260326-rankinglive5"></script>
+  <script src="js/devices/phone/phone-session.js?v=20260325-phoneapps1"></script>
+  <script src="js/apps/app-ui-helpers.js?v=20260323-bankloan1"></script>
+  <script src="js/apps/trading-terminal.js?v=20260325-coincycle2"></script>
+  <script src="js/apps/jobs/jobs-app-state.js"></script>
+  <script src="js/apps/jobs/jobs-app-ui.js?v=20260323-gates1"></script>
+  <script src="js/apps/jobs/jobs-manifest.js"></script>
+  <script src="js/apps/dis/dis-community-service.js?v=20260326-diggleguard1"></script>
+  <script src="js/apps/dis/dis-manifest.js?v=20260326-diggleguard1"></script>
+  <script src="js/apps/market/market-manifest.js?v=20260325-phoneapps1"></script>
+  <script src="js/apps/news/news-manifest.js?v=20260324-newscompact1"></script>
+  <script src="js/apps/playstore/playstore-manifest.js"></script>
+  <script src="js/apps/bus/bus-manifest.js?v=20260323-bus4"></script>
+  <script src="js/apps/call/call-manifest.js?v=20260324-romance4"></script>
+  <script src="js/apps/gallery/gallery-manifest.js"></script>
+  <script src="js/apps/bank/bank-app-state.js?v=20260323-assets1"></script>
+  <script src="js/apps/bank/bank-manifest.js?v=20260324-bankhome1"></script>
+  <script src="js/apps/stocks/stocks-manifest.js?v=20260326-stocknames1"></script>
+  <script src="js/apps/casino/casino-state.js"></script>
+  <script src="js/apps/casino/casino-exchange.js?v=20260324-casinofix1"></script>
+  <script src="js/apps/casino/casino-blackjack.js"></script>
+  <script src="js/apps/casino/casino-slots.js"></script>
+  <script src="js/apps/casino/casino-manifest.js"></script>
+  <script src="js/apps/coin/coin-manifest.js"></script>
+  <script src="js/apps/delivery/delivery-manifest.js"></script>
+  <script src="js/apps/video/video-manifest.js"></script>
+  <script src="js/devices/phone/phone-app-registry.js?v=20260324-casinomove1"></script>
+  <script src="js/devices/phone/phone-shell-ui.js?v=20260325-mapquick1"></script>
+  <script src="js/devices/phone/phone-router.js"></script>
+  <script src="js/ui.js?v=20260326-rankinghappy1"></script>
+  <script src="js/ui/city-map/city-map-ui.js?v=20260325-mapquick1"></script>
+  <script src="js/systems/progression/turn-briefing-service.js?v=20260325-lottoscratch1"></script>
+  <script src="js/logic.js?v=20260326-disfix1"></script>
+  <script src="js/dev.js?v=20260324-statcap1"></script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+.baegeum-editor-panel {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 6;
+  width: min(390px, calc(100vw - 28px));
+  max-height: calc(100vh - 28px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(255, 215, 102, 0.28);
+  border-radius: 10px;
+  background: rgba(20, 14, 16, 0.94);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+}
+
+.baegeum-editor-panel header {
+  display: grid;
+  gap: 3px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.baegeum-editor-panel strong {
+  color: #ffe186;
+  font-size: 18px;
+}
+
+.baegeum-editor-panel span,
+.baegeum-editor-panel p {
+  color: #bdb6a3;
+  font-size: 12px;
+}
+
+.baegeum-editor-panel label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.baegeum-editor-panel .two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.baegeum-editor-panel input,
+.baegeum-editor-panel select,
+.baegeum-editor-panel textarea,
+.baegeum-editor-panel button {
+  min-width: 0;
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.075);
+}
+
+.baegeum-editor-panel textarea {
+  min-height: 150px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+@media (max-width: 980px) {
+  .baegeum-editor-panel {
+    display: none;
+  }
+}

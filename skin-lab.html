@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>배금도시 v2 - 캐릭터 테스트장</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="./vendor/drawing-world/public/styles/skin-editor.css">
+    <link rel="stylesheet" href="./src/styles/skin-lab.css">
+  </head>
+  <body>
+    <main class="skin-lab-shell">
+      <section class="lab-hero">
+        <p class="eyebrow">배금도시 스킨 시스템</p>
+        <h1>캐릭터 테스트장</h1>
+        <p>프리셋, 커스텀 픽셀 스킨, NPC 스킨을 여기서 먼저 확인한 뒤 본게임에 적용합니다.</p>
+        <nav class="lab-actions" aria-label="페이지 이동">
+          <a href="./index.html">게임으로</a>
+          <a href="./editor.html">맵 에디터</a>
+        </nav>
+      </section>
+
+      <section class="stage-panel" aria-label="캐릭터 미리보기">
+        <div class="panel-head">
+          <div>
+            <p>LIVE PREVIEW</p>
+            <h2>플레이어 + NPC 스킨 확인</h2>
+          </div>
+          <span id="skinStatus">준비 완료</span>
+        </div>
+        <canvas id="skinStage" aria-label="스킨 테스트 무대"></canvas>
+      </section>
+
+      <section id="skinEditor" class="skin-editor editor-card" aria-label="스킨 편집기">
+        <div class="skin-editor-head">
+          <strong>스킨 선택</strong>
+          <span>원본 32x32 픽셀 규격</span>
+        </div>
+        <div id="skinPresets" class="skin-presets"></div>
+
+        <div class="skin-workbench">
+          <canvas id="skinCanvas" width="32" height="32" aria-label="커스텀 스킨 편집 캔버스"></canvas>
+          <div class="skin-preview-wrap">
+            <canvas id="skinPreview" width="32" height="32" aria-label="현재 스킨 미리보기"></canvas>
+            <span>게임 적용 미리보기</span>
+          </div>
+        </div>
+
+        <div class="skin-custom-panel">
+          <div class="skin-options">
+            <label class="skin-color-picker">
+              색상
+              <input id="skinColorInput" type="color" value="#111827">
+            </label>
+            <div class="skin-size-picker">
+              <span>브러시</span>
+              <div id="skinBrushSizes" class="skin-brush-sizes"></div>
+            </div>
+            <div class="skin-edit-tools" aria-label="스킨 도구">
+              <button id="skinEraserButton" type="button">지우개</button>
+              <button id="skinFillButton" type="button">채우기</button>
+              <button id="skinClearButton" type="button">초기화</button>
+              <button id="skinDefaultButton" type="button">검은 후드</button>
+            </div>
+          </div>
+          <div id="skinPalette" class="skin-palette" aria-label="스킨 팔레트"></div>
+        </div>
+
+        <div class="skin-editor-actions">
+          <input id="skinFileInput" type="file" accept="image/*" hidden>
+          <button id="skinEditButton" type="button">선택 스킨 편집</button>
+          <button id="skinLoadButton" type="button">PNG 불러오기</button>
+          <button id="skinSaveButton" type="button">PNG 저장</button>
+          <button id="skinApplyButton" type="button" class="primary">본게임에 적용</button>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./src/skins/skin-lab.js"></script>
+  </body>
+</html>

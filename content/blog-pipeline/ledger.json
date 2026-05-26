@@ -1,0 +1,75 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "id": "1056312",
+      "stage": "naver_private_published",
+      "source_url": "https://gall.dcinside.com/mgallery/board/view/?id=thesingularity&no=1056312",
+      "source_title": "(긴글,진지주의) AI 1인 개발을 하며 공허해진 이유",
+      "target_blog": "metasports",
+      "package": "content/naver-drafts/1056312-ai-one-person-dev-void",
+      "naver_url": "https://blog.naver.com/PostView.naver?blogId=metasports&logNo=224296506988",
+      "public_url": "",
+      "updated_at": "2026-05-26T09:19:17+0900",
+      "stats": {
+        "asset_count": 23,
+        "body_image_count": 14,
+        "attachment_count": 9,
+        "asset_error_count": 0,
+        "comment_count": 80,
+        "comment_total": 79,
+        "youtube_count": 1,
+        "video_count": 6
+      },
+      "next_action": "human_review_before_public_release",
+      "created_at": "2026-05-26T08:46:13+0900",
+      "notes": [
+        {
+          "at": "2026-05-26T08:47:54+0900",
+          "text": "pipeline structure initialized"
+        },
+        {
+          "at": "2026-05-26T08:52:07+0900",
+          "text": "Text pasted into Naver SmartEditor and saved as temporary draft; temp draft count observed as 4."
+        },
+        {
+          "at": "2026-05-26T08:53:35+0900",
+          "text": "Browser image clipboard paste succeeded, but direct click on long placeholder split the placeholder text; image insertion was undone and temp draft resaved clean. Next adapter should use short image anchors or toolbar upload."
+        },
+        {
+          "at": "2026-05-26T08:54:53+0900",
+          "text": "Temporary Naver draft exists in SmartEditor; generator now uses short image anchors for future image replacement."
+        },
+        {
+          "at": "2026-05-26T08:56:24+0900",
+          "text": "Agent handoff 2026-05-26: package validation passed with 23 assets, 14 body images, 0 asset errors, 80 collected comments, 1 YouTube, 6 videos. Current blocker is Naver SmartEditor image placement after text temp-save. Do not refetch or downgrade the ledger unless source refresh is explicitly requested. Use naver_editor_clipboard.txt with short [[IMG_001]] anchors, then replace anchors using editor_upload_plan.json; verify every inserted image position before private/public publishing. NAVER_ACCESS_TOKEN is not configured, so API private publish needs OAuth/token setup first. Public release still requires human review."
+        },
+        {
+          "at": "2026-05-26T09:07:55+0900",
+          "text": "2026-05-26 adapter work: generated browser_editor_payload.json and added validation for SmartEditor anchors/assets. Browser coordinate/find replacement tests were reverted; do not use coordinate-only image placement as the primary adapter. Internal Naver editor routes observed: RabbitTempPostWrite, RabbitTempPostUpdate, RabbitWrite, PostWriteFormManagerOptions."
+        },
+        {
+          "at": "2026-05-26T09:08:38+0900",
+          "text": "Browser draft resaved clean after reverted image-placement tests: imgCount=0, original long placeholders remain in current Naver temp draft."
+        },
+        {
+          "at": "2026-05-26T09:11:26+0900",
+          "text": "Clean Naver SmartEditor temporary draft created/refreshed from browser_editor_payload.json with short anchors [[IMG_001]]..[[IMG_004]], long placeholders removed, no images inserted yet."
+        },
+        {
+          "at": "2026-05-26T09:15:03+0900",
+          "text": "Naver SmartEditor temp draft now has 4 inline uploaded images, 0 remaining [[IMG_*]] anchors, 0 long placeholders. Successful adapter method: click exact short anchor, Home, Shift+End, paste image from clipboard."
+        },
+        {
+          "at": "2026-05-26T09:17:33+0900",
+          "text": "Image-position verification passed in current Naver SmartEditor draft: allOk=true, imageCount=4, remaining short anchors=0, long placeholders=0. Verification saved to naver_editor_verification.json. Public publishing remains blocked until human review."
+        },
+        {
+          "at": "2026-05-26T09:19:17+0900",
+          "text": "Private Naver post published after image-position verification. Browser confirmed visible post state: 방금 전 · 비공개. Public publishing remains blocked until human review."
+        }
+      ]
+    }
+  ],
+  "updated_at": "2026-05-26T09:19:17+0900"
+}

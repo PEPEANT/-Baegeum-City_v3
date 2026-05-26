@@ -1,0 +1,9 @@
+node_modules/
+.codex-server*.log
+.playwright-mcp/
+__pycache__/
+*.pyc
+.env
+.env.*
+!.env.example
+.naver-token.json

@@ -1,0 +1,14 @@
+{
+  "name": "baegeum-city-v2",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Baegeum City v2 offline city-core prototype.",
+  "scripts": {
+    "start": "node tools/static-server.cjs",
+    "check": "node tools/check-size.cjs && node tools/check-iron-line-vendor.cjs && node tools/smoke-baegeum-map-shrink-readiness.cjs && node tools/smoke-baegeum-city-urban-layout.cjs && node tools/check-drawing-world-vendor.cjs && node tools/check-mammon-city-vendor.cjs && node tools/check-diceland-vendor.cjs && node tools/smoke-city-core.cjs && node tools/smoke-city-startup-query.cjs && node tools/smoke-city-hud-map-label.cjs && node tools/smoke-state-protocol.cjs && node tools/smoke-map-registry.cjs && node tools/smoke-city-district-contract.cjs && node tools/smoke-map-transition-runtime.cjs && node tools/smoke-map-transition-interaction.cjs && node tools/smoke-dice-city-venues.cjs && node tools/smoke-casino-copy-contract.cjs && node tools/smoke-simple-scenery-renderer.cjs && node tools/smoke-runtime-state-facade.cjs && node tools/smoke-local-storage-diagnostics.cjs && node tools/smoke-venue-metadata-storage.cjs && node tools/smoke-phone-dis.cjs && node tools/smoke-player-economy.cjs && node tools/smoke-economy-ledger.cjs && node tools/smoke-inventory-master.cjs && node tools/smoke-object-interaction-master.cjs && node tools/smoke-game-action-master.cjs && node tools/smoke-local-action-runtime.cjs && node tools/smoke-local-ledger-effect.cjs && node tools/smoke-interior-interaction-runtime.cjs && node tools/smoke-mobile-action-controls.cjs && node tools/smoke-odd-even-table-panel.cjs && node tools/smoke-exchange-atm-panel.cjs && node tools/smoke-horse-racing-interior.cjs && node tools/smoke-world-editor-build-palette.cjs && node tools/smoke-world-editor-selection-lock.cjs && node tools/smoke-world-editor-map-selector.cjs && node tools/smoke-world-editor-draft-contract.cjs && node tools/smoke-editor-entry.cjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "mode": "browser_editor",
+  "note": "Use this when Naver API does not preserve exact in-body image placement.",
+  "body_images_available": 14,
+  "positions_in_rewritten_draft": [
+    {
+      "anchor": "[[IMG_001]]",
+      "alt": "초기 프로젝트 기록 이미지",
+      "path": "assets/body-001.png"
+    },
+    {
+      "anchor": "[[IMG_002]]",
+      "alt": "AI 개발 과정 스크린샷",
+      "path": "assets/body-002.png"
+    },
+    {
+      "anchor": "[[IMG_003]]",
+      "alt": "프로젝트 피드백 또는 개발 기록",
+      "path": "assets/body-003.png"
+    },
+    {
+      "anchor": "[[IMG_004]]",
+      "alt": "시뮬라크 또는 수복 관련 이미지",
+      "path": "assets/body-004.png"
+    }
+  ],
+  "recommended_first_pass": "paste text with short image anchors, then replace each anchor with its image"
+}

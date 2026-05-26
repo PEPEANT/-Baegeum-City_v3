@@ -1,0 +1,75 @@
+{
+  "verified_at": "2026-05-26T00:17:26.435Z",
+  "source": "Naver SmartEditor current browser draft",
+  "policy": {
+    "no_refetch": true,
+    "no_ledger_downgrade": true,
+    "public_publish_requires_human_review": true
+  },
+  "result": {
+    "allOk": true,
+    "imageChecks": [
+      {
+        "after": "아이디어가 생긴다",
+        "afterOk": true,
+        "anchor": "[[IMG_001]]",
+        "before": "그때 나는 특이점이 이미 시작됐다고 믿었다",
+        "beforeOk": true,
+        "image": {
+          "alt": "clipboard.png",
+          "height": 300,
+          "srcHead": "https://blogfiles.pstatic.net/MjAyNjA1MjZfMTAy/MDAxNzc5NzU0NDIzMDA3.hatn9XdyXUV6SXfPkZ1gqoYLVUlr3WgZGhAUE09f86gg.XjZG3rAupoG1CSVYDxnutwLyKjxYdXP6ijcxwV3tazgg.PN",
+          "width": 300
+        },
+        "ok": true
+      },
+      {
+        "after": "문제는 버그 하나가 아니었다",
+        "afterOk": true,
+        "anchor": "[[IMG_002]]",
+        "before": "감정과 흔적이 끊기지 않고 남는 공간을 만들고 싶었다",
+        "beforeOk": true,
+        "image": {
+          "alt": "clipboard.png",
+          "height": 520,
+          "srcHead": "https://blogfiles.pstatic.net/MjAyNjA1MjZfMjQz/MDAxNzc5NzU0NDUxODg2.wz7MV7Uy1DpBSdFviZ8GvFpC27f1nDtQASsBpIR8I9gg.ChB3uJMhwfYRPiaT5mWb34Iv8JTA0ouuNzwVLkxxIAgg.PN",
+          "width": 231
+        },
+        "ok": true
+      },
+      {
+        "after": "특히 온라인 게임을 만들면서 더 선명해졌다",
+        "afterOk": true,
+        "anchor": "[[IMG_003]]",
+        "before": "세계를 책임지는 감각까지 대신 주지는 않았다",
+        "beforeOk": true,
+        "image": {
+          "alt": "clipboard.png",
+          "height": 259,
+          "srcHead": "https://blogfiles.pstatic.net/MjAyNjA1MjZfMTUg/MDAxNzc5NzU0NDU5Njgw.WaqXRFKioEpUljiwZGK6iGmnU7IlzMZxRQlpTPktDG8g.e8lXkQNednekDgTUAGCnm7Qm4Cp7HLg7pUflsMNmrJkg.PN",
+          "width": 214
+        },
+        "ok": true
+      },
+      {
+        "after": "그럼에도 이 기록을 남기는 이유",
+        "afterOk": true,
+        "anchor": "[[IMG_004]]",
+        "before": "원하는 세계를 담기엔 부족하다는 걸 먼저 체감해버린 쪽에 가까웠다",
+        "beforeOk": true,
+        "image": {
+          "alt": "clipboard.png",
+          "height": 500,
+          "srcHead": "https://blogfiles.pstatic.net/MjAyNjA1MjZfMTUw/MDAxNzc5NzU0NDY3NTEw.xB67a3A7ejEMPxZ7TkK-AW9zgiBTzozrVHhRjImSwBUg.4g39_Cms7iEsyOQ7j8BN7Jm-exEiXu-dQTC_VTbLpIEg.PN",
+          "width": 618
+        },
+        "ok": true
+      }
+    ],
+    "imageCount": 4,
+    "longPlaceholderCount": 0,
+    "shortAnchors": [],
+    "titleSignal": true,
+    "url": "https://blog.naver.com/PostWriteForm.naver?blogId=metasports"
+  }
+}

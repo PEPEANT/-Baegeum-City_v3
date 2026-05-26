@@ -1,0 +1,52 @@
+/* base.css - 리셋/공통 변수/기본 스타일 */
+@import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@500;700&family=Rye&display=swap');
+
+:root {
+    --bg: #111;
+    --panel: rgba(0, 0, 0, 0.70);
+    --border: #444;
+    --gold: #ffd700;
+    --green: #4ade80;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: #1a1a1a;
+    color: #fff;
+    font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    touch-action: none;
+}
+
+#app {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+}
+
+/* Canvas */
+#gameCanvas {
+    display: block;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.hidden {
+    display: none !important;
+}
