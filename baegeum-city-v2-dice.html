@@ -116,6 +116,7 @@
                         </div>
 
                         <div class="mt-5 border-t border-gray-100 pt-5"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-black text-gray-800">캐릭터 능력치</h3><span class="text-[10px] font-bold text-gray-400">생활/직업/대화 확장 기준</span></div><div id="profile-stat-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div></div>
+                        <div class="mt-5 border-t border-gray-100 pt-5"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-black text-gray-800">관계 요약</h3><span class="text-[10px] font-bold text-gray-400">상세 관리는 휴대폰</span></div><div id="relationship-summary-card"></div></div>
                         <div class="mt-5 border-t border-gray-100 pt-5"><div class="flex items-center justify-between mb-3"><h3 class="text-sm font-black text-gray-800">인벤토리</h3><span id="profile-inventory-summary" class="text-[10px] font-bold text-gray-400">0개</span></div><div id="profile-inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-2"></div></div>
                         <div class="mt-5 border-t border-gray-100 pt-4"><div class="flex justify-between items-center"><div><h3 class="text-sm font-bold text-gray-800">계정</h3><p id="account-display-name" class="text-xs text-slate-400 mt-1">로컬 게스트</p></div><span id="account-online-status" class="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-full">OFFLINE</span></div></div>
                     </div>
@@ -153,7 +154,6 @@
                         </div>
                         <div class="grid grid-cols-3 gap-2" id="phone-app-buttons"></div>
                     </div>
-
                     <div id="phone-app-relationships" class="phone-app-view hidden space-y-4">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
                             <div class="flex items-center justify-between mb-4">
@@ -164,9 +164,15 @@
                                 <span id="phone-relationship-summary" class="text-xs font-bold px-3 py-1 rounded-full bg-pink-50 text-pink-600 border border-pink-100">솔로</span>
                             </div>
                             <div id="phone-partner-list" class="space-y-2"></div>
+                            <div class="mt-4 border-t border-slate-100 pt-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-sm font-black text-gray-800">최근 관계 기록</h3>
+                                    <span class="text-[10px] font-bold text-slate-400">최근 5개</span>
+                                </div>
+                                <div id="phone-relationship-log-list" class="space-y-2"></div>
+                            </div>
                         </div>
                     </div>
-
                     <div id="phone-app-news" class="phone-app-view space-y-4">
                         <div class="bg-slate-900 text-white p-6 rounded-2xl shadow-lg flex justify-between items-center">
                             <div>
@@ -179,7 +185,6 @@
                         </div>
                         <div id="news-list-container" class="space-y-3"></div>
                     </div>
-
                     <div id="phone-app-stock" class="phone-app-view hidden space-y-5">
                         <div id="stock-ticker-area" class="bg-white rounded-lg h-10 flex items-center overflow-hidden shadow-sm border"></div>
                         <section class="bg-white p-5 rounded-2xl shadow-sm border border-gray-200">
@@ -446,17 +451,23 @@
         import { loadRestoredGame, saveRestoredGame } from './src/restored/state/storage.js';
         import { canEnterRestoredGame, createRestoredGuestAccountState } from './src/restored/account/session-contract.js';
         import { listRestoredProfileStats } from './src/restored/player/profile-contract.js';
-        import { canUseRestoredPhoneApp, getRestoredPhoneApp, listRestoredPhoneApps, listUsableRestoredPhoneApps } from './src/restored/phone/phone-app-contract.js';
+        import { findRestoredLiquidatedFuturesPositionIndex, getRestoredCryptoPriceText, renderRestoredFuturesAppView } from './src/restored/phone/futures-app-view.js';
+        import { renderRestoredPhoneAppStoreView } from './src/restored/phone/app-store-view.js';
+        import { renderRestoredNewsListHtml } from './src/restored/phone/news-app-view.js';
+        import { renderRestoredRelationshipPhoneAppView } from './src/restored/phone/relationship-app-view.js';
+        import { renderRestoredStockAppView } from './src/restored/phone/stock-app-view.js';
+        import { appendRestoredRelationshipLog, applyRestoredRelationshipAction } from './src/restored/systems/relationship-event-runtime.js';
+        import { canUseRestoredPhoneApp, getRestoredPhoneApp, listRestoredPhoneAppIds, listRestoredPhoneApps, listUsableRestoredPhoneApps } from './src/restored/phone/phone-app-contract.js';
         import { getRestoredLocationContext, RESTORED_LOCATION_CONTEXT_IDS } from './src/restored/data/location-catalog.js';
         import { getRestoredLocationNavAction, listRestoredLocationNavActions } from './src/restored/ui/location-nav-contract.js';
-        import { RESTORED_PLACE_BUTTON_TONES, RESTORED_PLACE_SURFACE_COPY } from './src/restored/ui/place-surface-copy.js';
+        import { RESTORED_PLACE_SURFACE_COPY, renderRestoredPlaceSurfaceHtml } from './src/restored/ui/place-surface-copy.js';
+        import { getRestoredRelationshipSummaryView, renderRestoredRelationshipSummaryHtml } from './src/restored/ui/relationship-summary-view.js';
         import { getRestoredRank, getRestoredRankIndex, getRestoredTotalAsset, hasRestoredPhone, hasRestoredSmartPhone, listRestoredInventoryItems } from './src/restored/state/selectors.js';
         import { projectRestoredConsumableUse } from './src/restored/inventory/consumable-contract.js';
         import { renderRestoredInventoryPreviewHtml } from './src/restored/inventory/inventory-view.js';
         import { RESTORED_CRASH_EXTERNAL as CRASH_EXTERNAL, RESTORED_CRASH_INTERNAL as CRASH_INTERNAL, RESTORED_MARKET_CYCLE_ORDER as CYCLE_ORDER, RESTORED_MARKET_CYCLES as CYCLES, RESTORED_MARKET_NEWS_MESSAGES as NEWS_MESSAGES } from './src/restored/data/market-catalog.js';
         import { createRestoredPartnerFromArchetype, pickRestoredPartnerArchetype } from './src/restored/data/partner-catalog.js';
         import { RESTORED_RANKS as RANKS } from './src/restored/data/rank-catalog.js';
-
         async function callGemini(prompt) {
             return new Promise(resolve => {
                 setTimeout(() => {
@@ -662,9 +673,11 @@
             for (let i = gameState.partners.length - 1; i >= 0; i--) {
                 const p = gameState.partners[i];
                 if (p.isLover) continue;
-                p.love -= 2;
-                if (p.love <= 0) {
-                    const name = p.name;
+                const result = commitRelationshipAction(i, 'drift', { summary: `${p.name}님과 연락이 끊겼습니다.` }, false);
+                const nextPartner = result.ok ? result.partner : p;
+                if ((nextPartner.love ?? nextPartner.affection ?? 0) <= 0) {
+                    const name = nextPartner.name || nextPartner.displayName;
+                    if(result.ok) gameState.relationshipLogs = appendRestoredRelationshipLog(gameState.relationshipLogs, result.log);
                     gameState.partners.splice(i, 1);
                     showToast(`💔 ${name}님이 떠났습니다.`);
                 }
@@ -672,7 +685,6 @@
             renderRelationshipSurfaces();
             saveGame();
         }, 5000);
-
         function renderAll() {
             const rank = getRestoredRank(gameState, RANKS);
             const accountName = gameState.account?.displayName || '로컬 게스트';
@@ -823,11 +835,7 @@
             document.getElementById("place-surface-title").innerText = copy.title;
             document.getElementById("place-surface-copy").innerText = copy.copy;
             const actionsEl = document.getElementById("place-surface-actions");
-            actionsEl.innerHTML = (copy.actions || []).map((item) => {
-                const tone = RESTORED_PLACE_BUTTON_TONES[item.tone] || RESTORED_PLACE_BUTTON_TONES.slate;
-                const click = item.action === "walk" ? "goForWalk()" : item.tab === "phone" ? "openPhoneSurface()" : item.tab ? `switchTab('${item.tab}')` : `showToast('${item.message || "준비 중입니다."}')`;
-                return `<button onclick="${click}" class="py-4 rounded-2xl border ${tone} font-bold active:scale-95 transition">${item.label}</button>`;
-            }).join("") || `<div class="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-bold text-slate-400">준비 중</div>`;
+            actionsEl.innerHTML = renderRestoredPlaceSurfaceHtml(copy);
         }
 
         function renderTravelTab() {
@@ -875,8 +883,9 @@
             document.getElementById('account-online-status').innerText = gameState.online?.status === 'connected' ? 'ONLINE' : 'OFFLINE';
             const avatarEl = document.getElementById('my-avatar');
             if(avatarEl) avatarEl.innerText = rank.rankEmoji;
-            const loverCount = gameState.partners.filter(p => p.isLover).length;
-            document.getElementById('relationship-status').innerText = loverCount > 0 ? `연인 ${loverCount}명` : "솔로";
+            const relationshipView = getRestoredRelationshipSummaryView(gameState);
+            document.getElementById('relationship-status').innerText = relationshipView.headline;
+            document.getElementById('relationship-summary-card').innerHTML = renderRestoredRelationshipSummaryHtml(gameState);
             renderProfileStats(profile);
             renderInventoryPreview();
         }
@@ -940,9 +949,10 @@
             shell.classList.remove('hidden');
             document.getElementById('phone-device-badge').innerText = device.hasSmartPhone ? '스마트폰' : '폴더폰';
             renderPhoneAppButtons(usableApps);
+            if(activePhoneApp === 'app_store') renderAppStorePhoneApp(device);
             listRestoredPhoneApps().forEach(app => {
-                const view = document.getElementById(`phone-app-${app.id}`);
-                if(view) view.classList.toggle('hidden', app.id !== activePhoneApp);
+                const view = getPhoneAppView(app.id);
+                view.classList.toggle('hidden', app.id !== activePhoneApp);
             });
             if(activePhoneApp === 'news') renderNewsTab();
             if(activePhoneApp === 'stock') renderStockTab();
@@ -959,6 +969,8 @@
                 return `<button onclick="switchPhoneApp('${app.id}')" id="phone-app-${app.id}-btn" class="${className}">${app.icon} ${app.label}</button>`;
             }).join('');
         }
+        function getPhoneAppView(appId) { let view = document.getElementById(`phone-app-${appId}`); if(!view) { view = document.createElement('div'); view.id = `phone-app-${appId}`; view.className = 'phone-app-view hidden'; document.getElementById('phone-app-shell').appendChild(view); } return view; }
+        function renderAppStorePhoneApp(device) { getPhoneAppView('app_store').innerHTML = renderRestoredPhoneAppStoreView({ installedAppIds: listRestoredPhoneAppIds(), device }); }
         function isRelationshipPhoneAppVisible() {
             return Boolean(document.querySelector('#tab-phone.active')) && activePhoneApp === 'relationships';
         }
@@ -969,79 +981,40 @@
         function renderRelationshipPhoneApp() {
             const summary = document.getElementById('phone-relationship-summary');
             const list = document.getElementById('phone-partner-list');
-            if(!summary || !list) return;
-            const loverCount = gameState.partners.filter(p => p.isLover).length;
-            summary.innerText = loverCount > 0 ? `연인 ${loverCount}명` : '솔로';
-            list.innerHTML = '';
-            if(gameState.partners.length === 0) {
-                list.innerHTML = '<div class="text-gray-400 text-center py-8 text-xs">등록된 인연이 없습니다.</div>';
-                return;
-            }
-            gameState.partners.forEach((p, idx) => {
-                const barColor = p.love >= 100 ? 'bg-pink-600' : 'bg-pink-400';
-                const statusBadge = p.isLover ? '<span class="text-[10px] bg-pink-100 text-pink-600 font-bold px-1 rounded">LOVER</span>' : '';
-                list.innerHTML += `<div class="bg-pink-50 p-3 rounded-xl border border-pink-100 flex justify-between items-center"><div class="flex items-center gap-3"><div class="text-2xl">${p.emoji}</div><div><div class="font-bold text-gray-800 text-sm flex items-center gap-1">${p.name} ${statusBadge}</div><div class="flex items-center gap-1 mt-1 w-28"><div class="flex-1 h-1.5 bg-white rounded-full overflow-hidden"><div class="h-full ${barColor}" style="width:${Math.min(100, p.love)}%"></div></div><span class="text-[10px] font-bold text-pink-600">${Math.floor(p.love)}%</span></div></div></div><button onclick="openInteractModal(${idx})" title="대화 열기" class="w-10 h-10 rounded-full bg-white border border-pink-200 text-xl shadow-sm active:scale-95 transition">📞</button></div>`;
-            });
+            const logs = document.getElementById('phone-relationship-log-list');
+            if(!summary || !list || !logs) return;
+            const view = renderRestoredRelationshipPhoneAppView(gameState);
+            summary.innerText = view.summaryLabel;
+            list.innerHTML = view.listHtml;
+            logs.innerHTML = view.logHtml;
         }
+        function commitRelationshipAction(index, action, options = {}, recordLog = true) {
+            const result = applyRestoredRelationshipAction(gameState.partners[index], action, { partnerIndex: index, eventIndex: (gameState.relationshipLogs?.length || 0) + 1, day: (gameState.relationshipLogs?.length || 0) + 1, createdAt: new Date().toISOString(), ...options });
+            if(result.ok) { gameState.partners[index] = result.partner; if(recordLog) gameState.relationshipLogs = appendRestoredRelationshipLog(gameState.relationshipLogs, result.log); }
+            return result;
+        }
+        function syncInteractLove(p) { const love = Math.floor(p?.love ?? p?.affection ?? 0); document.getElementById('interact-love-val').innerText = love + '%'; document.getElementById('interact-love-bar').style.width = love + '%'; }
+        function showLoverMilestone(before, after) { if(before && !before.isLover && after?.isLover) showToast(`🎉 축하합니다! ${(after.name || after.displayName)}와 연인이 되었습니다!`); }
         function renderStockTab() {
-            const cyc = CYCLES[marketCycle];
-            document.getElementById('market-cycle').innerText = cyc.label;
-            document.getElementById('market-cycle').className = `text-2xl font-black transition-colors duration-500 ${cyc.color}`;
-            document.getElementById('nasdaq-price').innerText = fmt(gameState.stocks['NASDAQ'].price);
-            const ta = document.getElementById('stock-ticker-area');
-            if(hasRestoredPhone(gameState)) {
-                if(!ta.querySelector('.marquee-container')) ta.innerHTML = `<div class="bg-red-600 px-3 py-2 text-xs font-bold text-white z-10 shrink-0">LIVE</div><div class="marquee-container flex-1 py-2 text-sm text-gray-700 bg-gray-50 overflow-hidden"><div class="marquee-content" id="stock-marquee-text">${currentTickerMsg}</div></div>`;
-                else { const el = document.getElementById('stock-marquee-text'); if(el && el.innerText !== currentTickerMsg) el.innerText = currentTickerMsg; }
-            } else {
-                if(ta.innerHTML.indexOf('접근 불가') === -1) ta.innerHTML = `<div class="w-full text-center text-gray-400 text-xs py-2 bg-gray-100 flex justify-center gap-2">🔒 <span class="blur-sm">휴대폰이 없어 정보를 볼 수 없습니다</span></div>`;
-            }
-            const ch = document.getElementById('nasdaq-chart'); ch.innerHTML = '';
-            const min = Math.min(...chartHistory)*0.99, max = Math.max(...chartHistory)*1.01;
-            chartHistory.forEach((p,i) => {
-                const h = ((p-min)/(max-min))*100;
-                ch.innerHTML += `<div class="flex-1 mx-0.5 rounded-t-sm ${i===chartHistory.length-1?'bg-indigo-600 animate-pulse':'bg-indigo-200'}" style="height:${Math.max(5, h)}%"></div>`;
-            });
-            const sl = document.getElementById('stock-list'); sl.innerHTML = '';
-            Object.keys(gameState.stocks).forEach(k => {
-                const s = gameState.stocks[k];
-                sl.innerHTML += `<tr class="group hover:bg-gray-50"><td class="px-4 py-3 font-bold text-gray-700">${s.name}</td><td class="px-4 py-3 text-right font-mono font-bold text-gray-800">${fmt(s.price)}</td><td class="px-4 py-3 text-center space-x-1"><button onclick="openTradeModal('${k}','buy')" class="bg-red-50 text-red-600 text-xs px-2 py-1 rounded border">매수</button><button onclick="openTradeModal('${k}','sell')" class="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded border">매도</button></td></tr>`;
-            });
-            const pl = document.getElementById('my-portfolio-list'); pl.innerHTML = '';
-            let hasS = false;
-            Object.keys(gameState.stocks).forEach(k => {
-                const s = gameState.stocks[k];
-                if(s.qty > 0) {
-                    hasS = true;
-                    const currentVal = s.price * s.qty, buyVal = s.avg * s.qty, pnl = currentVal - buyVal, pnlRate = s.avg > 0 ? ((s.price - s.avg) / s.avg) * 100 : 0;
-                    const colorClass = pnl >= 0 ? 'text-red-600' : 'text-blue-600';
-                    pl.innerHTML += `<div class="flex justify-between items-center text-sm p-3 border-b border-gray-100 hover:bg-gray-50 transition"><div><div class="font-bold text-gray-800">${s.name}</div><div class="text-xs text-gray-400 mt-0.5">${s.qty}주 | 평단 ${fmt(s.avg)}</div></div><div class="text-right"><div class="font-bold text-gray-900">${fmt(currentVal)}</div><div class="text-xs font-bold ${colorClass}">${pnl > 0 ? '+' : ''}${fmt(pnl)} (${pnlRate.toFixed(2)}%)</div></div></div>`;
-                }
-            });
-            if(!hasS) pl.innerHTML = '<div class="text-center text-xs text-gray-400 py-8">보유 주식 없음</div>';
+            const view = renderRestoredStockAppView(gameState, { cycles: CYCLES, marketCycle, chartHistory, currentTickerMsg, hasPhone: hasRestoredPhone(gameState), formatMoney: fmt });
+            document.getElementById('market-cycle').innerText = view.marketCycleLabel;
+            document.getElementById('market-cycle').className = view.marketCycleClass;
+            document.getElementById('nasdaq-price').innerText = view.nasdaqPriceText;
+            document.getElementById('stock-ticker-area').innerHTML = view.tickerHtml;
+            document.getElementById('nasdaq-chart').innerHTML = view.chartHtml;
+            document.getElementById('stock-list').innerHTML = view.stockRowsHtml;
+            document.getElementById('my-portfolio-list').innerHTML = view.portfolioHtml;
         }
         function renderFuturesTab() {
-            document.getElementById('crypto-price-display').innerText = gameState.crypto[selectedCrypto].price.toLocaleString(undefined,{minimumFractionDigits:2});
-            const fa = document.getElementById('futures-ticker-area');
-            if(hasRestoredSmartPhone(gameState)) {
-                if(!fa.querySelector('.marquee-container')) fa.innerHTML = `<div class="bg-blue-600 px-3 py-2 text-xs font-bold text-white z-10 shrink-0">CRYPTO</div><div class="marquee-container flex-1 py-2 text-sm text-cyan-300 bg-slate-800 overflow-hidden"><div class="marquee-content" id="futures-marquee-text">${currentTickerMsg}</div></div>`;
-                else { const el = document.getElementById('futures-marquee-text'); if(el && el.innerText !== currentTickerMsg) el.innerText = currentTickerMsg; }
-            } else if(fa.innerHTML.indexOf('스마트폰이 필요') === -1) {
-                fa.innerHTML = `<div class="w-full text-center text-gray-500 text-xs py-2 bg-slate-800 flex justify-center gap-2">🔒 <span class="blur-sm">스마트폰이 필요합니다</span></div>`;
-            }
-            const c = document.getElementById('futures-positions'); c.innerHTML = '';
-            if(gameState.futures.length === 0) c.innerHTML = '<div class="p-4 text-center text-gray-400 text-xs">포지션 없음</div>';
-            gameState.futures.forEach((p,i) => {
-                const cur = gameState.crypto[p.symbol].price;
-                const r = p.type === 'long' ? ((cur-p.entry)/p.entry)*p.leverage : ((p.entry-cur)/p.entry)*p.leverage;
-                const v = p.margin * r;
-                c.innerHTML += `<div class="p-3 bg-white flex justify-between items-center border-b border-gray-100 text-sm hover:bg-gray-50 transition"><div><div class="font-bold text-gray-800">${p.symbol} <span class="${p.type==='long'?'text-green-600':'text-red-600'} uppercase">${p.type}</span> x${p.leverage}</div><div class="text-xs text-gray-400 mt-0.5">진입: ${p.entry.toLocaleString(undefined,{maximumFractionDigits:2})}</div></div><div class="text-right"><div class="font-bold ${v>=0?'text-green-600':'text-red-500'}">${v>=0?'+':''}${fmt(v)}</div><div class="text-xs font-bold ${r>=0?'text-green-500':'text-red-400'}">(${(r*100).toFixed(2)}%)</div><button onclick="closeFutures(${i})" class="bg-gray-100 border border-gray-200 text-xs px-2 py-1 rounded mt-1 hover:bg-gray-200 transition">청산</button></div></div>`;
-                if(r <= -0.95) { gameState.futures.splice(i,1); showToast(`${p.symbol} 청산됨 (마진콜)`); saveGame(); renderAll(); }
-            });
+            const liquidatedIndex = findRestoredLiquidatedFuturesPositionIndex(gameState);
+            if(liquidatedIndex >= 0) { const p = gameState.futures[liquidatedIndex]; gameState.futures.splice(liquidatedIndex,1); showToast(`${p.symbol} 청산됨 (마진콜)`); saveGame(); renderAll(); return; }
+            const view = renderRestoredFuturesAppView(gameState, { selectedCrypto, currentTickerMsg, hasSmartPhone: hasRestoredSmartPhone(gameState), formatMoney: fmt });
+            document.getElementById('crypto-price-display').innerText = view.cryptoPriceText;
+            document.getElementById('futures-ticker-area').innerHTML = view.tickerHtml;
+            document.getElementById('futures-positions').innerHTML = view.positionsHtml;
         }
         function renderNewsTab() {
-            const c = document.getElementById('news-list-container'); c.innerHTML = '';
-            if(gameState.newsHistory.length === 0) c.innerHTML = '<div class="bg-white p-6 rounded-2xl border text-center text-sm text-gray-400">아직 수신된 뉴스가 없습니다.</div>';
-            gameState.newsHistory.forEach(n => { c.innerHTML += `<div class="bg-white p-3 rounded-lg border shadow-sm text-sm"><div class="text-xs text-gray-400">${n.time}</div><div>${n.msg}</div></div>`; });
+            document.getElementById('news-list-container').innerHTML = renderRestoredNewsListHtml(gameState);
         }
         function renderAssetTab() {
             const c = document.getElementById('realestate-list'); c.innerHTML = '';
@@ -1052,24 +1025,21 @@
             });
             document.getElementById('total-rent').innerText = `+${fmt(rSum)}`;
         }
-
         function interactPartner(type) {
             if (activePartnerIdx === -1) return;
-            const p = gameState.partners[activePartnerIdx];
-            if(type === 'interest') { p.love = Math.min(100, p.love + 5); showToast(`👀 관심을 보였습니다. (+5)`); }
-            else if (type === 'call') { p.love = Math.min(100, p.love + 8); showToast(`📞 통화가 즐거웠습니다. (+8)`); }
-            else if (type === 'intimacy') { showToast(`❤️ ${p.name}와 깊은 시간을 보냈습니다.`); }
-            else if (type === 'marry') {
-                if(gameState.luxury.ring.count > 0) {
-                    gameState.luxury.ring.count--; p.title = "배우자";
-                    showToast(`💍 청혼 성공! ${p.name}와 결혼했습니다.`); closeInteractModal(); saveGame(); renderAll(); return;
-                }
-                showToast(`❌ 반지가 없습니다! 상점에서 다이아 반지를 사오세요.`); return;
-            }
-            if (!p.isLover && p.love >= 100) { p.isLover = true; p.title = "연인"; showToast(`🎉 축하합니다! ${p.name}와 연인이 되었습니다!`); }
+            const before = gameState.partners[activePartnerIdx];
+            if(type === 'marry' && gameState.luxury.ring.count <= 0) { showToast(`❌ 반지가 없습니다! 상점에서 다이아 반지를 사오세요.`); return; }
+            if(type === 'marry') gameState.luxury.ring.count--;
+            const result = commitRelationshipAction(activePartnerIdx, type);
+            if(!result.ok) return;
+            const p = result.partner;
+            if(type === 'interest') showToast(`👀 관심을 보였습니다. (+5)`);
+            else if(type === 'call') showToast(`📞 통화가 즐거웠습니다. (+8)`);
+            else if(type === 'intimacy') showToast(`❤️ ${(p.name || p.displayName)}와 깊은 시간을 보냈습니다.`);
+            else if(type === 'marry') { showToast(`💍 청혼 성공! ${(p.name || p.displayName)}와 결혼했습니다.`); closeInteractModal(); saveGame(); renderAll(); return; }
+            showLoverMilestone(before, p);
             saveGame();
-            document.getElementById('interact-love-val').innerText = Math.floor(p.love) + '%';
-            document.getElementById('interact-love-bar').style.width = p.love + '%';
+            syncInteractLove(p);
             renderRelationshipSurfaces();
             openInteractModal(activePartnerIdx);
         }
@@ -1078,8 +1048,7 @@
             const p = gameState.partners[idx];
             document.getElementById('interact-title').innerText = `${p.name} (${p.title || '지인'})`;
             document.getElementById('interact-emoji').innerText = p.emoji;
-            document.getElementById('interact-love-val').innerText = Math.floor(p.love) + '%';
-            document.getElementById('interact-love-bar').style.width = p.love + '%';
+            syncInteractLove(p);
             const aiResponseEl = document.getElementById('ai-talk-response'); aiResponseEl.classList.add('hidden'); aiResponseEl.innerText = "";
             document.getElementById('interaction-modal').classList.remove('hidden');
             const btnContainer = document.getElementById('interact-buttons'); btnContainer.innerHTML = '';
@@ -1103,9 +1072,8 @@
             const result = await callGemini("역할놀이");
             if (result) {
                 responseEl.innerText = `"${result}"`;
-                p.love = Math.min(100, p.love + 2);
-                document.getElementById('interact-love-val').innerText = Math.floor(p.love) + '%';
-                document.getElementById('interact-love-bar').style.width = p.love + '%';
+                const applied = commitRelationshipAction(activePartnerIdx, 'ai_talk', { summary: "AI 대화로 마음을 나눴습니다." });
+                if(applied.ok) { showLoverMilestone(p, applied.partner); syncInteractLove(applied.partner); renderRelationshipSurfaces(); }
                 saveGame();
             } else responseEl.innerText = "(대화에 실패했습니다)";
             btn.innerHTML = `✨ AI와 대화하기`;
@@ -1128,12 +1096,14 @@
         function closeGiftSelectModal() { document.getElementById('gift-select-modal').classList.add('hidden'); if(activePartnerIdx !== -1) openInteractModal(activePartnerIdx); }
         function sendGift(key) {
             const item = gameState.luxury[key];
-            item.count--;
             if(activePartnerIdx === -1 || !gameState.partners[activePartnerIdx]) return;
-            const p = gameState.partners[activePartnerIdx];
-            p.love = Math.min(100, p.love + 25);
+            const before = gameState.partners[activePartnerIdx];
+            item.count--;
+            const result = commitRelationshipAction(activePartnerIdx, 'gift', { summary: `${item.name} 선물을 건넸습니다.` });
+            if(!result.ok) return;
+            const p = result.partner;
             showToast(`🎁 ${item.name}(${fmt(item.price)}) 선물! ${p.name}님이 매우 기뻐합니다.`);
-            if (!p.isLover && p.love >= 100) { p.isLover = true; p.title = "연인"; showToast(`🎉 ${p.name}와 연인이 되었습니다!`); }
+            showLoverMilestone(before, p);
             saveGame(); renderRelationshipSurfaces(); closeGiftSelectModal();
         }
         function goHome() {
@@ -1164,6 +1134,7 @@
             if(isSuccess) {
                 const t = pickRestoredPartnerArchetype();
                 gameState.partners.push(createRestoredPartnerFromArchetype(t));
+                commitRelationshipAction(gameState.partners.length - 1, 'met', { summary: `${t.name}의 연락처를 받았습니다.` });
                 saveGame();
                 rEmoji.innerText = "😍"; rText.innerText = `"${t.name}"의 번호를 따냈습니다!`; rText.className = "font-bold mb-4 text-pink-600";
                 renderRelationshipSurfaces();
@@ -1207,7 +1178,7 @@
             }
             saveGame(); renderAll(); closeModal();
         };
-        function selectCrypto(s) { selectedCrypto = s; document.getElementById('crypto-price-display').innerText = gameState.crypto[s].price.toLocaleString(); }
+        function selectCrypto(s) { selectedCrypto = s; document.getElementById('crypto-price-display').innerText = getRestoredCryptoPriceText(gameState, s); }
         function updateLeverageUI(v) { document.getElementById('leverage-val').innerText = 'x' + v; }
         function setFuturesMarginPercent(p) { document.getElementById('futures-margin').value = Math.floor(gameState.cash*p); }
         function openPosition(t) {

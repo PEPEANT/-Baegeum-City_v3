@@ -47,6 +47,7 @@ Current split status:
 - `src/restored/online/online-adapter-contract.js` owns the restored online adapter snapshot, unavailable default, and lobby availability guard.
 - `src/restored/player/profile-contract.js` owns the player profile, job title, residence label, condition label, and core stats that the My Info surface renders.
 - `src/restored/phone/phone-app-contract.js` owns phone app ids, labels, icons, and phone/smartphone gates before chat, ranking, or online lobby apps are added.
+- `src/restored/phone/phone-app-ecosystem-contract.js` owns the planned phone OS/app-store catalog, including BaeTalk-style messenger, relationships, Baegeum Gallery-style community, rankings, bank/pay, map, and online lobby candidates.
 - The partner/lover list is a phone app entry. My Info only shows a compact relationship summary.
 - `src/restored/inventory/consumable-contract.js` owns registered consumable use effects, starting with energy drink energy recovery.
 - `src/restored/inventory/inventory-view.js` owns the My Info carried-item preview rendering.
@@ -80,6 +81,7 @@ Primary surfaces:
 - Home shell: start location with `myinfo`, `home`, and `go_out`.
 - Home-front shell: first outside location with fast food, labor office, convenience store, bus stop, and return-home actions.
 - Phone shell: app grid, app stage/window, notifications, relationship/lover app, partner DM entry, news, stocks, futures, rankings, and future online services.
+- App store: Baegeum Store, where planned phone apps appear before they become live registry entries.
 - Relationship panel: phone-launched partner mood, stage, memory hints, call/message/gift/date choices.
 - Dialogue modal: branching choices, emotional result preview, memory references, and illustration slot.
 - Casino surface: bet controls, game table, settlement feed, and partner reaction strip.
@@ -260,7 +262,7 @@ Minimum message shape:
 
 1. Keep restored static catalogs for ranks, assets, markets, partner archetypes, and first city ids guarded.
 2. Add UI surface contracts for top bar, bottom nav, phone shell, relationship panel, dialogue modal, casino surface, and ranking screen.
-3. Move phone app rendering into `src/restored/phone/`. Current status: app ids and device gates live in `src/restored/phone/phone-app-contract.js`.
+3. Move phone app rendering into `src/restored/phone/`. Current status: app ids and device gates live in `src/restored/phone/phone-app-contract.js`; planned app-store candidates live in `src/restored/phone/phone-app-ecosystem-contract.js`.
 4. Add a relationship/lover phone app id and move the partner list entry point out of My Info.
 5. Keep the runtime shell consuming the location navigation contract for `home_inside`, `home_front`, `baegeum-city`, `dice-city`, and `seosan-city`.
 6. Add local ranking snapshot selectors and a phone ranking app.

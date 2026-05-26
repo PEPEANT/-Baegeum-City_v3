@@ -45,6 +45,8 @@
 - [Restored Three City Home Navigation Plan](plans/restored-three-city-home-navigation.md): Planning draft for starting inside the player home, moving to house-front, and expanding through Baegeum City, Dice City, and Seosan City with location-aware tabs.
 - [Restored Login Home, Online, And Phone Migration Plan](plans/restored-login-home-online-phone-migration.md): Planning draft for retiring visible save-code UI, using a login home, adapting MammonCity2 phone/online references, and keeping online authority explicit.
 - [Restored UI Surface Redesign Plan](plans/restored-ui-surface-redesign.md): Pre-redesign checklist for the restored playable shell, including My Info, home, outside, phone, city, asset, ranking, chat, and online boundaries.
+- [Restored Lover And Relationship System Plan](plans/restored-lover-relationship-system.md): Planning draft for lover/relationship v2, including My Info social summaries, phone relationship app depth, affection/trust/stability/risk, relationship logs, and event boundaries.
+- [Restored Phone App Ecosystem Plan](plans/restored-phone-app-ecosystem.md): Planning draft for the phone OS, app store, BaeTalk messenger, relationship app, virtual community board, and app separation rules.
 - [Restored Feature Plan Template](templates/restored-feature-plan-template.md): Required sections for restored feature plans, including job/occupation impact, ranking impact, chat impact, online authority, assets, and verification.
 
 ## AI Operating Loop

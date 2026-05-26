@@ -24,7 +24,8 @@ function createRestoredStateShape() {
     online: createInitialRestoredOnlineState(),
     location: createInitialRestoredLocationState(),
     newsHistory: [],
-    partners: []
+    partners: [],
+    relationshipLogs: []
   };
 }
 

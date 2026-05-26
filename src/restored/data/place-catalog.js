@@ -13,6 +13,24 @@ export const RESTORED_PLACE_CATALOG = Object.freeze([
     featureDomains: Object.freeze(["relationship", "ownership"])
   }),
   Object.freeze({
+    id: "baegeum:job-street",
+    cityId: RESTORED_CITY_IDS.BAEGEUM,
+    label: "배금도시 일자리 거리",
+    kind: "job_district",
+    uiSurface: "city",
+    actorSlots: Object.freeze(["job_dispatcher", "worker_npc"]),
+    featureDomains: Object.freeze(["jobs", "part_time", "condition"])
+  }),
+  Object.freeze({
+    id: "baegeum:shop-street",
+    cityId: RESTORED_CITY_IDS.BAEGEUM,
+    label: "배금도시 상가 거리",
+    kind: "commerce_district",
+    uiSurface: "city",
+    actorSlots: Object.freeze(["merchant_npc", "street_npc"]),
+    featureDomains: Object.freeze(["shop", "finance", "dpa_exchange", "vehicle"])
+  }),
+  Object.freeze({
     id: "baegeum:phone-space",
     cityId: RESTORED_CITY_IDS.BAEGEUM,
     label: "휴대폰 화면",

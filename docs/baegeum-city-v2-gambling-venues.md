@@ -15,6 +15,190 @@
 - 실제 온라인 서버는 아직 붙이지 않았지만, 각 건물은 `onlineRoomId`를 미리 가진다.
 - `editor.html`의 배금도시 확장 패널에서 간판, 입구, 실내 씬, 온라인 채널을 편집할 수 있다.
 
+## Restored gambling replacement rule
+
+Current rule: the restored build's existing gambling code is legacy scaffolding, not the system to extend.
+
+The human direction is to replace the old Dice City gambling layer with a new venue-by-venue system. Treat the current odd-even, blackjack, casino tab, and copied venue behavior as reference/prototype material only until each game has its own restored contract.
+
+Replacement order:
+
+1. Keep Dice City split into separate places first: casino street, pawnshop, loan office, hotel, and later individual casino interiors.
+2. For each gambling game, write a small restored contract before UI work: rules, bet input, result event, ledger effect, emotional event hook, and online authority boundary.
+3. Build each game as a separate module under `src/restored/games/` or a narrower restored gambling folder, not as more inline HTML script.
+4. Use DiceLand and the current Dice City code as visual/reference material, not as copy-paste runtime authority.
+5. Casino outcomes should emit neutral events such as `gambling_bet_placed`, `gambling_win`, `gambling_loss`, `debt_created`, or `collateral_sold`; relationship, chat, and illustration systems react to those events later.
+6. Do not preserve old payout odds, direct cash mutation, or modal layout just because they already exist.
+
+Current contract module: `src/restored/games/gambling-replacement-contract.js`.
+
+The contract is intentionally not connected to the live restored HTML yet. It only defines the shared vocabulary for the replacement layer:
+
+- Events: `gambling_venue_visit`, `gambling_bet_placed`, `gambling_win`, `gambling_loss`, `gambling_refund`, `debt_created`, `collateral_posted`, `collateral_redeemed`, and `collateral_sold`.
+- Effects: `gambling_event_record`, `economy_ledger_entry`, `relationship_emotion_hook`, and `online_authority_request`.
+- Ledger bridge for implemented casino flows: placed bets map to `bet_reserved`, wins/losses map to `bet_settled`, and refunds map to `bet_refunded`.
+- Debt and collateral are event vocabulary only until a separate debt/collateral ledger contract exists.
+- Relationship and emotion reactions must consume `relationship_emotion_hook` later instead of casino code mutating partner state directly.
+
+Immediate implication: future gambling work should not "fix" the old casino scripts unless the fix is needed to keep the current playable shell from breaking. New feature work starts from replacement contracts.
+
+## Restored gambling anti-spaghetti gate
+
+Current rule: animated casino screens are allowed to be flashy, but restored game contracts must stay boring, deterministic, and easy to test.
+
+Expansion order for roulette, baccarat, horse racing, slots, and future Dice City games:
+
+1. Add pure game contracts under `src/restored/games/`.
+2. Add one smoke check for the contract before any visual work.
+3. Build animation adapters or standalone design-test pages after the rules are guarded.
+4. Connect a venue UI only after the adapter reads contract output instead of inventing money/result logic.
+5. Route cash, chips, debt, collateral, relationship reactions, and online authority through event/effect envelopes.
+
+Contract purity rules:
+
+- No `document`, `window`, `localStorage`, `Math.random`, or timers in pure game contracts.
+- No DOM queries, class toggles, HTML strings, audio playback, browser navigation, or direct storage writes in pure game contracts.
+- Random-looking outcomes must receive their result input from a caller, test fixture, or future authority layer.
+- Animation timing belongs in animation adapters or design-test pages, not in the rule contract.
+- Each new contract needs an explicit version export, validation function, smoke check, and a `npm run check` entry.
+
+Current guard: `tools/check-restored-game-contract-purity.cjs`.
+
+## Blackjack design prototype handoff
+
+Current standalone prototype: `blackjack-design-test.html`.
+
+Future integration target: `다이스시티 -> 카지노거리 -> 블랙잭카지노`.
+
+Do not connect it to the live restored game yet. Keep it as a design-test page until the human explicitly says to apply it in-game.
+
+Current prototype direction:
+
+1. The table layout is good enough to become the future in-game blackjack base.
+2. The page should stay fully Korean in visible UI copy.
+3. The chip visuals should feel more like premium casino chips than simple buttons.
+4. Clicking a chip should animate a chip flying onto the table and stacking in the betting area.
+5. The later in-game version should preserve the table/hand/control feel, but route all money changes through the restored gambling replacement contract before integration.
+
+## Blackjack replacement contract v0
+
+Current pure rules module: `src/restored/games/blackjack-contract.js`.
+Current pure round module: `src/restored/games/blackjack-round-contract.js`.
+
+Version: `restored-blackjack-001`.
+Round version: `restored-blackjack-round-001`.
+
+This module is the first replacement-game layer on top of the restored gambling event contract. It is not wired to `blackjack-design-test.html` or `baegeum-city-v2-dice.html` yet.
+
+Current scope:
+
+- Scores blackjack hands with ace downgrade, soft totals, bust detection, and natural blackjack detection.
+- Compares player/dealer hands into `player_blackjack`, `dealer_blackjack`, `player_win`, `player_loss`, `push`, `player_bust`, or `dealer_bust`.
+- Creates bet envelopes that map blackjack bets to `gambling_bet_placed` and the `bet_reserved` ledger bridge.
+- Creates result envelopes that map wins/losses/pushes to `gambling_win`, `gambling_loss`, or `gambling_refund`.
+- Keeps blackjack payouts as event output only: normal win returns `bet * 2`, natural blackjack returns `bet * 2.5`, push returns the original bet through `bet_refunded`.
+- Keeps relationship/emotion reaction as hook output, not direct partner mutation.
+
+Round-state scope:
+
+- The round state flow is `ready -> player_turn -> dealer_turn -> settled`.
+- A provided shoe is consumed from the front and never reshuffled or refilled by the round module.
+- Initial deal alternates player/dealer/player/dealer.
+- Natural blackjack auto-settles immediately after the initial deal.
+- Hit draws one player card and auto-settles on bust.
+- Stand moves to dealer turn, draws until 17 or higher, then settles.
+- A settled round can create a result envelope through the restored gambling contract; unsettled rounds return no result envelope.
+
+## Roulette replacement contract v0
+
+Current pure rules module: `src/restored/games/roulette-contract.js`.
+
+Version: `restored-roulette-001`.
+
+This module is not wired to the live restored HTML yet. It only defines the future roulette table's rules and event output.
+
+Current scope:
+
+- Supports single-zero roulette numbers `0` through `36`.
+- Supports bet types: `straight / red / black / odd / even / low / high / dozen / column`.
+- Treats `0` as green; outside bets lose on `0`.
+- Pays straight bets at `36x`, dozen/column at `3x`, and outside bets at `2x`, including stake after bet reservation.
+- Creates bet envelopes through `gambling_bet_placed` and the `bet_reserved` ledger bridge.
+- Creates result envelopes through `gambling_win` or `gambling_loss` and the `bet_settled` ledger bridge.
+- Keeps relationship/emotion reaction as hook output, not direct partner mutation.
+
+## Baccarat replacement contract v0
+
+Current pure rules module: `src/restored/games/baccarat-contract.js`.
+
+Version: `restored-baccarat-001`.
+
+This module is not wired to the live restored HTML yet. It only defines the future baccarat table's rules and event output.
+
+Current scope:
+
+- Supports provided final hands for player / banker / tie comparison.
+- Scores baccarat hands by the ones digit only; aces count as 1 and 10/J/Q/K count as 0.
+- Detects natural 8/9 on two-card hands, but does not draw cards or implement table animation.
+- Supports player / banker / tie bets.
+- Pays player bets at `2x`, banker bets at `1.95x` after commission, and tie bets at `9x`, including stake after bet reservation.
+- Refunds player/banker bets on a tied hand through `gambling_refund` and the `bet_refunded` ledger bridge.
+- Creates bet/result envelopes through the restored gambling event contract.
+- Keeps relationship/emotion reaction as hook output, not direct partner mutation.
+
+## Slot replacement contract v0
+
+Current pure rules module: `src/restored/games/slot-contract.js`.
+
+Version: `restored-slot-001`.
+
+This module is not wired to the live restored HTML yet. It only defines the future slot machine's provided-result rules and event output.
+
+Current scope:
+
+- Supports three provided reel symbols: `blank`, `cherry`, `lemon`, `bell`, `bar`, and `seven`.
+- Does not generate random reel results. A caller, fixture, animation adapter, or future server authority must provide the reel symbols.
+- Classifies outcomes as jackpot / triple / pair / loss.
+- Pays three sevens at `50x`, three bars at `20x`, three bells at `10x`, other triples at `5x`, two sevens at `3x`, and two cherries at `2x`, including stake after bet reservation.
+- Creates bet envelopes through `gambling_bet_placed` and the `bet_reserved` ledger bridge.
+- Creates result envelopes through `gambling_win` or `gambling_loss` and the `bet_settled` ledger bridge.
+- Keeps relationship/emotion reaction as hook output, not direct partner mutation.
+
+## Pawnshop collateral contract v0
+
+Current pure collateral module: `src/restored/games/pawnshop-contract.js`.
+
+Version: `restored-pawnshop-001`.
+
+This module is not wired to the live restored HTML yet. It only defines the future pawnshop's quote and collateral event output.
+
+Current scope:
+
+- Creates pawnshop quotes from item id/name/count, appraised cash value, loan rate, fee rate, and term days.
+- Uses default loan math of `50%` of appraised value and `15%` redemption fee.
+- Emits `collateral_posted` when an item is pawned, `collateral_redeemed` when the item is bought back, and `collateral_sold` when the item is forfeited/sold.
+- Produces local pawnshop effects for item hold, item return, collateral sold, and cash delta.
+- Keeps pawnshop cash/item mutation out of the live UI until a debt/collateral ledger contract exists.
+- Keeps relationship/emotion reaction as hook output, not direct partner mutation.
+
+## Loan office debt contract v0
+
+Current pure debt module: `src/restored/games/loan-office-contract.js`.
+
+Version: `restored-loan-office-001`.
+
+This module is not wired to the live restored HTML yet. It only defines the future Dice City loan office's debt quote and local effect output.
+
+Current scope:
+
+- Creates loan quotes from principal cash, service fee rate, interest rate, and term days.
+- Uses default loan math of `5%` upfront service fee and `30%` due interest.
+- Emits shared `debt_created` only when a loan is borrowed.
+- Produces local loan-office effects for debt registration, cash delta, payment, delinquency, and default state.
+- Keeps repayment, delinquency, and default as local contract effects until a separate debt ledger/event vocabulary exists.
+- Does not project loan-office cash changes into the economy ledger yet.
+- Keeps relationship/emotion reaction as hook output on borrow, not direct partner mutation.
+
 ## Dice-city copied venue anchors
 
 Current rule: dice-city has copied casino anchors, while baegeum-city originals remain untouched.

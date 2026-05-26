@@ -42,6 +42,28 @@ Dice City full-restore playable prototype is the active priority:
 22. The partner/lover list now belongs to the phone relationship app, not to My Info. My Info only shows a compact relationship summary, and the current playable phone tab exposes the `인연` app beside news/stock for folder phones. The MammonCity2-style phone registry/router/app-stage pattern remains the reference for relationship, market, ranking, chat, and online apps.
 23. My Info now has a carried-item inventory preview for shop-owned devices, luxury goods, and consumables. Registered consumables can show a `사용` button through `src/restored/inventory/consumable-contract.js`; real estate remains excluded, and `docs/baegeum-city-v2-restored-inventory.md` records the restored inventory boundary.
 
+24. Existing restored gambling is legacy scaffolding. The next gambling direction is a replacement system: each venue/game needs its own restored contract before UI work, and old odd-even/blackjack/casino scripts should be kept only as playable reference until replaced.
+25. `src/restored/games/gambling-replacement-contract.js` now owns the restored gambling event/effect vocabulary: neutral gambling events, ledger bridge effects, relationship/emotion hooks, and online authority requests. The live restored HTML is still intentionally unconnected to this contract.
+26. `src/restored/games/blackjack-contract.js` now owns pure blackjack scoring, outcome comparison, and bet/result envelopes on top of the restored gambling contract. It is not connected to `blackjack-design-test.html` or the live restored HTML yet.
+27. `src/restored/games/blackjack-round-contract.js` now owns the pure blackjack round flow `ready -> player_turn -> dealer_turn -> settled`, including shoe consumption, initial deal, hit, stand, auto-settle, and settled result-envelope creation. It is still intentionally unconnected to UI.
+28. `src/restored/games/roulette-contract.js` now owns pure single-zero roulette bet rules, color resolution, payout projection, and bet/result envelopes. It is still intentionally unconnected to UI.
+29. `src/restored/games/baccarat-contract.js` now owns pure baccarat scoring, player / banker / tie bet normalization, banker commission payout, tie refund behavior, and bet/result envelopes. It is still intentionally unconnected to UI.
+30. `src/restored/games/slot-contract.js` now owns pure provided-reel slot symbols, jackpot / triple / pair / loss classification, payout projection, and bet/result envelopes. It is still intentionally unconnected to UI and does not generate random outcomes.
+31. `src/restored/games/pawnshop-contract.js` now owns pure pawnshop collateral quotes, pawn/redeem/forfeit envelopes, local item hold/return/sold effects, and local cash delta effects. It is still intentionally unconnected to UI and does not use the economy ledger until a debt/collateral ledger contract exists.
+32. `src/restored/games/loan-office-contract.js` now owns pure loan quotes, borrow, payment, delinquency, default, and local debt/cash effects. It is still intentionally unconnected to UI and does not use the economy ledger until a debt ledger exists.
+33. `tools/check-restored-game-contract-purity.cjs` now guards restored game contracts against DOM, browser storage, timers, direct random outcome generation, and missing smoke-check coverage before animated roulette, baccarat, horse racing, or slots are added.
+34. `src/restored/economy/dpa-token-contract.js` now owns the DPA casino-token boundary: normal cash stays 원화, Dice City betting/exchange UI can refer to `DPA`, and `1 DPA = 1,000원` bridges to the current `chips` ledger field during migration.
+35. Baegeum frontage rows are now guarded: job street shows 고시원/편의점/맥버거/인력소, shop street shows 디페이 ATM/배금증권/배금은행/중고차 매장, and Dice City casino street shows 룰렛카지노/바카라카지노/경마장/DPA 환전소 without adding more bottom tabs.
+36. `docs/plans/restored-lover-relationship-system.md` now owns the relationship v2 planning boundary: My Info can show social/emotional summaries, the phone relationship app owns the full partner/lover flow, and future affection/trust/stability/risk changes must consume events instead of being mutated directly by casino, stock, loan, pawnshop, gift, or job handlers.
+37. `src/restored/systems/relationship-contract.js` now owns pure relationship v2 helpers for legacy `love` migration, stage inference, affection/trust/stability/risk clamping, confession readiness, relationship summaries, and relationship log envelopes.
+38. `src/restored/ui/relationship-summary-view.js` now turns that contract into a compact My Info summary card and phone app badge label. The full partner list remains inside the phone relationship app, and relationship mutations still need event boundaries.
+39. `src/restored/phone/relationship-app-view.js` now owns the phone relationship app partner-card list and recent relationship-log HTML. The HTML shell only mounts the returned summary label, list HTML, and log HTML, preserving `openInteractModal(index)` as the current interaction entry.
+40. Restored initial state and storage now seed and preserve `relationshipLogs`.
+41. `src/restored/systems/relationship-event-runtime.js` now routes current walk encounters, interest, calls, AI talk, gifts, intimacy, marriage, and passive drift through relationship source events/logs while preserving legacy `love` compatibility.
+42. `src/restored/phone/phone-app-ecosystem-contract.js` now separates the planned phone OS/app-store catalog from the live phone app registry. Planned apps include BaeTalk-style messenger, Baegeum Gallery-style community, rankings, bank/pay, map, and online lobby candidates.
+43. `src/restored/phone/app-store-view.js` now renders the smartphone-only Baegeum Store shell from the ecosystem catalog. It shows installed, locked, planned, and online-prep app rows without mutating save data or adding phone apps to bottom navigation.
+44. `src/restored/phone/news-app-view.js`, `src/restored/phone/stock-app-view.js`, and `src/restored/phone/futures-app-view.js` now own the restored phone news, stock, and futures renderers. The HTML shell mounts returned view HTML and still owns market ticks, trades, and futures open/close handlers.
+
 Multimap safety remains verified:
 
 1. Pre-multimap backup exists at `C:\Users\rneet\OneDrive\문서\baegeum-city-v2-backups\pre-multimap-20260526-114932`.
@@ -99,12 +121,26 @@ Construction UX remains a paused work-queue slice:
 
 Recommended next autonomous loop:
 
-Economy loop closure:
+Restored phone app ecosystem:
 
-1. Browser-check odd-even reserve, settle/refund, ledger projection, and HUD state.
-2. Use the local-storage workflow report before and after intentionally stale state so economy, ledger, odd-even round, editor draft, and venue metadata persistence bugs are separated from gameplay bugs.
-3. If the browser workflow stays explainable, choose the next contract slice: food purchase ledger or stat/time tick.
-4. Do not implement player-to-player transfers, stock trading, food purchases, or hunger ticks until their ledger/effect types are explicitly added.
+1. Keep planned apps in `phone-app-ecosystem-contract.js` until each has a view and gate.
+2. Build BaeTalk partner DM and Baegeum Gallery community as separate apps; do not merge community posts with realtime chat.
+3. Add install-state persistence to Baegeum Store only after the live registry and save contract can represent optional installs safely.
+4. Move stock/futures action handlers only after their state/effect contract is documented.
+
+Restored lover/relationship v2:
+
+1. Add a deliberate date, DM, or confession surface that consumes the relationship event runtime instead of growing the old interaction modal.
+2. Keep My Info as summary only; do not move the full partner list back out of the phone app.
+3. Leave casino/loan/pawnshop reactions disconnected until the relationship event runtime has a non-modal date or DM loop.
+4. Extract the next phone app renderer, likely news or stock, only after the relationship source-event slice stays stable.
+
+Paused restored gambling replacement:
+
+1. Pick the next replacement module or adapter: loan/debt state, slots, blackjack/roulette UI adapter planning, or pawnshop UI adapter planning.
+2. Keep each module pure: rules, allowed inputs, output event/effect envelopes, and no DOM writes.
+3. Add a smoke check before wiring any live HTML button to the module.
+4. Keep the old odd-even/blackjack scripts playable only as reference. Do not continue the old settlement path as the future gambling architecture.
 
 Paused city-role map-editor loop:
 
@@ -151,6 +187,134 @@ Paused loops:
 - `docs/ai-spaghetti-bug-root-cause.md` explains why the spaghetti/bug pattern emerged and now fixes the next audit sequence around persistence, silent failures, and browser workflows.
 
 ## Loop Record
+
+Date: 2026-05-27
+Observed: The final phone-app rendering bottleneck was stock and futures. News, relationships, and app-store were already extracted, but stock rows, portfolio rows, chart bars, futures ticker, and futures position cards still rendered inline in `baegeum-city-v2-dice.html`.
+Changed: Added `src/restored/phone/stock-app-view.js` and `src/restored/phone/futures-app-view.js`, rewired the restored HTML to mount returned view objects, preserved existing trade/close button entry points, kept futures margin-call mutation in the HTML shell, and updated docs/checks so news/stock/futures views stay extracted.
+Verified: `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-phone-app-ecosystem.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-size.cjs`, `git diff --check`, `npm run check`, and `Invoke-WebRequest http://127.0.0.1:4173/baegeum-city-v2-dice.html` passed. The restored HTML is now 1463 lines; new stock/futures phone view modules are under 100 lines each.
+Blocked: In-app browser automation still could not attach because no active Codex browser pane was reported. Visual browser verification remains pending even though local HTTP and full static/project checks pass.
+Next: Treat the core phone renderer extraction as complete. The next meaningful slice is a BaeTalk/date/confession surface through relationship events, or a separate stock/futures action-effect contract if market handlers need to move next.
+Do not: Put news/stock/futures app rendering back into `baegeum-city-v2-dice.html`, add phone apps to bottom navigation, or move stock/futures action handlers without a separate contract.
+
+Date: 2026-05-27
+Observed: The phone app ecosystem next slice was renderer extraction. News still rendered cards inline in `baegeum-city-v2-dice.html`, while relationship and app-store views were already extracted.
+Changed: Added `src/restored/phone/news-app-view.js`, delegated `renderNewsTab()` to `renderRestoredNewsListHtml(gameState)`, and extended phone app checks/docs so news stays a phone app view module. The restored HTML is now 1498 lines and stock/futures are the remaining inline phone renderers.
+Verified: `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-phone-app-ecosystem.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-size.cjs`, `git diff --check`, `npm run check`, and `Invoke-WebRequest http://127.0.0.1:4173/baegeum-city-v2-dice.html` all passed.
+Blocked: In-app browser automation could not attach because no active Codex browser pane was reported, and the fallback Playwright target was closed before inspection. Visual browser verification is still pending when the app pane is available again.
+Next: Extract the stock phone app renderer, then futures, before adding BaeTalk or Baegeum Gallery surfaces.
+Do not: Put news back into inline HTML rendering, add phone apps to bottom navigation, or grow stock/futures UI before their renderers are split.
+
+Date: 2026-05-27
+Observed: Final verification found that the Dice City casino street still labeled baccarat as `계약 예정` even though the pure baccarat contract is now guarded.
+Changed: Updated the casino street baccarat row copy in `src/restored/ui/place-surface-copy.js` from `계약 예정` to `계약 있음`.
+Verified: `node tools/check-restored-city-frontage-contract.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed guest login, home-front navigation, bus stop, Dice City casino street, no captured browser errors, and baccarat shown as `계약 있음`.
+Blocked: None.
+Next: Continue with horse-racing as the next pure game contract, or start a UI adapter plan after the current contract layer is reviewed.
+Do not: Treat casino street copy as authority; the contracts under `src/restored/games/` remain the source for game readiness.
+
+Date: 2026-05-27
+Observed: Blackjack, roulette, baccarat, pawnshop, and loan-office contracts were guarded, leaving slot machines as the next small Dice City game that needed a pure provided-result contract before animation.
+Changed: Added `src/restored/games/slot-contract.js` with three-reel symbol normalization, jackpot / triple / pair / loss classification, payout projection, and restored gambling bet/result envelopes. Added `tools/check-restored-slot-contract.cjs`, wired it into the game-contract purity gate and `npm run check`, and documented `restored-slot-001`.
+Verified: `node tools/check-restored-slot-contract.cjs`, `node tools/check-restored-game-contract-purity.cjs`, `node tools/check-restored-gambling-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Continue with horse-racing as the next pure game contract if the human keeps pushing Dice City game expansion.
+Do not: Generate random slot outcomes, animate reels, or wire slot payouts to live UI before the adapter and authority boundary are explicitly guarded.
+
+Date: 2026-05-27
+Observed: Pawnshop and baccarat contracts were guarded, leaving Dice City's loan office as the next high-risk system that should not mutate cash/debt directly from UI.
+Changed: Added `src/restored/games/loan-office-contract.js` with loan quotes, borrow envelopes, payment, delinquency, default, and local debt/cash effects. Added `tools/check-restored-loan-office-contract.cjs`, wired it into the game-contract purity gate and `npm run check`, and documented `restored-loan-office-001`.
+Verified: `node tools/check-restored-loan-office-contract.cjs`, `node tools/check-restored-game-contract-purity.cjs`, `node tools/check-restored-gambling-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Continue with slots or horse-racing as the next pure game contract if the human keeps pushing Dice City game expansion.
+Do not: Wire loan-office buttons to live cash, ledger, debt, partner emotion, or online state before the debt ledger boundary is explicitly guarded.
+
+Date: 2026-05-27
+Observed: The next safe Dice City gambling slice was baccarat, but only as a pure contract before any casino animation or live UI wiring.
+Changed: Added `src/restored/games/baccarat-contract.js` with baccarat scoring, player / banker / tie bets, banker commission payout, tie refund behavior, and restored gambling bet/result envelopes. Added `tools/check-restored-baccarat-contract.cjs`, registered baccarat in the shared gambling game ids, wired it into the game-contract purity gate and `npm run check`, and documented `restored-baccarat-001`.
+Verified: `node tools/check-restored-baccarat-contract.cjs`, `node tools/check-restored-game-contract-purity.cjs`, `node tools/check-restored-gambling-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Continue with slots or loan/debt as the next pure replacement contract, or plan a UI adapter that consumes blackjack/roulette/baccarat contract output without inventing money logic.
+Do not: Wire baccarat into live casino UI, add card animations, or generate random outcomes inside `src/restored/games/`.
+
+Date: 2026-05-27
+Observed: The human wanted the useful parts of the Baegeum City promo/design notes selected, with normal 원화 kept intact, betting chips renamed toward DPA, missing city buildings added, and the bottom tabs kept simple.
+Changed: Added `src/restored/economy/dpa-token-contract.js` with `1 DPA = 1,000원` and a bridge to the current `chips` ledger field. Added Baegeum job/shop frontage places and rendered compact place-surface rows for 고시원, 편의점, 맥버거, 인력소, 디페이 ATM, 배금증권, 배금은행, 중고차 매장, plus Dice City 룰렛카지노, 바카라카지노, 경마장, and DPA 환전소. Kept bottom nav capped at five actions and made 상점가 open a frontage surface before the shop tab. Added `tools/check-restored-dpa-token-contract.cjs` and `tools/check-restored-city-frontage-contract.cjs`.
+Verified: `node tools/check-restored-dpa-token-contract.cjs`, `node tools/check-restored-city-frontage-contract.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-size.cjs`, and `npm run check` passed. Browser verification confirmed 배금도시 상점가 shows 디페이 ATM/1 DPA = 1,000원/배금증권/배금은행/중고차 매장, and 다이스시티 카지노거리 shows 룰렛카지노/바카라카지노/경마장/DPA 환전소.
+Blocked: None.
+Next: If continuing visual redesign, add a dedicated city frontage/design-test surface or map scenery pass; if continuing systems, add baccarat or horse-racing pure contracts before animation.
+Do not: Rename all money to DPA, add every building as a bottom tab, or wire DPA exchange to live casino cash mutation before the action/ledger path is guarded.
+
+Date: 2026-05-27
+Observed: The human wanted roulette, baccarat, horse racing, and other animated Dice City games, but asked to validate first so the expansion does not become another tangled inline script layer.
+Changed: Added `tools/check-restored-game-contract-purity.cjs` and wired it into `npm run check`. The guard scans `src/restored/games/*-contract.js` for DOM/browser storage/timer/random dependencies, requires explicit contract versions and validation exports, and requires smoke-check coverage for each current game contract. Documented the anti-spaghetti gate in the gambling venues doc and recomposition guard list.
+Verified: `node tools/check-restored-game-contract-purity.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Add baccarat, horse racing, slots, or loan/debt as pure contracts first; build animation adapters or design-test pages only after each contract has a smoke check.
+Do not: Put wheel/card/race animations, DOM writes, timers, storage, or random result generation into `src/restored/games/` contracts.
+
+Date: 2026-05-27
+Observed: The restored gambling replacement path had blackjack and roulette contracts, but Dice City's planned pawnshop still needed a pure collateral boundary before any UI or inventory wiring.
+Changed: Added `src/restored/games/pawnshop-contract.js` with pawnshop quote math, pawn/redeem/forfeit envelopes, and local item/cash effects. Added `collateral_redeemed` to the shared restored gambling vocabulary, added `tools/check-restored-pawnshop-contract.cjs`, wired it into `npm run check`, and documented that pawnshop is not connected to live UI yet.
+Verified: `node tools/check-restored-gambling-contract.cjs`, `node tools/check-restored-pawnshop-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Continue with loan/debt state, slots, or a UI adapter plan for blackjack/roulette/pawnshop.
+Do not: Wire pawnshop buttons to live cash or inventory before the debt/collateral ledger and UI adapter boundary are explicitly guarded.
+
+Date: 2026-05-27
+Observed: Blackjack now had a reusable round contract, but Dice City's planned casino street also needs roulette as a separate replacement module instead of inheriting the old casino tab.
+Changed: Added `src/restored/games/roulette-contract.js` with single-zero roulette numbers, color resolution, straight/outside/dozen/column bet normalization, payout projection, and bet/result envelopes through the restored gambling contract. Added `tools/check-restored-roulette-contract.cjs`, wired it into `npm run check`, and documented that roulette remains unconnected to live UI.
+Verified: `node tools/check-restored-roulette-contract.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Add pawnshop collateral or loan/debt state as the next non-casino replacement module, or plan the eventual blackjack/roulette UI adapter.
+Do not: Reuse the old casino tab as the long-term roulette runtime.
+
+Date: 2026-05-27
+Observed: Blackjack had pure scoring and result envelopes, but no reusable round state flow yet. Without that layer, the later UI hookup would have to re-invent shoe consumption, deal order, hit/stand transitions, and auto-settlement inside the screen code.
+Changed: Added `src/restored/games/blackjack-round-contract.js` with deterministic shoe consumption, initial deal, hit, stand, auto-settle, and settled result-envelope creation. Added `tools/check-restored-blackjack-round-contract.cjs`, wired it into `npm run check`, and documented that the flow remains unconnected to both the standalone design page and live restored HTML.
+Verified: `node tools/check-restored-blackjack-round-contract.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Add either the next replacement gambling module, such as roulette/pawnshop/loan, or a later UI adapter plan that maps `blackjack-design-test.html` controls onto the restored blackjack round contract.
+Do not: Put blackjack card drawing or result settlement directly into UI handlers.
+
+Date: 2026-05-27
+Observed: With the restored gambling event contract in place, blackjack was the right first replacement game because the human already approved the standalone table design as the future candidate.
+Changed: Added `src/restored/games/blackjack-contract.js` with pure scoring, ace downgrade, natural blackjack, bust, push, win/loss comparison, and blackjack bet/result envelopes that flow through the restored gambling contract. Added `tools/check-restored-blackjack-contract.cjs`, wired it into `npm run check`, and documented that it remains unconnected to both the design prototype and live restored HTML.
+Verified: `node tools/check-restored-blackjack-contract.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Add either a blackjack shoe/round-state layer or the next replacement venue contract before any live UI wiring.
+Do not: Attach the blackjack design page to live casino money before the restored gambling contract path is used.
+
+Date: 2026-05-27
+Observed: The restored gambling direction needed a contract before any live casino rewrite, otherwise blackjack, roulette, pawnshop, and loan-office work would each invent separate result vocabularies.
+Changed: Added `src/restored/games/gambling-replacement-contract.js` with neutral events for venue visits, bets, wins, losses, refunds, debt, and collateral. Added effect vocabulary for event records, economy ledger bridge entries, relationship/emotion hooks, and online authority requests. Guarded it with `tools/check-restored-gambling-contract.cjs`, wired the check into `npm run check`, and updated the gambling/recomposition docs.
+Verified: `node tools/check-restored-gambling-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Build the first replacement gambling module as a pure rules/event layer before connecting any live casino UI.
+Do not: Let casino modules mutate partner emotions, cash, chips, debt, or collateral directly from UI handlers.
+
+Date: 2026-05-27
+Observed: After the standalone blackjack design pass, the next safe step was to keep that prototype from regressing while it stays disconnected from the live restored game.
+Changed: Added `tools/check-blackjack-design-prototype.cjs` and wired it into `npm run check`. The check guards the Korean visible UI, circular chip/stack animation pieces, the documented future target `다이스시티 -> 카지노거리 -> 블랙잭카지노`, and the rule that the prototype is not connected yet.
+Verified: `node tools/check-blackjack-design-prototype.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Keep `blackjack-design-test.html` as a standalone handoff page until the human explicitly asks to apply it in-game, then start from a restored gambling replacement contract.
+Do not: Replace live casino behavior with this prototype before the betting/ledger/emotion/online boundary exists.
+
+Date: 2026-05-27
+Observed: The human liked `blackjack-design-test.html` enough to keep it as the future in-game blackjack candidate, but wanted no visible English, better chip visuals, and chip-click animation before later integration.
+Changed: Reworked `blackjack-design-test.html` as a Korean-only visible prototype, redesigned the betting chips, added a table betting zone, and made clicked chips animate from the rail to the table stack. Recorded the future integration location as `다이스시티 -> 카지노거리 -> 블랙잭카지노` in the gambling venue document.
+Verified: `git diff --check`, script parse check, `npm run check`, and browser smoke on `http://127.0.0.1:4173/blackjack-design-test.html` passed. Browser verification confirmed no captured runtime errors, no visible English UI labels from the old prototype, circular chip buttons, chip-click flight animation, table chip stacking, and a playable start/hit/stand/settle round.
+Blocked: None.
+Next: Browser-check the standalone prototype, then keep it disconnected until the human explicitly asks to apply it in-game.
+Do not: Wire this prototype into `baegeum-city-v2-dice.html` before the restored gambling replacement contract exists.
+
+Date: 2026-05-27
+Observed: The human clarified that the existing gambling layer should be treated as a system to replace, not as the long-term base to extend.
+Changed: Added the restored gambling replacement rule to `docs/baegeum-city-v2-gambling-venues.md`, updated the recomposition plan so gambling work starts from replacement contracts, and recorded the direction in this working state.
+Verified: `git diff --check` and `npm run check` passed after the document-only update.
+Blocked: None.
+Next: Add a restored gambling replacement contract before touching roulette, blackjack, odd-even, pawnshop, or loan-office runtime behavior.
+Do not: Keep expanding the old inline casino scripts as if they were the final gambling system.
 
 Date: 2026-05-27
 Observed: The human asked for a final bug pass and a check that the canonical docs still cover the conversation requirements before moving deeper into redesign.
@@ -833,6 +997,70 @@ Next: Wire the odd-even start button to `bet_reserved` only, with no result sett
 Do not: Implement win/loss results, random settlement, or ranking updates before the bet reservation path is documented and verified.
 
 ## Loop Log
+
+Date: 2026-05-27
+Observed: The phone ecosystem catalog existed, but `app_store` was still only planned and there was no store screen to show planned apps safely inside the phone.
+Changed: Added `src/restored/phone/app-store-view.js`, promoted `app_store` to the smartphone-only live phone registry, wired the restored HTML to create the dynamic store app view, and updated the phone ecosystem/contract checks plus docs. The store renders installed, locked, planned, and online-prep rows without save mutation.
+Verified: `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-phone-app-ecosystem.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification confirmed folder phone hides store/futures, smartphone shows store/futures, the Baegeum Store renders installed/planned/online-prep rows, and no captured browser errors were present.
+Blocked: News, stock, and futures still render inside `baegeum-city-v2-dice.html`; BaeTalk, Baegeum Gallery, rankings, bank/pay, map, and online lobby remain catalog-only.
+Next: Run the phone checks, full `npm run check`, and browser-verify folder-phone versus smartphone store gates; then extract news/stock/futures renderers before adding messenger/community UI.
+Do not: Add planned apps to bottom navigation or make optional install state persistent until the save contract owns it.
+
+Date: 2026-05-27
+Observed: The live phone registry was separated from bottom navigation, but only the relationship app renderer was extracted. News, stock, and futures still render in the restored HTML, and planned apps such as messenger, app store, and virtual community had no explicit catalog boundary.
+Changed: Added `src/restored/phone/phone-app-ecosystem-contract.js`, `docs/plans/restored-phone-app-ecosystem.md`, and `tools/check-restored-phone-app-ecosystem.cjs`. The plan separates live apps from planned app-store candidates and defines BaeTalk-style messenger, Baegeum Store, relationships, Baegeum Gallery-style community, rankings, bank/pay, map, and online lobby boundaries.
+Verified: `node tools/check-restored-phone-app-ecosystem.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: No live app-store, messenger, or community UI has been wired yet. Planned apps must not enter the live phone registry until each has a small app view.
+Next: Add a small Baegeum Store phone app shell that reads the ecosystem catalog, then extract news/stock/futures renderers before expanding BaeTalk or Baegeum Gallery.
+Do not: Add planned apps directly to bottom navigation or the live registry without a view and gate.
+
+Date: 2026-05-27
+Observed: Relationship logs were visible in the phone app, but no live action wrote them and legacy modal actions still mutated `p.love` directly.
+Changed: Added `src/restored/systems/relationship-event-runtime.js` for walk encounter, interest, call, AI talk, gift, intimacy, marriage, and passive drift events. Wired the restored HTML relationship handlers through `commitRelationshipAction()`, preserved legacy `love` compatibility, kept My Info summary-only, and extended relationship/growth checks plus docs.
+Verified: `node tools/check-restored-relationship-contract.cjs`, `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed guest entry, My Info relationship summary, phone relationship app switching, empty partner/log states, and no captured browser errors.
+Blocked: Dedicated date, DM, confession, and inventory/economy-envelope gift surfaces are still pending. Casino, loan, pawnshop, stock, and job reactions remain intentionally disconnected.
+Next: Add a deliberate phone date/DM/confession surface that consumes the relationship event runtime before casino/loan/pawnshop reactions.
+Do not: Reintroduce direct `p.love` mutation, move the full partner list back into My Info, or let casino/loan/pawnshop handlers mutate relationship state directly.
+
+Date: 2026-05-27
+Observed: The phone relationship app could show partner cards from the v2 contract, but it had no visible place for `relationshipLogs`, so the next event slice would have nowhere to land in UI.
+Changed: Added `relationshipLogs` to restored initial state and storage merge, expanded `src/restored/phone/relationship-app-view.js` to render recent relationship logs, mounted `phone-relationship-log-list` in the restored HTML, and updated relationship/phone/growth checks plus docs.
+Verified: `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-relationship-contract.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed guest entry, phone relationship app switching, empty partner state, empty relationship-log state, no My Info `partner-list`, and no captured browser errors.
+Blocked: No live source event creates relationship logs yet; DM/date/confession surfaces remain pending.
+Next: Wire one safe source event, preferably a local job/date event, to create a relationship log before casino, loan, pawnshop, or gift reactions.
+Do not: Let casino, loan, pawnshop, stock, or gift handlers directly mutate affection/trust/stability/risk or write private relationship logs without the event boundary.
+
+Date: 2026-05-27
+Observed: The phone relationship app still rendered its partner cards inline in `baegeum-city-v2-dice.html` after My Info started reading the v2 relationship contract.
+Changed: Added `src/restored/phone/relationship-app-view.js`, delegated `renderRelationshipPhoneApp()` to that renderer, updated the phone/relationship checks, and refreshed the restored relationship/recomposition/UI planning docs.
+Verified: `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-restored-relationship-contract.cjs`, `node tools/check-restored-planning-kit.cjs`, `node tools/check-restored-growth-architecture.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed guest entry, My Info relationship summary, no My Info `partner-list`, phone relationship app switching, empty partner state, and no captured browser errors.
+Blocked: Relationship logs, DM/date surfaces, and source-event wiring are still pending.
+Next: Add relationship log rendering or wire one safe job/date relationship event before casino, loan, pawnshop, or gift reactions.
+Do not: Put partner cards back inline in the restored HTML or move the full partner list back into My Info.
+
+Date: 2026-05-27
+Observed: The relationship v2 contract existed, but My Info and the phone relationship badge still counted only legacy `isLover` values.
+Changed: Added `src/restored/ui/relationship-summary-view.js`, wired My Info to render a compact relationship summary card from the v2 contract, and made the phone relationship badge use the same summary label. Extended the relationship check to guard the summary view and My Info DOM boundary.
+Verified: `node tools/check-restored-relationship-contract.cjs`, `node tools/check-restored-player-profile.cjs`, `node tools/check-restored-phone-app-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/baegeum-city-v2-dice.html` confirmed guest entry, `relationship-summary-card`, no My Info `partner-list`, the phone partner-list still present, and no captured browser errors.
+Blocked: Full phone partner-card extraction, relationship logs, and source-event wiring are still pending.
+Next: Extract the phone relationship app renderer under `src/restored/phone/`, then connect one safe job/date relationship event.
+Do not: Put the full partner list back into My Info or mutate affection/trust/stability/risk directly from casino, stock, loan, pawnshop, gift, or job handlers.
+
+Date: 2026-05-27
+Observed: The next documented relationship slice was a pure contract before UI, so the live restored HTML should stay untouched.
+Changed: Added `src/restored/systems/relationship-contract.js` with legacy `love` migration, relationship stage inference, affection/trust/stability/risk clamping, confession readiness checks, summary selectors, and relationship log envelopes. Added `tools/check-restored-relationship-contract.cjs`, wired it into `npm run check`, and updated the relationship/recomposition docs.
+Verified: `node tools/check-restored-relationship-contract.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: Live My Info and phone relationship UI are not connected to the new contract yet.
+Next: Add My Info relationship summary selectors/UI or extract the phone relationship app renderer under `src/restored/phone/`.
+Do not: Mutate partner state directly from casino, stock, loan, pawnshop, gift, or job handlers.
+
+Date: 2026-05-27
+Observed: The human identified the lover/relationship system as a key next step, but explicitly asked to plan it first instead of implementing everything at once.
+Changed: Added `docs/plans/restored-lover-relationship-system.md`, linked it from `docs/INDEX.md` and `docs/plans/README.md`, and guarded it through `tools/check-restored-planning-kit.cjs`. The plan keeps My Info as social/emotional summary tabs, keeps full partner flow inside the phone relationship app, and requires relationship changes to consume events rather than direct casino/stock/loan/pawnshop/job mutations.
+Verified: `node tools/check-restored-planning-kit.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None.
+Next: Add a pure `src/restored/systems/relationship-contract.js` with migration, stage, clamp, selector, and relationship-log helpers before UI wiring.
+Do not: Put the full partner list back into My Info, mutate partner state from money/gambling handlers, or make AI-generated dialogue a hard dependency.
 
 Date: 2026-05-26
 Observed: The human wanted to move past verification and redesign the lobby so it only works after online connection, using Iron Line as a reference without copying the combat game.

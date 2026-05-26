@@ -42,6 +42,7 @@ Current guarded preparation:
 - `src/restored/online/online-adapter-contract.js` keeps online unavailable by default.
 - `src/restored/inventory/consumable-contract.js` owns registered consumable effects such as energy drink recovery.
 - `src/restored/inventory/inventory-view.js` owns the My Info inventory preview renderer.
+- `src/restored/phone/relationship-app-view.js` owns the phone relationship partner-card and recent-log HTML.
 - `src/restored/assets/asset-manifest.js` owns current audio/image manifest ids.
 
 ## Redesign Goal
@@ -110,7 +111,7 @@ City:
 
 Do these before a large UI pass:
 
-1. Move phone app view rendering under `src/restored/phone/`.
+1. Move phone app view rendering under `src/restored/phone/`. Current status: relationship partner cards and recent logs are extracted; news, stock, and futures are still pending.
 2. Make the playable shell read `src/restored/ui/location-nav-contract.js`.
 3. Add a home surface renderer that can show `내집`.
 4. Add a home-front surface renderer for `밖으로 나가기`.

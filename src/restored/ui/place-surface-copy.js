@@ -25,9 +25,30 @@ export const RESTORED_PLACE_SURFACE_COPY = Object.freeze({
   }),
   job_places: Object.freeze({
     meta: "Baegeum City",
+    cards: Object.freeze([
+      Object.freeze({ title: "고시원", status: "수면/저장 후보", copy: "하루를 넘기는 가장 싼 방. 생활 루프의 시작점." }),
+      Object.freeze({ title: "편의점", status: "알바 후보", copy: "짧은 근무, 낮은 보상, 초반 체력 소모 검증용." }),
+      Object.freeze({ title: "맥버거", status: "알바 후보", copy: "식사/알바/체력 회복을 한 곳에 묶을 매장." }),
+      Object.freeze({ title: "인력소", status: "직업 확장 후보", copy: "공장, 배달, 단기 일감으로 이어질 구직 허브." })
+    ]),
     title: "배금도시 일자리",
     copy: "정장 차림 사람들과 구직 전단이 뒤섞인 고용 거리입니다.",
     actions: Object.freeze([Object.freeze({ label: "구인 게시판", tone: "indigo" })])
+  }),
+  shops: Object.freeze({
+    meta: "Baegeum City",
+    title: "상가와 금융 거리",
+    copy: "원화 생활권은 유지하고, 다이스시티용 DPA 환전 표지와 소비 시설만 전면에 세웁니다.",
+    cards: Object.freeze([
+      Object.freeze({ title: "디페이 ATM", status: "DPA 환전 후보", copy: "1 DPA = 1,000원. 카지노 토큰은 원화와 분리." }),
+      Object.freeze({ title: "배금증권", status: "폰 앱 연결", copy: "주식/뉴스는 거리 탭이 아니라 휴대폰 앱으로 진입." }),
+      Object.freeze({ title: "배금은행", status: "대출 전 단계", copy: "계좌, 신용등급, 향후 온라인 로비 검증과 연결." }),
+      Object.freeze({ title: "중고차 매장", status: "이동 확장 후보", copy: "도시 간 빠른 이동은 차량 시스템 이후에 개방." })
+    ]),
+    actions: Object.freeze([
+      Object.freeze({ label: "상점 보기", tone: "indigo", tab: "shop" }),
+      Object.freeze({ label: "DPA 환전 준비중", tone: "amber", message: "DPA 환전은 계약만 준비된 상태입니다." })
+    ])
   }),
   relationships: Object.freeze({
     meta: "Baegeum City",
@@ -40,6 +61,12 @@ export const RESTORED_PLACE_SURFACE_COPY = Object.freeze({
   }),
   casino_street: Object.freeze({
     meta: "Dice City",
+    cards: Object.freeze([
+      Object.freeze({ title: "룰렛카지노", status: "계약 있음", copy: "휠/구슬 애니메이션은 별도 디자인 테스트에서 연결." }),
+      Object.freeze({ title: "바카라카지노", status: "계약 있음", copy: "카드 공개 연출 전, 플레이어/뱅커 룰부터 분리." }),
+      Object.freeze({ title: "경마장", status: "애니메이션 후보", copy: "말 이동은 화면 어댑터, 배당/정산은 계약으로 분리." }),
+      Object.freeze({ title: "DPA 환전소", status: "1000원=1DPA", copy: "칩이라는 말 대신 다이스시티 전용 DPA로 표시." })
+    ]),
     title: "카지노거리",
     copy: "슬롯, 블랙잭, 룰렛 업장이 각자 불빛을 켠 다이스시티 메인 거리입니다.",
     actions: Object.freeze([
@@ -56,6 +83,10 @@ export const RESTORED_PLACE_SURFACE_COPY = Object.freeze({
   }),
   pawnshop: Object.freeze({
     meta: "Dice City",
+    cards: Object.freeze([
+      Object.freeze({ title: "담보 접수 창구", status: "계약 있음", copy: "아이템 보류/상환/처분 이벤트는 분리 완료." }),
+      Object.freeze({ title: "감정 전광판", status: "추가 후보", copy: "가방, 금괴, 시계 같은 보유품 가치를 표시." })
+    ]),
     title: "전당포",
     copy: "명품과 보유품을 담보로 현금을 마련하는 어두운 유리창의 가게입니다.",
     actions: Object.freeze([Object.freeze({ label: "담보 목록", tone: "amber" })])
@@ -105,3 +136,24 @@ export const RESTORED_PLACE_BUTTON_TONES = Object.freeze({
   pink: "border-pink-100 bg-pink-50 text-pink-700",
   slate: "border-slate-100 bg-slate-50 text-slate-700"
 });
+
+export function renderRestoredPlaceSurfaceHtml(copy = {}) {
+  const actions = (copy.actions || []).map(renderActionButton).join("");
+  const rows = (copy.cards || []).map(renderSurfaceRow).join("");
+  const list = rows ? `<div class="col-span-1 sm:col-span-2 border-t border-slate-100 pt-4"><div class="divide-y divide-slate-100">${rows}</div></div>` : "";
+  return actions + list || `<div class="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-bold text-slate-400">준비 중</div>`;
+}
+
+function renderActionButton(item) {
+  const tone = RESTORED_PLACE_BUTTON_TONES[item.tone] || RESTORED_PLACE_BUTTON_TONES.slate;
+  const click = item.action === "walk" ? "goForWalk()" : item.tab === "phone" ? "openPhoneSurface()" : item.tab ? `switchTab(${JSON.stringify(item.tab)})` : `showToast(${JSON.stringify(item.message || "준비 중입니다.")})`;
+  return `<button onclick='${click}' class="py-4 rounded-2xl border ${tone} font-bold active:scale-95 transition">${escapeHtml(item.label)}</button>`;
+}
+
+function renderSurfaceRow(item) {
+  return `<div class="flex items-start justify-between gap-3 py-3"><div><div class="text-sm font-black text-slate-800">${escapeHtml(item.title)}</div><div class="mt-0.5 text-xs text-slate-500">${escapeHtml(item.copy)}</div></div><div class="shrink-0 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-500">${escapeHtml(item.status)}</div></div>`;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+}

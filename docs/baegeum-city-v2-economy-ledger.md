@@ -102,3 +102,21 @@ update(patch)
 1. 브라우저에서 예약, 정산, 환불, HUD 잔고, ledger projection이 일치하는지 확인한다.
 2. clean/stale localStorage 검사에서 경제 ledger와 odd-even round state를 함께 본다.
 3. 랭킹은 현재 잔고가 아니라 ledger 집계 결과를 기준으로 만든다.
+
+## DPA casino token boundary
+
+Current rule: 원화/cash remains the normal life currency, while Dice City gambling should use a separate player-facing casino token named `DPA`.
+
+Contract module: `src/restored/economy/dpa-token-contract.js`.
+
+Version: `restored-dpa-token-001`.
+
+Rules:
+
+- `1 DPA = 1,000원`.
+- DPA is the visible Dice City casino token name.
+- During migration, DPA bridges to the existing ledger field named `chips`.
+- Normal cash, wages, stocks, rent, and shop prices should continue to show as 원.
+- Roulette, baccarat, blackjack, slots, and horse racing should eventually display bets as DPA after their exchange path is wired.
+- Do not rename the whole economy to DPA. DPA is only for casino/chip exchange surfaces.
+- Do not make legacy casino buttons directly mutate DPA before the exchange/action/ledger path is guarded.

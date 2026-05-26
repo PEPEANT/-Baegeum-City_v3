@@ -48,7 +48,11 @@ const ACTIONS_BY_CONTEXT = Object.freeze({
 });
 
 export function listRestoredLocationNavActions(contextId) {
-  return ACTIONS_BY_CONTEXT[contextId] || Object.freeze([]);
+  const actions = ACTIONS_BY_CONTEXT[contextId] || Object.freeze([]);
+  if (contextId !== RESTORED_LOCATION_CONTEXT_IDS.BAEGEUM_CITY) return actions;
+  return Object.freeze(actions.map((action) => (
+    action.id === "shops" ? Object.freeze({ ...action, surface: "place" }) : action
+  )));
 }
 
 export function getRestoredLocationNavAction(contextId, actionId) {

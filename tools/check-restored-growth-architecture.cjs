@@ -44,6 +44,7 @@ function assertDocumentWiring() {
   assert(recompositionDoc.includes("src/restored/data/place-catalog.js"), "restored recomposition plan must point to the place catalog.");
   assert(recompositionDoc.includes("src/restored/data/location-catalog.js"), "restored recomposition plan must point to the location catalog.");
   assert(recompositionDoc.includes("src/restored/online/online-adapter-contract.js"), "restored recomposition plan must point to the online adapter contract.");
+  assert(recompositionDoc.includes("src/restored/economy/dpa-token-contract.js") && recompositionDoc.includes("src/restored/systems/relationship-event-runtime.js"), "restored recomposition plan must point to DPA and relationship event runtime contracts.");
 }
 function assertRestoredHtmlShell() {
   const html = read(htmlPath);
@@ -106,6 +107,8 @@ async function assertPlaceCatalog() {
   const dicePlaces = mod.listRestoredPlacesForCity("dice-city");
   const seosanPlaces = mod.listRestoredPlacesForCity("seosan-city");
   assert(baegeumPlaces.some((place) => place.actorSlots.includes("partner_meet")), "baegeum-city places must support partner meetings.");
+  assert(baegeumPlaces.some((place) => place.id === "baegeum:job-street"), "baegeum-city places must include a job street frontage.");
+  assert(baegeumPlaces.some((place) => place.id === "baegeum:shop-street"), "baegeum-city places must include a commerce frontage.");
   assert(dicePlaces.some((place) => place.actorSlots.includes("casino_staff")), "dice-city places must support casino staff actors.");
   assert(dicePlaces.some((place) => place.id === "dice:pawnshop"), "dice-city places must include a pawnshop.");
   assert(dicePlaces.some((place) => place.id === "dice:loan-office"), "dice-city places must include a loan office.");
@@ -146,6 +149,7 @@ async function assertLocationNavContract() {
   assert(location.listRestoredLocationContextIds().includes("home_inside"), "location catalog must include home_inside.");
   assert(nav.listRestoredLocationNavActions("home_inside").some((action) => action.id === "go_out"), "home_inside nav must include go_out.");
   assert(nav.getRestoredLocationNavAction("home_front", "labor_office"), "home_front nav must include labor_office.");
+  assert(nav.getRestoredLocationNavAction("baegeum-city", "shops")?.surface === "place", "baegeum shops nav must open a compact frontage surface.");
   assert(nav.getRestoredLocationNavAction("travel", "to_seosan"), "travel nav must include seosan-city.");
   assert(nav.getRestoredLocationNavAction("dice-city", "pawnshop"), "dice-city nav must include pawnshop.");
   assert(nav.getRestoredLocationNavAction("dice-city", "loan_office"), "dice-city nav must include loan office.");
@@ -188,22 +192,18 @@ async function assertStateStorageContract() {
   assert(state.account.mode === "signed_out", "restored initial state must start signed out.");
   assert(state.online.status === "unavailable", "restored initial state must start with unavailable online status.");
   assert(state.location.contextId === "home_inside", "restored initial state must start inside home.");
+  assert(Array.isArray(state.relationshipLogs) && state.relationshipLogs.length === 0, "restored initial state must start with an empty relationship log list.");
   assert(storage.RESTORED_STORAGE_KEY === "baegeum_city_v2_dice_restore", "restored storage key must stay isolated.");
-  const encoded = storage.encodeRestoredSaveCode({ cash: 1234 });
-  const decoded = storage.restoreCashOnlyFromSaveCode(encoded);
+  const decoded = storage.restoreCashOnlyFromSaveCode(storage.encodeRestoredSaveCode({ cash: 1234 }));
   assert(decoded.ok && decoded.cash === 1234, "restored storage must roundtrip cash-only save codes.");
   const merged = initial.createInitialRestoredState();
-  storage.mergeSavedRestoredState(merged, {
-    cash: 55,
-    luxury: { phone: { count: 1 } },
-    account: { mode: "guest", playerId: "guest:test", displayName: "Tester" },
-    online: { status: "disconnected", lastError: "network" }
-  });
+  const saved = { cash: 55, luxury: { phone: { count: 1 } }, account: { mode: "guest", playerId: "guest:test", displayName: "Tester" }, online: { status: "disconnected", lastError: "network" }, relationshipLogs: [{ id: "rel-log:test", partnerId: "partner:test", type: "memory", day: 1 }] };
+  storage.mergeSavedRestoredState(merged, saved);
   assert(merged.luxury.phone.count === 1, "restored storage must preserve saved phone ownership.");
   assert(merged.account.displayName === "Tester", "restored storage must preserve saved account display name.");
   assert(merged.online.status === "disconnected", "restored storage must preserve online state.");
+  assert(merged.relationshipLogs.length === 1, "restored storage must preserve relationship logs.");
 }
-
 async function assertAccountSessionContract() {
   const modulePath = pathToFileURL(path.join(restoredRoot, "account", "session-contract.js")).href;
   const mod = await import(modulePath);

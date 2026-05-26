@@ -6,6 +6,7 @@ export const RESTORED_PHONE_APPS = Object.freeze([
   Object.freeze({ id: "news", label: "뉴스", icon: "📰", gate: "phone", domain: "news" }),
   Object.freeze({ id: "stock", label: "주식", icon: "📈", gate: "phone", domain: "market" }),
   Object.freeze({ id: "relationships", label: "인연", icon: "💕", gate: "phone", domain: "relationship" }),
+  Object.freeze({ id: "app_store", label: "스토어", icon: "🛒", gate: "smartphone", domain: "store" }),
   Object.freeze({ id: "futures", label: "코인선물", icon: "⚡", gate: "smartphone", domain: "futures" })
 ]);
 
@@ -51,7 +52,7 @@ export function validateRestoredPhoneAppContract() {
       errors.push(`phone app display data missing: ${app.id}`);
     }
   }
-  for (const required of ["news", "stock", "relationships", "futures"]) {
+  for (const required of ["news", "stock", "relationships", "app_store", "futures"]) {
     if (!ids.has(required)) errors.push(`missing phone app: ${required}`);
   }
   if (getRestoredPhoneAppGate("relationships") !== "phone") {
@@ -59,6 +60,9 @@ export function validateRestoredPhoneAppContract() {
   }
   if (getRestoredPhoneAppGate("futures") !== "smartphone") {
     errors.push("futures app must require smartphone");
+  }
+  if (getRestoredPhoneAppGate("app_store") !== "smartphone") {
+    errors.push("app_store must require smartphone");
   }
   return Object.freeze({ ok: errors.length === 0, errors });
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blackjack Design Test</title>
+  <title>블랙잭 디자인 테스트</title>
   <style>
     :root {
       --felt: #126244;
@@ -27,7 +27,7 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       color: var(--white);
       background:
         repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 18px),
@@ -72,12 +72,12 @@
     }
 
     .table::before {
-      content: "BLACKJACK";
+      content: "블랙잭";
       position: absolute;
       top: 48%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: clamp(52px, 12vw, 148px);
+      font-size: 112px;
       font-weight: 950;
       letter-spacing: 0;
       color: rgba(255, 250, 240, 0.06);
@@ -108,13 +108,12 @@
       font-size: 11px;
       font-weight: 800;
       letter-spacing: 0;
-      text-transform: uppercase;
     }
 
     .stat strong {
       display: block;
       margin-top: 6px;
-      font-size: clamp(18px, 2.5vw, 28px);
+      font-size: 24px;
       line-height: 1;
       color: var(--brass);
     }
@@ -145,7 +144,6 @@
       font-size: 13px;
       font-weight: 900;
       letter-spacing: 0;
-      text-transform: uppercase;
     }
 
     .score-pill {
@@ -161,13 +159,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: clamp(8px, 1.3vw, 14px);
+      gap: 12px;
       min-height: 104px;
       flex-wrap: wrap;
     }
 
     .card {
-      width: clamp(62px, 8vw, 88px);
+      width: 78px;
       aspect-ratio: 5 / 7;
       border-radius: 12px;
       background: linear-gradient(145deg, #fffdf6, #e9dfcd);
@@ -194,7 +192,7 @@
     }
 
     .card .rank {
-      font-size: clamp(17px, 2.3vw, 25px);
+      font-size: 20px;
       font-weight: 950;
       line-height: 1;
     }
@@ -202,7 +200,7 @@
     .card .suit {
       align-self: center;
       justify-self: center;
-      font-size: clamp(24px, 3.8vw, 42px);
+      font-size: 36px;
     }
 
     .card .mini {
@@ -212,7 +210,7 @@
 
     .center-callout {
       align-self: center;
-      max-width: 760px;
+      max-width: 780px;
       width: 100%;
       margin: 0 auto;
       display: grid;
@@ -232,7 +230,7 @@
 
     .message h1 {
       margin: 0;
-      font-size: clamp(22px, 4vw, 44px);
+      font-size: 36px;
       line-height: 1;
       letter-spacing: 0;
     }
@@ -258,7 +256,6 @@
       font-weight: 900;
       font-size: 11px;
       letter-spacing: 0;
-      text-transform: uppercase;
     }
 
     .dealer-tell strong {
@@ -266,6 +263,44 @@
       margin-top: 8px;
       font-size: 16px;
       line-height: 1.18;
+    }
+
+    .bet-zone {
+      grid-column: 1 / -1;
+      min-height: 96px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      border: 1px dashed rgba(255,255,255,0.24);
+      background: rgba(3, 15, 12, 0.24);
+      box-shadow: inset 0 0 34px rgba(0,0,0,0.18);
+    }
+
+    .bet-stack {
+      position: relative;
+      min-width: 280px;
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bet-placeholder {
+      color: rgba(255,255,255,0.56);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .stack-chip {
+      position: absolute;
+      width: 58px;
+      height: 58px;
+      transform:
+        translateX(calc((var(--stack-index) - var(--stack-center)) * 18px))
+        translateY(calc(var(--stack-lift) * -4px))
+        rotate(var(--stack-tilt));
+      animation: stackLand 180ms ease-out both;
+      pointer-events: none;
     }
 
     .controls {
@@ -345,37 +380,87 @@
     .chips {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 12px;
+      justify-items: center;
+    }
+
+    .chip,
+    .chip-ghost,
+    .stack-chip {
+      border: 0;
+      border-radius: 50%;
+      color: #fff8d8;
+      font-weight: 950;
+      letter-spacing: 0;
+      display: grid;
+      place-items: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.42);
+      box-shadow:
+        inset 0 0 0 4px rgba(255,255,255,0.18),
+        inset 0 0 0 10px rgba(0,0,0,0.12),
+        inset 0 -8px 14px rgba(0,0,0,0.22),
+        0 10px 18px rgba(0,0,0,0.24);
     }
 
     .chip {
-      min-height: 64px;
-      border: 0;
-      border-radius: 999px;
-      background:
-        radial-gradient(circle at center, #fff7d8 0 28%, transparent 29%),
-        conic-gradient(#9f2430 0 12%, #f6e6b2 12% 19%, #9f2430 19% 31%, #f6e6b2 31% 38%, #9f2430 38% 50%, #f6e6b2 50% 57%, #9f2430 57% 69%, #f6e6b2 69% 76%, #9f2430 76% 88%, #f6e6b2 88% 95%, #9f2430 95%);
-      color: #1b1310;
-      font-weight: 950;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      position: relative;
+      width: 124px;
+      max-width: 100%;
+      aspect-ratio: 1;
+      min-height: 0;
+      transition: transform 130ms ease, box-shadow 130ms ease;
     }
 
-    .chip:nth-child(2) {
-      background:
-        radial-gradient(circle at center, #fff7d8 0 28%, transparent 29%),
-        conic-gradient(#176d4a 0 12%, #f6e6b2 12% 19%, #176d4a 19% 31%, #f6e6b2 31% 38%, #176d4a 38% 50%, #f6e6b2 50% 57%, #176d4a 57% 69%, #f6e6b2 69% 76%, #176d4a 76% 88%, #f6e6b2 88% 95%, #176d4a 95%);
+    .chip:hover {
+      transform: translateY(-2px);
+      box-shadow:
+        inset 0 0 0 4px rgba(255,255,255,0.2),
+        inset 0 0 0 10px rgba(0,0,0,0.12),
+        inset 0 -8px 14px rgba(0,0,0,0.22),
+        0 15px 24px rgba(0,0,0,0.28);
     }
 
-    .chip:nth-child(3) {
+    .chip::before,
+    .chip-ghost::before,
+    .stack-chip::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.58);
       background:
-        radial-gradient(circle at center, #fff7d8 0 28%, transparent 29%),
-        conic-gradient(#214d9b 0 12%, #f6e6b2 12% 19%, #214d9b 19% 31%, #f6e6b2 31% 38%, #214d9b 38% 50%, #f6e6b2 50% 57%, #214d9b 57% 69%, #f6e6b2 69% 76%, #214d9b 76% 88%, #f6e6b2 88% 95%, #214d9b 95%);
+        radial-gradient(circle, rgba(255,255,255,0.2) 0 24%, transparent 25%),
+        conic-gradient(from 10deg, rgba(255,255,255,0.86) 0 8%, transparent 8% 17%, rgba(255,255,255,0.86) 17% 25%, transparent 25% 34%, rgba(255,255,255,0.86) 34% 42%, transparent 42% 51%, rgba(255,255,255,0.86) 51% 59%, transparent 59% 68%, rgba(255,255,255,0.86) 68% 76%, transparent 76% 85%, rgba(255,255,255,0.86) 85% 93%, transparent 93%);
+      pointer-events: none;
     }
 
-    .chip:nth-child(4) {
-      background:
-        radial-gradient(circle at center, #fff7d8 0 28%, transparent 29%),
-        conic-gradient(#2c2623 0 12%, #f6e6b2 12% 19%, #2c2623 19% 31%, #f6e6b2 31% 38%, #2c2623 38% 50%, #f6e6b2 50% 57%, #2c2623 57% 69%, #f6e6b2 69% 76%, #2c2623 76% 88%, #f6e6b2 88% 95%, #2c2623 95%);
+    .chip span,
+    .chip-ghost span,
+    .stack-chip span {
+      position: relative;
+      z-index: 1;
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.28);
+      border: 1px solid rgba(255,255,255,0.28);
+      font-size: 13px;
+    }
+
+    .chip-100 { background: conic-gradient(#8f2432 0 12%, #f8df86 12% 19%, #8f2432 19% 31%, #f8df86 31% 38%, #8f2432 38% 50%, #f8df86 50% 57%, #8f2432 57% 69%, #f8df86 69% 76%, #8f2432 76% 88%, #f8df86 88% 95%, #8f2432 95%); }
+    .chip-500 { background: conic-gradient(#11613f 0 12%, #f8df86 12% 19%, #11613f 19% 31%, #f8df86 31% 38%, #11613f 38% 50%, #f8df86 50% 57%, #11613f 57% 69%, #f8df86 69% 76%, #11613f 76% 88%, #f8df86 88% 95%, #11613f 95%); }
+    .chip-1000 { background: conic-gradient(#224e9d 0 12%, #f8df86 12% 19%, #224e9d 19% 31%, #f8df86 31% 38%, #224e9d 38% 50%, #f8df86 50% 57%, #224e9d 57% 69%, #f8df86 69% 76%, #224e9d 76% 88%, #f8df86 88% 95%, #224e9d 95%); }
+    .chip-5000 { background: conic-gradient(#292321 0 12%, #f8df86 12% 19%, #292321 19% 31%, #f8df86 31% 38%, #292321 38% 50%, #f8df86 50% 57%, #292321 57% 69%, #f8df86 69% 76%, #292321 76% 88%, #f8df86 88% 95%, #292321 95%); }
+
+    .chip-ghost {
+      position: fixed;
+      z-index: 200;
+      width: 58px;
+      height: 58px;
+      pointer-events: none;
+      animation: chipFly 520ms cubic-bezier(.18,.84,.28,1) forwards;
     }
 
     .bet-row {
@@ -446,6 +531,36 @@
       50% { transform: scale(1.025); }
     }
 
+    @keyframes chipFly {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      65% {
+        opacity: 1;
+        transform: translate(calc(var(--move-x) * .72), calc(var(--move-y) * .72 - 34px)) scale(.98) rotate(240deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--move-x), var(--move-y)) scale(.7) rotate(420deg);
+      }
+    }
+
+    @keyframes stackLand {
+      from {
+        opacity: 0;
+        filter: blur(2px);
+        transform:
+          translateX(calc((var(--stack-index) - var(--stack-center)) * 18px))
+          translateY(-24px)
+          rotate(var(--stack-tilt));
+      }
+      to {
+        opacity: 1;
+        filter: blur(0);
+      }
+    }
+
     @media (max-width: 980px) {
       .app {
         grid-template-columns: 1fr;
@@ -453,6 +568,10 @@
 
       .table {
         min-height: 760px;
+      }
+
+      .table::before {
+        font-size: 72px;
       }
 
       .topbar {
@@ -476,6 +595,10 @@
         min-height: 720px;
       }
 
+      .table::before {
+        font-size: 44px;
+      }
+
       .center-callout {
         grid-template-columns: 1fr;
       }
@@ -487,6 +610,14 @@
       .controls {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
+
+      .card {
+        width: 64px;
+      }
+
+      .chip {
+        width: 112px;
+      }
     }
   </style>
 </head>
@@ -494,67 +625,70 @@
   <main class="app">
     <section class="table" aria-label="블랙잭 테이블">
       <div class="topbar">
-        <div class="stat"><small>Bankroll</small><strong id="bankroll">0</strong></div>
-        <div class="stat"><small>Bet</small><strong id="current-bet">0</strong></div>
-        <div class="stat"><small>Streak</small><strong id="streak">0</strong></div>
-        <div class="stat"><small>Shoe</small><strong id="shoe">52</strong></div>
+        <div class="stat"><small>보유금</small><strong id="bankroll">0</strong></div>
+        <div class="stat"><small>현재 베팅</small><strong id="current-bet">0</strong></div>
+        <div class="stat"><small>연승</small><strong id="streak">0</strong></div>
+        <div class="stat"><small>남은 카드</small><strong id="shoe">52</strong></div>
       </div>
 
       <div class="arena">
         <section class="hand-zone">
-          <div class="hand-title">Dealer <span id="dealer-score" class="score-pill">?</span></div>
+          <div class="hand-title">딜러 <span id="dealer-score" class="score-pill">?</span></div>
           <div id="dealer-cards" class="cards"></div>
         </section>
 
         <section class="center-callout">
           <div class="message" id="message-box">
-            <h1 id="message-title">테이블 오픈</h1>
-            <p id="message-copy">칩을 올리고 Deal을 누르면 바로 테스트할 수 있습니다.</p>
+            <h1 id="message-title">테이블 준비</h1>
+            <p id="message-copy">칩을 눌러 베팅을 올리고 시작 버튼을 누르세요.</p>
           </div>
           <aside class="dealer-tell">
-            <small>Table Read</small>
-            <strong id="hint">판돈을 정해보세요.</strong>
+            <small>판 읽기</small>
+            <strong id="hint">칩을 골라 베팅하세요.</strong>
           </aside>
+          <div class="bet-zone" aria-label="베팅 칩 영역">
+            <div id="bet-stack" class="bet-stack"></div>
+          </div>
         </section>
 
         <section class="hand-zone">
-          <div class="hand-title">Player <span id="player-score" class="score-pill">0</span></div>
+          <div class="hand-title">플레이어 <span id="player-score" class="score-pill">0</span></div>
           <div id="player-cards" class="cards"></div>
         </section>
       </div>
 
       <div class="controls">
-        <button id="deal" class="action primary">DEAL</button>
-        <button id="hit" class="action blue">HIT</button>
-        <button id="stand" class="action red">STAND</button>
-        <button id="double" class="action green">DOUBLE</button>
+        <button id="deal" class="action primary">시작</button>
+        <button id="hit" class="action blue">한 장 더</button>
+        <button id="stand" class="action red">멈추기</button>
+        <button id="double" class="action green">두 배</button>
       </div>
     </section>
 
     <aside class="rail">
       <div class="panel-title">
-        <h2>Bet Rail</h2>
-        <span id="phase" class="badge">READY</span>
+        <h2>베팅 칩</h2>
+        <span id="phase" class="badge">대기</span>
       </div>
 
       <div class="chips">
-        <button class="chip" data-chip="100">100</button>
-        <button class="chip" data-chip="500">500</button>
-        <button class="chip" data-chip="1000">1K</button>
-        <button class="chip" data-chip="5000">5K</button>
+        <button class="chip chip-100" data-chip="100"><span>100</span></button>
+        <button class="chip chip-500" data-chip="500"><span>500</span></button>
+        <button class="chip chip-1000" data-chip="1000"><span>1,000</span></button>
+        <button class="chip chip-5000" data-chip="5000"><span>5,000</span></button>
       </div>
 
       <div class="bet-row">
-        <button id="clear-bet" class="soft-button">Clear Bet</button>
-        <button id="all-in" class="soft-button">All In</button>
+        <button id="clear-bet" class="soft-button">베팅 취소</button>
+        <button id="all-in" class="soft-button">전부 걸기</button>
       </div>
 
       <div class="rule-card">
-        <strong>Design rule:</strong> natural blackjack pays 3:2, dealer stands on soft 17, double is allowed only on the first two cards.
+        <strong>규칙:</strong> 처음 두 장이 21이면 블랙잭 보너스가 지급됩니다. 딜러는 17 이상에서 멈추고, 두 배는 처음 두 장에서만 가능합니다.
       </div>
 
       <div class="panel-title">
-        <h2>Table Feed</h2>
+        <h2>진행 기록</h2>
         <span id="profit" class="badge">+0</span>
       </div>
       <ul id="ledger" class="ledger"></ul>
@@ -568,7 +702,18 @@
       { key: "diamond", symbol: "♦", red: true },
       { key: "club", symbol: "♣", red: false }
     ];
-    const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+    const ranks = ["ace", "2", "3", "4", "5", "6", "7", "8", "9", "10", "jack", "queen", "king"];
+    const rankLabels = {
+      ace: "에",
+      jack: "잭",
+      queen: "퀸",
+      king: "킹"
+    };
+    const phaseLabels = {
+      ready: "대기",
+      playing: "진행 중",
+      settled: "정산 중"
+    };
     const state = {
       balance: 50000,
       bet: 0,
@@ -585,6 +730,7 @@
 
     const $ = (id) => document.getElementById(id);
     const money = (value) => Math.floor(value).toLocaleString("ko-KR");
+    const rankText = (rank) => rankLabels[rank] || rank;
 
     function buildDeck() {
       return suits.flatMap((suit) => ranks.map((rank) => ({ ...suit, rank })));
@@ -608,10 +754,10 @@
       let total = 0;
       let aces = 0;
       for (const card of hand) {
-        if (card.rank === "A") {
+        if (card.rank === "ace") {
           total += 11;
           aces += 1;
-        } else if (["J", "Q", "K"].includes(card.rank)) {
+        } else if (["jack", "queen", "king"].includes(card.rank)) {
           total += 10;
         } else {
           total += Number(card.rank);
@@ -625,15 +771,56 @@
     }
 
     function renderCard(card, hidden = false) {
-      if (hidden) return `<div class="card back">BJC</div>`;
+      if (hidden) return `<div class="card back">배금</div>`;
       const color = card.red ? " red" : "";
+      const label = rankText(card.rank);
       return `
         <div class="card${color}">
-          <div class="rank">${card.rank}</div>
+          <div class="rank">${label}</div>
           <div class="suit">${card.symbol}</div>
-          <div class="rank mini">${card.rank}</div>
+          <div class="rank mini">${label}</div>
         </div>
       `;
+    }
+
+    function chipClass(value) {
+      if (value >= 5000) return "chip-5000";
+      if (value >= 1000) return "chip-1000";
+      if (value >= 500) return "chip-500";
+      return "chip-100";
+    }
+
+    function chipMarkup(value, extraClass = "stack-chip", style = "") {
+      return `<div class="${extraClass} ${chipClass(value)}" ${style}><span>${money(value)}</span></div>`;
+    }
+
+    function makeChipPlan(total) {
+      const plan = [];
+      let remaining = total;
+      for (const value of [5000, 1000, 500, 100]) {
+        while (remaining >= value && plan.length < 24) {
+          plan.push(value);
+          remaining -= value;
+        }
+      }
+      if (remaining > 0) plan.push(remaining);
+      return plan;
+    }
+
+    function renderBetStack() {
+      const stack = $("bet-stack");
+      if (!state.bet) {
+        stack.innerHTML = `<span class="bet-placeholder">칩을 누르면 이곳에 베팅이 쌓입니다.</span>`;
+        return;
+      }
+      const plan = makeChipPlan(state.bet);
+      const center = (plan.length - 1) / 2;
+      stack.innerHTML = plan.map((value, index) => {
+        const tilt = ((index % 5) - 2) * 4;
+        const lift = index % 4;
+        const style = `style="--stack-index:${index};--stack-center:${center};--stack-tilt:${tilt}deg;--stack-lift:${lift};"`;
+        return chipMarkup(value, "stack-chip", style);
+      }).join("");
     }
 
     function render() {
@@ -641,10 +828,11 @@
       $("current-bet").textContent = money(state.bet);
       $("streak").textContent = state.streak;
       $("shoe").textContent = state.deck.length || 52;
-      $("phase").textContent = state.phase.toUpperCase();
+      $("phase").textContent = phaseLabels[state.phase] || state.phase;
       $("profit").textContent = `${state.profit >= 0 ? "+" : ""}${money(state.profit)}`;
       $("dealer-cards").innerHTML = state.dealer.map((card, index) => renderCard(card, state.hideDealer && index === 0)).join("");
       $("player-cards").innerHTML = state.player.map((card) => renderCard(card)).join("");
+      renderBetStack();
 
       const playerScore = score(state.player);
       const dealerScore = score(state.dealer);
@@ -676,42 +864,64 @@
     }
 
     function getHint() {
-      if (state.phase !== "playing") return state.bet ? "Deal 준비 완료." : "칩을 올려보세요.";
+      if (state.phase !== "playing") return state.bet ? "시작 준비 완료." : "칩을 골라 베팅하세요.";
       const player = score(state.player).total;
       const upCard = state.dealer[1];
       const dealerValue = upCard ? cardValue(upCard) : 0;
-      if (state.player.length === 2 && [10, 11].includes(player)) return "더블다운이 맛있는 숫자.";
-      if (player <= 11) return "한 장은 비교적 안전합니다.";
-      if (player >= 17) return "여기서 멈추는 쪽이 단단합니다.";
-      if (dealerValue >= 2 && dealerValue <= 6) return "딜러 약패. 버스트를 기다려도 됩니다.";
-      return "아슬아슬한 승부수 구간.";
+      if (state.player.length === 2 && [10, 11].includes(player)) return "두 배를 노려볼 만한 숫자입니다.";
+      if (player <= 11) return "한 장 더 받아도 안전합니다.";
+      if (player >= 17) return "여기서 멈추는 쪽이 안정적입니다.";
+      if (dealerValue >= 2 && dealerValue <= 6) return "딜러 약한 패. 버스트를 기다려도 됩니다.";
+      return "조심스럽게 한 장을 고민할 구간입니다.";
     }
 
     function cardValue(card) {
-      if (card.rank === "A") return 11;
-      if (["J", "Q", "K"].includes(card.rank)) return 10;
+      if (card.rank === "ace") return 11;
+      if (["jack", "queen", "king"].includes(card.rank)) return 10;
       return Number(card.rank);
     }
 
-    function setBet(amount) {
+    function animateChip(button, amount) {
+      const target = $("bet-stack");
+      if (!button || !target) return;
+      const from = button.getBoundingClientRect();
+      const to = target.getBoundingClientRect();
+      const startX = from.left + from.width / 2 - 29;
+      const startY = from.top + from.height / 2 - 29;
+      const endX = to.left + to.width / 2 - 29;
+      const endY = to.top + to.height / 2 - 29;
+      const chip = document.createElement("div");
+      chip.className = `chip-ghost ${chipClass(amount)}`;
+      chip.innerHTML = `<span>${money(amount)}</span>`;
+      chip.style.left = `${startX}px`;
+      chip.style.top = `${startY}px`;
+      chip.style.setProperty("--move-x", `${endX - startX}px`);
+      chip.style.setProperty("--move-y", `${endY - startY}px`);
+      document.body.appendChild(chip);
+      chip.addEventListener("animationend", () => chip.remove(), { once: true });
+    }
+
+    function setBet(amount, sourceButton) {
       if (state.phase === "playing") return;
+      const before = state.bet;
       const next = Math.min(state.balance, state.bet + amount);
       state.bet = next;
-      setMessage("베팅 세팅", `${money(state.bet)} 칩이 테이블 위에 올라갔습니다.`);
+      if (state.bet > before) animateChip(sourceButton, amount);
+      setMessage("베팅 올림", `${money(state.bet)}원을 테이블에 올렸습니다.`);
       render();
     }
 
     function clearBet() {
       if (state.phase === "playing") return;
       state.bet = 0;
-      setMessage("베팅 초기화", "칩 레일이 비었습니다.");
+      setMessage("베팅 취소", "테이블 위 칩을 모두 거두었습니다.");
       render();
     }
 
     function allIn() {
       if (state.phase === "playing") return;
       state.bet = state.balance;
-      setMessage("올인", "테이블이 잠깐 조용해졌습니다.", true);
+      setMessage("전부 걸기", "테이블이 잠시 조용해집니다.", true);
       render();
     }
 
@@ -723,8 +933,8 @@
       state.hideDealer = true;
       state.doubled = false;
       state.phase = "playing";
-      addLog(`${money(state.bet)} 베팅으로 새 판 시작.`);
-      setMessage("Deal", "첫 두 장이 깔렸습니다.", true);
+      addLog(`${money(state.bet)}원 베팅으로 새 판을 시작했습니다.`);
+      setMessage("카드 배분", "처음 두 장이 깔렸습니다.", true);
 
       const playerBlackjack = score(state.player).total === 21;
       const dealerBlackjack = score(state.dealer).total === 21;
@@ -735,16 +945,16 @@
     function hit() {
       if (state.phase !== "playing") return;
       state.player.push(draw());
-      setMessage("Hit", "카드 한 장 추가.", true);
+      setMessage("한 장 더", "플레이어에게 카드 한 장이 추가되었습니다.", true);
       if (score(state.player).total > 21) settle();
-      else addLog("플레이어가 카드를 받았습니다.");
+      else addLog("플레이어가 카드를 한 장 받았습니다.");
       render();
     }
 
     function stand() {
       if (state.phase !== "playing") return;
       state.hideDealer = false;
-      setMessage("Stand", "딜러가 규칙대로 움직입니다.");
+      setMessage("멈추기", "딜러가 규칙대로 움직입니다.");
       dealerPlay();
       settle();
     }
@@ -756,7 +966,7 @@
       state.doubled = true;
       state.player.push(draw());
       state.hideDealer = false;
-      setMessage("Double Down", "판돈을 두 배로 올리고 딱 한 장만 받습니다.", true);
+      setMessage("두 배", "베팅을 두 배로 올리고 마지막 카드 한 장을 받았습니다.", true);
       if (score(state.player).total <= 21) dealerPlay();
       settle();
     }
@@ -775,22 +985,22 @@
       const dealer = score(state.dealer).total;
       const natural = state.player.length === 2 && player === 21;
       let payout = 0;
-      let title = "Lose";
-      let copy = "판돈을 잃었습니다.";
+      let title = "패배";
+      let copy = "딜러에게 밀렸습니다.";
 
       if (player > 21) {
-        title = "Bust";
+        title = "버스트";
         copy = "21을 넘었습니다.";
         state.streak = 0;
       } else if (dealer > 21 || player > dealer) {
         payout = natural ? Math.floor(state.bet * 2.5) : state.bet * 2;
-        title = natural ? "Blackjack" : "Win";
-        copy = natural ? "내추럴 21. 3:2 보너스 지급." : "딜러보다 높은 점수입니다.";
+        title = natural ? "블랙잭" : "승리";
+        copy = natural ? "처음 두 장으로 21을 만들었습니다." : "딜러보다 높은 점수입니다.";
         state.streak += 1;
       } else if (player === dealer) {
         payout = state.bet;
-        title = "Push";
-        copy = "무승부. 판돈을 돌려받았습니다.";
+        title = "무승부";
+        copy = "베팅금이 그대로 돌아옵니다.";
       } else {
         state.streak = 0;
       }
@@ -808,7 +1018,7 @@
     }
 
     document.querySelectorAll(".chip").forEach((button) => {
-      button.addEventListener("click", () => setBet(Number(button.dataset.chip)));
+      button.addEventListener("click", () => setBet(Number(button.dataset.chip), button));
     });
     $("clear-bet").addEventListener("click", clearBet);
     $("all-in").addEventListener("click", allIn);

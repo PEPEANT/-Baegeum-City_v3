@@ -17,9 +17,11 @@ index.html -> baegeum-city-v2-dice.html
 - `baegeum-city-v2-dice.html` is still the runtime, view layer, market simulator, relationship system, and casino system in one file, but core static catalogs are now split into `src/restored/data/`.
 - `gameState` is still mutated directly from UI handlers, timers, casino outcomes, gifts, stock trades, futures positions, and relationship actions, but read-only selectors for rank, assets, and phone ownership now live outside the HTML.
 - Player profile basics now live in `src/restored/player/profile-contract.js`, so My Info can become a character sheet before jobs, rankings, and dialogue emotion expand.
-- Phone apps are now grouped correctly as phone UI, but their render, market logic, and future relationship app logic still live beside global tab rendering.
-- Relationship state is still mostly `love`, so future AI lovers, jealousy, trust, memory, and dialogue branching have no clean ownership boundary yet.
-- Casino results do not yet produce a neutral event stream that relationship/conversation systems can react to later.
+- Phone apps are now grouped correctly as phone UI. News, stock, futures, relationship partner-card/recent-log rendering, and the Baegeum Store shell are extracted under `src/restored/phone/`, while market ticks, trades, and futures open/close handlers still live in the restored HTML.
+- The phone OS/app-store ecosystem now has a separate catalog so future messenger, virtual community, ranking, bank/pay, map, and online lobby apps do not automatically become live app buttons. `app_store` is live only because its small view module exists.
+- Relationship mutation paths for the current walk encounter, interest, call, AI talk, gift, intimacy, marriage, and passive drift now run through a relationship event runtime while keeping legacy `love` compatibility.
+- Relationship summary display and phone recent-log display now read the new relationship contract through small view modules, and the current relationship actions can create visible relationship logs.
+- Existing casino results are legacy prototype behavior. The restored gambling replacement contract now defines the neutral event/effect stream, but live casino UI still does not emit it.
 - City identity exists as a catalog, but places, actor locations, and UI surfaces are not yet explicit enough for roaming AI.
 - Illustration and portrait expansion now has an asset manifest contract, but illustration rendering and fallback logic are not wired into gameplay yet.
 
@@ -52,12 +54,13 @@ src/restored/
   state/           initial state, storage, selectors, migrations
   player/          profile, stats, job identity, residence and condition contracts
   data/            static catalogs for cities, places, assets, markets, partners
+  economy/         restored currency boundaries such as DPA casino token exchange
   actors/          AI actor identity, location, schedule, memory contracts
   systems/         economy, ownership, market, gambling, relationship, emotion
   phone/           phone shell and phone apps
   ui/              view renderers, modals, illustration stage, toast surface
   assets/          manifest ids for audio, images, references, and future art
-  games/           odd-even, blackjack, futures helpers
+  games/           replacement gambling modules, game rules, and result helpers
 ```
 
 Each file should stay small enough for an AI session to understand in one pass. Prefer under 250 lines for restored modules.
@@ -73,8 +76,26 @@ Current contract files:
 - `src/restored/player/profile-contract.js`
 - `src/restored/online/online-adapter-contract.js`
 - `src/restored/phone/phone-app-contract.js`
+- `src/restored/phone/phone-app-ecosystem-contract.js`
+- `src/restored/phone/app-store-view.js`
+- `src/restored/phone/futures-app-view.js`
+- `src/restored/phone/news-app-view.js`
+- `src/restored/phone/relationship-app-view.js`
+- `src/restored/phone/stock-app-view.js`
 - `src/restored/inventory/consumable-contract.js`
 - `src/restored/inventory/inventory-view.js`
+- `src/restored/economy/dpa-token-contract.js`
+- `src/restored/games/gambling-replacement-contract.js`
+- `src/restored/games/blackjack-contract.js`
+- `src/restored/games/blackjack-round-contract.js`
+- `src/restored/games/roulette-contract.js`
+- `src/restored/games/baccarat-contract.js`
+- `src/restored/games/slot-contract.js`
+- `src/restored/games/pawnshop-contract.js`
+- `src/restored/games/loan-office-contract.js`
+- `src/restored/systems/relationship-contract.js`
+- `src/restored/systems/relationship-event-runtime.js`
+- `src/restored/ui/relationship-summary-view.js`
 - `src/restored/ui/shell-contract.js`
 - `src/restored/ui/location-nav-contract.js`
 - `src/restored/assets/asset-manifest.js`
@@ -162,6 +183,15 @@ Long-term UI surfaces should be separated by location and job:
 - Casino surface: game selection, bet controls, result event feed.
 - City surface: city-specific place view, roaming actor presence, travel actions.
 
+Baegeum frontage slice:
+
+- Keep the bottom nav compact; do not add every building as a tab.
+- Show missing city identity through place-surface rows and signs inside existing surfaces.
+- `baegeum:job-street` owns 고시원, 편의점, 맥버거, and 인력소 as first job/life frontage candidates.
+- `baegeum:shop-street` owns 디페이 ATM, 배금증권, 배금은행, and 중고차 매장 as first commerce/finance frontage candidates.
+- Dice City casino street can show 룰렛카지노, 바카라카지노, 경마장, and DPA 환전소 as rows before each game has a full animated adapter.
+- DPA is a casino token boundary, not a replacement for normal 원화/cash.
+
 Do not redesign the visuals broadly before these surfaces are named in code. Otherwise later AI, illustration, and city movement work will keep fighting the layout.
 
 `docs/baegeum-city-v2-restored-ui-online-ranking-chat-roadmap.md` owns the broader UI/design, online, ranking, and chat expansion plan that builds on these surfaces.
@@ -199,11 +229,11 @@ Examples:
 6. Add location navigation contracts for house, house-front, city districts, and travel. Current status: location catalog and location-nav contract are guarded and the playable shell consumes them.
 7. Add an online adapter contract that returns `unavailable` by default and never opens a fake lobby. Current status: guarded in `src/restored/online/online-adapter-contract.js`.
 8. Keep My Info as a profile/character sheet, not a money/action dump. Current status: profile stats are guarded in `src/restored/player/profile-contract.js`.
-9. Extract phone apps: news, stock, futures rendering and access gates. Current status: app ids and phone/smartphone gates are guarded in `src/restored/phone/phone-app-contract.js`; full render extraction is still pending.
+9. Extract phone apps: news, stock, futures rendering and access gates. Current status: live app ids and phone/smartphone gates are guarded in `src/restored/phone/phone-app-contract.js`; app-store candidates are guarded in `src/restored/phone/phone-app-ecosystem-contract.js`; the Baegeum Store shell is rendered by `src/restored/phone/app-store-view.js`; news list rendering is in `src/restored/phone/news-app-view.js`; stock app rendering is in `src/restored/phone/stock-app-view.js`; futures app rendering is in `src/restored/phone/futures-app-view.js`; relationship partner-card plus recent-log rendering is in `src/restored/phone/relationship-app-view.js`.
 10. Add the relationship/lover list as a phone app entry instead of a My Info section. Current status: implemented in the playable phone surface.
 10a. Add carried inventory preview and basic consumable use. Current status: My Info inventory preview is rendered from `src/restored/inventory/inventory-view.js`, and energy drink use routes through `src/restored/inventory/consumable-contract.js`.
-11. Extract gambling systems: odd-even and blackjack result helpers.
-12. Add relationship/emotion state v2 beside old `love`, with migration.
+11. Replace gambling systems: define a restored gambling contract first, then rebuild odd-even, blackjack, roulette, baccarat, slots, pawnshop, and loan-office flows as separate modules instead of preserving the inline casino scripts. Current status: `src/restored/games/gambling-replacement-contract.js` defines neutral gambling events, ledger bridge effects, relationship/emotion hooks, and online authority requests. `src/restored/games/blackjack-contract.js` now defines pure blackjack scoring, comparison, and bet/result envelopes. `src/restored/games/blackjack-round-contract.js` now defines the pure `ready -> player_turn -> dealer_turn -> settled` round state flow. `src/restored/games/roulette-contract.js` now defines pure single-zero roulette bet/result envelopes. `src/restored/games/baccarat-contract.js` now defines pure player / banker / tie baccarat bet/result envelopes. `src/restored/games/slot-contract.js` now defines pure provided-reel slot bet/result envelopes. `src/restored/games/pawnshop-contract.js` now defines pure pawnshop quote, pawn, redeem, and forfeiture envelopes. `src/restored/games/loan-office-contract.js` now defines pure loan quotes, borrow, payment, delinquency, and default effects. Live casino, pawnshop, and loan-office UI are still intentionally unconnected.
+12. Add relationship/emotion state v2 beside old `love`, with migration. Current status: `src/restored/systems/relationship-contract.js` now owns pure legacy `love` migration, relationship stages, affection/trust/stability/risk clamps, confession readiness checks, summary selectors, and relationship log envelopes. `src/restored/systems/relationship-event-runtime.js` routes current walk encounter, interest, call, AI talk, gift, intimacy, marriage, and passive drift actions through source events and relationship logs. `src/restored/ui/relationship-summary-view.js` renders the compact My Info summary, and `src/restored/phone/relationship-app-view.js` renders phone partner cards plus recent relationship logs from that contract. Dedicated DM/date/confession surfaces are still pending.
 13. Add conversation catalog and event-driven dialogue selection.
 14. Add illustration catalog and fallback portrait handling using asset manifest ids.
 15. Add actor roaming scheduler only after actor/place contracts are used by UI.
@@ -224,6 +254,7 @@ The architecture check should fail when:
 - New mp3 or image files appear under `assets/` without manifest ids.
 - Total asset, rank, phone, or smartphone ownership selectors move back into the HTML.
 - Inventory preview rendering or consumable effect logic moves back into the HTML.
+- Game contracts must stay pure: no DOM, browser storage, timers, random outcome generation, or direct UI animation code under `src/restored/games/`.
 
 ## Do Not
 
@@ -231,10 +262,11 @@ The architecture check should fail when:
 - Do not add more large inline systems to `baegeum-city-v2-dice.html`.
 - Do not connect AI dialogue to an external API as a hard dependency.
 - Do not make casino events directly mutate partner emotion.
+- Do not extend the old Dice City gambling scripts as the long-term system; keep them playable only until their replacement modules exist.
 - Do not put phone apps back into the main bottom navigation.
 - Do not add every city place to the same global tab bar.
 - Do not attach real payment, real gambling, or account behavior.
 
 ## Next Safe Slice
 
-State, storage, selectors, profile stats, phone app gates, static catalogs, city/place/location contracts, shell contracts, location-nav contracts, online adapter contract, inventory consumables, asset manifest, intake, planning kit, and the UI/online/ranking/chat roadmap are now guarded. The next coding slice should move more phone app rendering under `src/restored/phone/` or move shop purchases toward a restored action/effect contract.
+State, storage, selectors, profile stats, phone app gates, phone app ecosystem catalog, Baegeum Store shell, news/stock/futures phone views, relationship phone app cards and recent logs, static catalogs, city/place/location contracts, shell contracts, location-nav contracts, online adapter contract, inventory consumables, DPA casino-token boundary, Baegeum frontage rows, restored gambling replacement vocabulary, pure blackjack rules and round state, pure roulette rules, pure baccarat rules, pure slot rules, pure pawnshop collateral envelopes, pure loan-office debt effects, relationship v2 contract helpers, relationship event runtime, My Info relationship summary view, asset manifest, intake, planning kit, and the UI/online/ranking/chat roadmap are now guarded. The next coding slice should add a deliberate date, DM, or confession surface before casino/loan/pawnshop reactions, or move stock/futures action handlers after a separate contract.

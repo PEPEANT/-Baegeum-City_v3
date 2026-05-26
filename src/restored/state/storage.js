@@ -98,6 +98,7 @@ export function mergeSavedRestoredState(targetState, savedState, initialState = 
 
   targetState.futures = savedState.futures || [];
   targetState.partners = savedState.partners || [];
+  targetState.relationshipLogs = Array.isArray(savedState.relationshipLogs) ? savedState.relationshipLogs : [];
   targetState.partners.forEach((partner) => {
     if (partner.isLover === undefined) partner.isLover = false;
     if (partner.title === undefined) partner.title = "지인";
