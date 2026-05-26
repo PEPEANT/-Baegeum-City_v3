@@ -131,6 +131,7 @@ Phase 3: expose stale persistence.
 - World-editor draft readers now expose the same status pattern without clearing user data.
 - Money-affecting ledger effect failures now return `missing_effect`, `missing_economy_record`, or `record_failed`.
 - Game action/effect payload clone failures now keep the safe `{}` fallback but expose `clone_failed` and a reason.
+- `src/systems/local-storage-workflow.js` now classifies the inventory as `clean`, `stale`, `corrupt`, or `unavailable` and marks blocking stale state before browser workflow assertions.
 
 Phase 4: expose silent failures.
 
@@ -159,6 +160,7 @@ After the final scene publication repair, use this order:
 
 4. Browser workflow pass
    Run the same workflow twice: once with clean localStorage and once with intentionally stale localStorage. Bugs that appear only in the second run are persistence bugs, not gameplay bugs.
+   Use the local-storage workflow summary before each run so stale economy, ledger, odd-even, editor draft, or venue state is recorded instead of guessed.
 
 5. Hub-file pressure pass
    Pick one large hub file only after a failing symptom points there. Split by responsibility, not by line count alone.
@@ -188,6 +190,6 @@ Recommended next target:
 clean/stale localStorage browser workflow pass
 ```
 
-Reason: source-level runtime global access is centralized now, corrupt storage is observable for money, ledger, venue metadata, and world-editor drafts, ledger effect failures are observable, and malformed action/effect payload clone failures now expose `clone_failed`. The next common "bug that looks like code" is stale browser state surviving between runs.
+Reason: source-level runtime global access is centralized now, corrupt storage is observable for money, ledger, venue metadata, and world-editor drafts, ledger effect failures are observable, malformed action/effect payload clone failures now expose `clone_failed`, and the clean/stale/corrupt workflow summary exists. The next common "bug that looks like code" is stale browser state surviving between runs.
 
-Do not add payouts, rankings, or reset UI yet. First run the same browser workflow with clean and stale localStorage, then record which symptoms are persistence bugs rather than gameplay bugs.
+Do not add payouts, rankings, or reset UI yet. First run the same browser workflow with the workflow summary on clean and stale localStorage, then record which symptoms are persistence bugs rather than gameplay bugs.

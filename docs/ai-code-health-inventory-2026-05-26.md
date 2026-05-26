@@ -54,6 +54,7 @@ baegeum-city-v2-world-editor-draft-v0  src/data/world-editor-draft.js, src/tools
 baegeum-city-v2-venue-metadata-v1      src/data/gambling-venues.js, src/tools/baegeum-city-editor.js
 baegeum-city:v2:economy                src/systems/player-economy-state.js
 baegeum-city:v2:economy-ledger         src/systems/economy-ledger.js
+baegeum-city:v2:odd-even-rounds        src/systems/odd-even-round-state.js
 baegeum-city:v2:skin                   src/skins/drawing-world-adapter.js
 baegeum-city:v2:skin-preset            src/skins/drawing-world-adapter.js
 simulac-draw-world:skin:v1             legacy fallback in src/skins/drawing-world-adapter.js
@@ -64,6 +65,8 @@ Risk: these systems can become stale independently. A browser bug can come from 
 Preflight repair: `src/tools/baegeum-city-editor.js` now writes venue metadata through `writeStoredVenueMetadata`, and `tools/smoke-venue-metadata-storage.cjs` asserts that the editor no longer bypasses normalization.
 
 Current diagnostics: `src/systems/local-storage-diagnostics.js` inventories these keys and reports `ok`, `missing`, `corrupt`, `migrated`, or `unavailable`. `tools/smoke-local-storage-diagnostics.cjs` covers economy state, economy ledger, corrupt JSON, and legacy skin fallback detection.
+
+Current workflow guard: `src/systems/local-storage-workflow.js` turns the raw inventory into `clean`, `stale`, `corrupt`, or `unavailable`. It treats saved economy, ledger, odd-even round state, editor draft, and venue metadata as blocking stale state for clean browser assertions. `tools/smoke-local-storage-workflow.cjs` covers clean, stale, corrupt, unavailable, economy, round, and map-draft cases.
 
 Money-adjacent read diagnostics: `inspectPlayerEconomyStorage()` and `inspectEconomyLedgerStorage()` now expose `ok`, `missing`, `missing_storage`, and `corrupt` status while preserving the existing fallback behavior of `readPlayerEconomy()` and `readEconomyLedger()`.
 
@@ -117,6 +120,7 @@ Facade repair completed so far:
 - Added `inspectStoredVenueMetadata()` in `src/data/gambling-venues.js`, guarded by `tools/smoke-venue-metadata-storage.cjs`, so corrupt venue metadata is observable without clearing local data.
 - Added `inspectWorldEditorDraftStorage()` in `src/data/world-editor-draft.js`, guarded by `tools/smoke-world-editor-draft-contract.cjs`, so corrupt editor drafts are observable without clearing local data.
 - Added `src/systems/local-ledger-effect.js` and `tools/smoke-local-ledger-effect.cjs`. Exchange ATM and odd-even bet reservation now expose `missing_effect`, `missing_economy_record`, or `record_failed` instead of collapsing ledger write failures into a silent boolean.
+- Added `src/systems/local-storage-workflow.js` and `tools/smoke-local-storage-workflow.cjs` so browser workflow checks can distinguish clean state, stale persisted project state, corrupt storage, and unavailable storage before blaming gameplay code.
 
 ## Next Repair Candidate
 
@@ -124,6 +128,6 @@ Continue the silent-fallback bug-hunt pass.
 
 Completed target: `src/systems/game-action-master.js` `cloneJson()` fallback now preserves the safe `{}` payload fallback while adding `payloadCloneStatus` and `payloadCloneReason` to actions/effects.
 
-Next target: run clean/stale `localStorage` browser workflows so persistence bugs can be separated from gameplay bugs.
+Next target: use the clean/stale workflow report during browser runs, then decide whether the next contract slice is food purchase ledger or stat/time tick.
 
 Do not add reset buttons or broad refactors yet. Convert one silent fallback at a time into an observable result.

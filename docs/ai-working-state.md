@@ -22,7 +22,7 @@ First playable economy loop is the active priority:
 2. The first loop is `baegeum-city lifestyle prep -> bus terminal -> dice-city gambling -> exchange ATM -> odd-even reserve -> settle/refund -> ledger/HUD check -> phone/DIS readback -> return`.
 3. New stock trading, player-to-player transfer, food purchase, hunger ticks, job income, race payout, and admin payout remain blocked until the first loop closes and their ledger/effect contracts exist.
 4. Odd-even UI now connects local `bet_reserved -> bet_settled | bet_refunded` and stores `roundId` close state to prevent duplicate settlement/refund.
-5. Next implementation should browser-check reserve, settle/refund, ledger projection, and HUD state, then run clean/stale localStorage workflows.
+5. Clean/stale/corrupt localStorage workflow classification is now available; next implementation should browser-check reserve, settle/refund, ledger projection, and HUD state with that report before blaming gameplay code.
 
 Multimap safety remains verified:
 
@@ -59,6 +59,7 @@ Current bug-first economy/code-health audit state:
 10. `WorldClock` now exports `WORLD_CLOCK_DEFAULT_MINUTES_PER_SECOND = 1`, and `tools/smoke-world-clock.cjs` guards that the official default stays 1 game minute per real second.
 11. `src/systems/odd-even-round-runtime.js` creates local `bet_settled` and `bet_refunded` action envelopes, and `src/ui/odd-even-table-panel.js` now uses them for local result/refund testing.
 12. `src/systems/odd-even-round-state.js` persists odd-even round close state under `baegeum-city:v2:odd-even-rounds`; reconnect recovery is still not implemented.
+13. `src/systems/local-storage-workflow.js` summarizes diagnostics into `clean`, `stale`, `corrupt`, or `unavailable` and marks blocking stale state for economy, ledger, odd-even rounds, editor drafts, and venue metadata.
 
 Horse-racing venue work is paused before gambling logic:
 
@@ -83,8 +84,8 @@ Recommended next autonomous loop:
 Economy loop closure:
 
 1. Browser-check odd-even reserve, settle/refund, ledger projection, and HUD state.
-2. Run clean/stale localStorage workflows covering economy state, economy ledger, odd-even round state, and editor drafts.
-3. If clean/stale workflows pass, choose the next contract slice: food purchase ledger or stat/time tick.
+2. Use the local-storage workflow report before and after intentionally stale state so economy, ledger, odd-even round, editor draft, and venue metadata persistence bugs are separated from gameplay bugs.
+3. If the browser workflow stays explainable, choose the next contract slice: food purchase ledger or stat/time tick.
 4. Do not implement player-to-player transfers, stock trading, food purchases, or hunger ticks until their ledger/effect types are explicitly added.
 
 Paused city-role map-editor loop:
@@ -131,6 +132,14 @@ Paused loops:
 - `docs/ai-spaghetti-bug-root-cause.md` explains why the spaghetti/bug pattern emerged and now fixes the next audit sequence around persistence, silent failures, and browser workflows.
 
 ## Loop Record
+
+Date: 2026-05-26
+Observed: The next spaghetti/root-cause risk was that browser workflow failures could still be caused by stale localStorage rather than current gameplay code.
+Changed: Added `src/systems/local-storage-workflow.js` and `tools/smoke-local-storage-workflow.cjs`; `npm run check` now guards clean/stale/corrupt/unavailable classification and blocking stale state for economy, ledger, odd-even round state, editor drafts, and venue metadata.
+Verified: `node tools/smoke-local-storage-workflow.cjs`, `node tools/smoke-local-storage-diagnostics.cjs`, `node tools/check-size.cjs`, `npm run check`, and `git diff --check` passed.
+Blocked: Browser workflow has not yet been rerun with intentionally stale storage after this module; no reset UI was added.
+Next: Browser-run the first economy loop with the workflow summary, then choose food purchase ledger or stat/time tick.
+Do not: Add reset buttons, payouts, rankings, stock, transfers, or hunger ticks before contracts.
 
 Date: 2026-05-26
 Observed: The first economy loop had local reserve and settlement/refund envelopes, but the table UI still did not close rounds or persist duplicate-close state.
