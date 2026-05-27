@@ -22,6 +22,7 @@ Current pre-split contracts:
 - `online/marathon-dev-room-transport.js`: temporary same-origin dev room packet relay for Singularity Race join/input/skill/attack/snapshot packets before WebSocket delivery exists.
 - `online/marathon-netcode-contract.js`: 30-runner Singularity Race latency/bandwidth budget, input coalescing, snapshot cadence, interpolation, degraded-lane rules, and relay packet pressure guard.
 - `online/marathon-server-transport-contract.js`: server-shaped Singularity Race WebSocket/Firebase-style transport config, snapshot, and packet envelope contract for future server delivery without embedded client secrets.
+- `online/marathon-server-provider-adapter.js`: pure provider-flow state machine for the first real online bridge, enforcing `hello -> join -> chat_history -> state_snapshot` and server-owned replay/snapshot packets.
 - `online/marathon-server-state-contract.js`: server-owned Singularity Race movement state, including room start, accepted input application, stale-input rejection, finish clamp, and server-owned runner snapshots.
 - `online/marathon-websocket-dev-server-mock.js`: local WebSocket-shaped server rehearsal for connected transport, room join, client packet ingest, server-owned movement, server snapshot creation, and netcode rate limiting without opening public online.
 - `games/singularity-race-dev-online.js`: player-page dev relay helpers plus the server `state_snapshot` to runner-display merge used before a real transport is attached.

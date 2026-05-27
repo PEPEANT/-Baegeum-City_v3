@@ -33,7 +33,8 @@ export function createSingularityDevRoomPacketTransport(options = {}) {
 }
 
 export function mergeSingularityServerSnapshotRunners(existingRunners = [], snapshotPayload = {}, options = {}) {
-  const participants = Array.isArray(snapshotPayload.participants) ? snapshotPayload.participants : [];
+  const participants = (Array.isArray(snapshotPayload.participants) ? snapshotPayload.participants : [])
+    .filter((participant) => isRunnerParticipant(participant));
   const existingById = new Map(existingRunners.map((runner) => [runner.id, runner]));
   const courseDistanceMeters = positiveNumber(options.courseDistanceMeters, DEFAULT_COURSE_METERS);
   const startProgress = finiteNumber(options.startLineProgress, DEFAULT_START_PROGRESS);
@@ -103,6 +104,12 @@ export function validateSingularityRaceDevOnlineContract() {
   if (!merged.applied || merged.runners[0].id !== "you") errors.push("server snapshots must map runner:you onto the local player");
   if (merged.runners[0].progress < 9 || merged.runners[0].progress > 11) errors.push("server snapshot meters must become display progress percent");
   if (merged.runners[0].skin !== "gpichan") errors.push("server snapshot merge must preserve the local player skin");
+  const spectatorMerged = mergeSingularityServerSnapshotRunners([], {
+    sequence: 8,
+    phase: "racing",
+    participants: [{ participantId: "spectator:test", displayName: "Watcher", type: "spectator" }]
+  });
+  if (spectatorMerged.applied || spectatorMerged.runners.length) errors.push("spectators must not render as runners");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 
@@ -111,6 +118,11 @@ function normalizeRunnerId(participantId, index) {
   if (id === "runner:you") return "you";
   if (id.startsWith("runner:bot-")) return id.slice("runner:".length);
   return id || `runner:${index + 1}`;
+}
+
+function isRunnerParticipant(participant = {}) {
+  if (participant.type) return participant.type === "player" || participant.type === "bot";
+  return String(participant.participantId || "").startsWith("runner:");
 }
 
 function resolveSnapshotProgress(participant, options) {

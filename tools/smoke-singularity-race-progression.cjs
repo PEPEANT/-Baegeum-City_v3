@@ -86,6 +86,9 @@ async function main() {
 
   assert(pageSource.includes("race_finalized"), "local finish should rehearse server-owned finalization");
   assert(pageSource.includes("server:local-preview"), "local finish packet must be marked as server-preview owned");
+  assert(pageSource.includes("race-result-panel"), "race screen needs a minimal finish result layer");
+  assert(pageSource.includes("finalizeRaceResult"), "local and server finishes should share one result finalizer");
+  assert(pageSource.includes("createConnectedFinishRanking"), "server-owned snapshots should drive connected race results");
 
   console.log("singularity race progression smoke ok");
   console.log(JSON.stringify({

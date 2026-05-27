@@ -46,6 +46,7 @@ export function applyRestoredMarathonServerInputCommand(roomInput = {}, commandI
   const index = room.participants.findIndex((participant) => participant.participantId === command.participantId);
   if (index < 0) return rejected("participant_not_found", room);
   const participant = createRestoredMarathonParticipant(room.participants[index]);
+  if (participant.type === "spectator" || participant.type === "admin") return rejected("participant_cannot_move", room);
   if (command.sequence <= participant.lastSequence) return rejected("stale_input", room);
 
   const forwardFactor = command.hasDirection ? Math.max(0, command.direction.x) : 1;
@@ -98,6 +99,9 @@ export function validateRestoredMarathonServerStateContract() {
   if (!first.ok || first.participant.progressMeters <= 0) errors.push("server input should advance runner progress");
   const sideOnly = applyRestoredMarathonServerInputEnvelope(first.room, input(2, "sprint", 1100, 0, 1), { elapsedMs: 1000, receivedAtMs: 1100 });
   if (!sideOnly.ok || sideOnly.participant.progressMeters !== first.participant.progressMeters) errors.push("side-only input must not advance marathon progress");
+  const spectatorRoom = createRestoredMarathonRoom({ ...first.room, participants: [...first.room.participants, { participantId: "spectator:test", type: "spectator" }] });
+  const spectatorMove = applyRestoredMarathonServerInputEnvelope(spectatorRoom, input(1, "sprint", 1200, 1, 0, "spectator:test"), { elapsedMs: 1000, receivedAtMs: 1200 });
+  if (spectatorMove.ok || spectatorMove.reason !== "participant_cannot_move") errors.push("spectator input must not move server state");
   const stale = applyRestoredMarathonServerInputEnvelope(first.room, input(1, "sprint", 1200), { elapsedMs: 1000, receivedAtMs: 1200 });
   if (stale.ok || stale.reason !== "stale_input") errors.push("server must reject stale input sequences");
   const snapshot = createRestoredMarathonServerRunnerSnapshot(first.participant, first.room);
@@ -105,8 +109,8 @@ export function validateRestoredMarathonServerStateContract() {
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 
-function input(sequence, pace, raceTimeMs, x = 1, y = 0) {
-  return Object.freeze({ roomId: "room:test", sequence, payload: { participantId: "runner:test", pace, raceTimeMs, direction: { x, y } } });
+function input(sequence, pace, raceTimeMs, x = 1, y = 0, participantId = "runner:test") {
+  return Object.freeze({ roomId: "room:test", sequence, payload: { participantId, pace, raceTimeMs, direction: { x, y } } });
 }
 
 function rejected(reason, room) { return Object.freeze({ ok: false, reason, room, participant: null, command: null }); }

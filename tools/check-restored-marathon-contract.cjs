@@ -12,14 +12,9 @@ const trailGeometryPath = path.join(root, "src", "restored", "games", "marathon-
 const viewPath = path.join(root, "src", "restored", "games", "marathon-stadium-view.js"), raceSkinPath = path.join(root, "src", "skins", "singularity-race-skin-presets.js");
 const flowPath = path.join(root, "src", "restored", "games", "singularity-race-flow.js");
 const runnerViewPath = path.join(root, "src", "restored", "games", "singularity-race-runner-view.js"), trackPath = path.join(root, "src", "restored", "games", "singularity-race-track.js"), queuePath = path.join(root, "src", "restored", "games", "singularity-race-queue.js"), localSimPath = path.join(root, "src", "restored", "games", "singularity-race-local-sim.js"), devOnlinePath = path.join(root, "src", "restored", "games", "singularity-race-dev-online.js"), raceControlPath = path.join(root, "src", "restored", "games", "singularity-race-control.js");
-const adapterPath = path.join(root, "src", "restored", "online", "marathon-room-adapter.js");
-const channelPath = path.join(root, "src", "restored", "online", "marathon-channel-adapter.js");
-const chatTransportPath = path.join(root, "src", "restored", "online", "marathon-dev-chat-transport.js");
-const roomTransportPath = path.join(root, "src", "restored", "online", "marathon-dev-room-transport.js");
-const netcodePath = path.join(root, "src", "restored", "online", "marathon-netcode-contract.js");
-const serverTransportPath = path.join(root, "src", "restored", "online", "marathon-server-transport-contract.js");
-const serverRoomAdapterPath = path.join(root, "src", "restored", "online", "marathon-server-room-adapter.js");
-const websocketDevServerPath = path.join(root, "src", "restored", "online", "marathon-websocket-dev-server-mock.js");
+const adapterPath = path.join(root, "src", "restored", "online", "marathon-room-adapter.js"), roomPolicyPath = path.join(root, "src", "restored", "online", "marathon-room-policy.js"), channelPath = path.join(root, "src", "restored", "online", "marathon-channel-adapter.js"), chatTransportPath = path.join(root, "src", "restored", "online", "marathon-dev-chat-transport.js");
+const roomTransportPath = path.join(root, "src", "restored", "online", "marathon-dev-room-transport.js"), netcodePath = path.join(root, "src", "restored", "online", "marathon-netcode-contract.js"), serverLoopPath = path.join(root, "src", "restored", "online", "marathon-server-loop-contract.js"), websocketDevLoopPath = path.join(root, "src", "restored", "online", "marathon-websocket-dev-loop.js");
+const serverTransportPath = path.join(root, "src", "restored", "online", "marathon-server-transport-contract.js"), serverRoomAdapterPath = path.join(root, "src", "restored", "online", "marathon-server-room-adapter.js"), serverSessionPath = path.join(root, "src", "restored", "online", "marathon-server-session-contract.js"), serverProviderPath = path.join(root, "src", "restored", "online", "marathon-server-provider-adapter.js"), websocketDevServerPath = path.join(root, "src", "restored", "online", "marathon-websocket-dev-server-mock.js"), websocketDevServerValidationPath = path.join(root, "src", "restored", "online", "marathon-websocket-dev-server-validation.js");
 const planPath = path.join(root, "docs", "plans", "restored-marathon-stadium.md");
 const indexPath = path.join(root, "docs", "INDEX.md");
 const plansReadmePath = path.join(root, "docs", "plans", "README.md");
@@ -29,9 +24,7 @@ const adminHtmlPath = path.join(root, "singularity-race-admin.html");
 const placeCopyPath = path.join(root, "src", "restored", "ui", "place-surface-copy.js");
 const placeCatalogPath = path.join(root, "src", "restored", "data", "place-catalog.js");
 
-function read(filePath) {
-  return fs.readFileSync(filePath, "utf8");
-}
+function read(filePath) { return fs.readFileSync(filePath, "utf8"); }
 function assertPureSource() {
   const source = read(contractPath);
   for (const blocked of ["document.", "window.", "localStorage", "sessionStorage", "Math.random", "Date.now", "setTimeout", "setInterval", "fetch("]) {
@@ -47,6 +40,9 @@ function assertMarathonRoomAdapter(adapter, marathon, serverTransport) {
   assert.equal(adapter.canOpenConnectedMarathonLobby(unavailableAdapter), false, "unavailable adapter must not open a connected lobby.");
   const connectedAdapter = adapter.createDevConnectedMarathonRoomAdapter({ serverTimeMs: 1234 });
   assert.equal(adapter.canOpenConnectedMarathonLobby(connectedAdapter), true, "dev adapter should open a connected lobby.");
+  const summary = adapter.getConnectedMarathonRoomSummaries(connectedAdapter)[0];
+  assert.equal(summary.spectators, 0, "room summary should expose current spectator count.");
+  assert.equal(summary.maxSpectators, marathon.RESTORED_MARATHON_DEFAULT_MAX_SPECTATORS, "room summary should expose max spectators.");
   const joined = adapter.joinConnectedMarathonRoom(connectedAdapter, {
     participantId: "runner:dev",
     nickname: "Dev Runner",
@@ -58,6 +54,12 @@ function assertMarathonRoomAdapter(adapter, marathon, serverTransport) {
   assert.equal(marathon.validateRestoredMarathonOnlinePacket(joined.joinResult).ok, true, "join_result packet should validate.");
   const snapshot = adapter.createConnectedMarathonStateSnapshot(joined.room, { participantId: "runner:dev", sequence: 5 }); assert.equal(snapshot.payload.serverOwned, true, "connected snapshot must be server-owned."); assert.ok(snapshot.payload.pingSample && snapshot.payload.reconciliation, "connected snapshot must include ping and reconciliation metadata.");
   assert.equal(adapter.joinConnectedMarathonRoom(connectedAdapter, { mapVersion: "bad-map" }).ok, false, "map version mismatch should block connected join.");
+  const racingAdapter = Object.freeze({
+    ...connectedAdapter,
+    rooms: Object.freeze([marathon.createRestoredMarathonRoom({ ...connectedAdapter.rooms[0], phase: "racing" })])
+  });
+  assert.equal(adapter.joinConnectedMarathonRoom(racingAdapter, { participantId: "runner:late", participantType: "player" }).ok, false, "late runner join should be blocked during racing.");
+  assert.equal(adapter.joinConnectedMarathonRoom(racingAdapter, { participantId: "spectator:late", participantType: "spectator" }).ok, true, "late spectator join should be allowed during racing.");
   const remoteTransport = serverTransport.createConfiguredRestoredMarathonServerTransport({
     provider: "websocket",
     endpointId: "ws:local-dev",
@@ -76,62 +78,9 @@ function assertMarathonDocs() {
   const adminHtml = read(adminHtmlPath);
   const flowSource = read(flowPath), raceSkinSource = read(raceSkinPath);
   const runnerViewSource = read(runnerViewPath), trackSource = read(trackPath), queueSource = read(queuePath), localSimSource = read(localSimPath), devOnlineSource = read(devOnlinePath), raceControlSource = read(raceControlPath);
-  [
-    "src/restored/games/marathon-contract.js",
-    "src/restored/games/marathon-input-contract.js",
-    "src/restored/games/marathon-character-skill-contract.js",
-    "src/restored/games/marathon-combat-contract.js",
-    "src/restored/games/marathon-trail-geometry.js",
-    "src/restored/games/marathon-stadium-view.js",
-    "src/skins/singularity-race-skin-presets.js",
-    "src/restored/games/singularity-race-flow.js",
-    "src/restored/games/singularity-race-runner-view.js", "src/restored/games/singularity-race-queue.js", "src/restored/games/singularity-race-track.js", "src/restored/games/singularity-race-local-sim.js", "src/restored/games/singularity-race-dev-online.js", "src/restored/games/singularity-race-control.js",
-    "src/restored/online/marathon-room-adapter.js",
-    "src/restored/online/marathon-channel-adapter.js",
-    "src/restored/online/marathon-dev-chat-transport.js",
-    "src/restored/online/marathon-dev-room-transport.js",
-    "src/restored/online/marathon-netcode-contract.js",
-    "src/restored/online/marathon-server-transport-contract.js",
-    "src/restored/online/marathon-server-room-adapter.js",
-    "src/restored/online/marathon-websocket-dev-server-mock.js",
-    "server transport adapter",
-    "RESTORED_MARATHON_MAX_RUNNERS",
-    "state_snapshot"
-  ].forEach((token) => assert.ok(plan.includes(token), token));
-
-  [
-    "marathon-room-adapter.js", "marathon-input-contract.js",
-    "marathon-character-skill-contract.js", "marathon-combat-contract.js",
-    "marathon-trail-geometry.js", "trail-map", "track-effects", "--world-grid", "--track-rail", "--track-road",
-    "track-world", "track-hud", "TRACK_WORLD_WIDTH",
-    "TRACK_CAMERA_X_ANCHOR = 0.5", "TRACK_CAMERA_Y_ANCHOR = 0.5",
-    "TRACK_WORLD_WIDTH = 7600", "START_LINE_PROGRESS",
-    "START_GATE_PROGRESS", "ROAD_LANE_HALF_WIDTH_PX",
-    "laneOffsetPx", "advanceLocalPlayerMovement", "advanceWaitingBotPack",
-    "botsMoved",
-    "LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND", "LOCAL_SPRINT_PROGRESS_PER_SECOND",
-    "SOFT_PASS_RADIUS", "SOFT_PASS_BODY_RADIUS_PX", "SOFT_COLLISION_LANE_PUSH_PX",
-    "calculateSoftPassPressure", "calculateSoftPassSideOffset", "calculateSoftCollisionImpulse", "applySoftCollisionImpulse",
-    "LOCAL_FINISH_PROGRESS", "createLocalFinishRanking",
-    "SINGULARITY_RACE_START_COUNTDOWN_MS", "SINGULARITY_RACE_CONTROL_STORAGE_KEY",
-    "startLocalCountdown", "track-countdown", "start-gate",
-    "updateTrackCamera", "eventToTrackWorldPercent", "runnerVisualPoint", "smoothRunnerVisualPoint", "runnerVisuals", "resolveRestoredMarathonVisualStep",
-    "createSingularityRunnerAvatarNode", "setInterval(advanceActionPreview, 60)",
-    "vector-effect: non-scaling-stroke", "stroke-width: 580px",
-    "stroke-width: 460px", "var(--track-rail)", "var(--track-road)", "player-focus-ring", "race-standings",
-    "advanceLocalBotPack", "RAIL_COLLISION_GAP", "resolveSingleRailCollisions",
-    "advanceLocalPlayerProgress", "runner-avatar.is-colliding", "runner-nameplate",
-    "event.code === \"KeyT\"", "focusChatInput", "FEATURED_SKIN_IDS", "PROFILE_SKIN_LIMIT",
-    "kaguya", "singularity-fan", "robot", "gpichan", "pepe-runner", "moderator-armband", "yalrkun", "lakers-wile", "sam-altman", "demis-hassabis", "action-character", "checkpoint-strip",
-    "action-packets", "channel-tabs", "marathon-dev-chat-transport.js", "marathon-netcode-contract.js",
-    "netcode-budget", "server_snapshot", "ping_sample", "reconcile_guard", "anti_teleport", "relay_guard", "admin-page-link", "adminLaunch",
-    "PROFILE_STORAGE_KEY", "profile-skin-grid", "data-screen=\"profile\"", "enterQueue", "enterMapPreview", "enterRaceScreen", "debug-only", "getSingularitySkillDisplayName",
-    "singularity-race-flow.js", "singularity-race-runner-view.js", "singularity-race-queue.js", "singularity-race-track.js", "singularity-race-local-sim.js", "singularity-race-dev-online.js", "singularity-race-control.js", "SINGULARITY_RACE_SCREENS",
-    ".shell[data-screen=\"lobby\"] .brand p", ".shell[data-screen=\"lobby\"] .chat-panel", ".shell[data-screen=\"lobby\"] #preview-button",
-    ".shell[data-screen=\"queue\"] .room-panel", ".shell[data-screen=\"queue\"] .channel-tabs", ".shell[data-screen=\"mapPreview\"] .chat-panel", ".shell[data-screen=\"mapPreview\"] .slot-grid", ".shell[data-screen=\"mapPreview\"] #track-runners", "updateMapPreviewCamera",
-    "queue-actions", "맵 미리보기", "state.screen === SINGULARITY_RACE_SCREENS.QUEUE",
-    ".shell[data-screen=\"race\"] .room-panel", ".shell[data-screen=\"race\"] .chat-panel", ".shell[data-screen=\"race\"] .track-panel .panel-header", ".shell[data-screen=\"race\"] .action-hud", ".shell[data-screen=\"race\"] .checkpoint-strip", ".shell[data-screen=\"race\"] .track-progress-pill", ".shell[data-screen=\"race\"] .start-gate::after", "race-mobile-controls", "race-queue-toggle", "race-chat-toggle", "race-start-status", "race-queue-open", "race-chat-open", "renderRaceMobileControls", "state.raceQueueOpen", "관리자 대기중", "race-input-controls", "race-dpad", "race-action-button", "race-skill-button", "race-chat-action-button", "VIRTUAL_MOVE_KEYS", "setVirtualMoveKey", "releaseVirtualMoveKeys", "triggerVirtualSkillButton"
-  ].forEach((token) => assert.ok(singularityHtml.includes(token), token));
+  ["src/restored/games/marathon-contract.js", "src/restored/games/marathon-input-contract.js", "src/restored/games/marathon-character-skill-contract.js", "src/restored/games/marathon-combat-contract.js", "src/restored/games/marathon-trail-geometry.js", "src/restored/games/marathon-stadium-view.js", "src/skins/singularity-race-skin-presets.js", "src/restored/games/singularity-race-flow.js", "src/restored/games/singularity-race-runner-view.js", "src/restored/games/singularity-race-queue.js", "src/restored/games/singularity-race-track.js", "src/restored/games/singularity-race-local-sim.js", "src/restored/games/singularity-race-dev-online.js", "src/restored/games/singularity-race-control.js", "src/restored/online/marathon-room-adapter.js", "src/restored/online/marathon-channel-adapter.js", "src/restored/online/marathon-dev-chat-transport.js", "src/restored/online/marathon-dev-room-transport.js", "src/restored/online/marathon-netcode-contract.js", "src/restored/online/marathon-server-loop-contract.js", "src/restored/online/marathon-websocket-dev-loop.js", "src/restored/online/marathon-server-transport-contract.js", "src/restored/online/marathon-server-room-adapter.js", "src/restored/online/marathon-server-session-contract.js", "src/restored/online/marathon-server-provider-adapter.js", "src/restored/online/marathon-websocket-dev-server-mock.js", "src/restored/online/marathon-websocket-dev-server-validation.js", "src/restored/online/marathon-room-policy.js", "server transport adapter", "maxSpectators", "RESTORED_MARATHON_MAX_RUNNERS", "state_snapshot"].forEach((token) => assert.ok(plan.includes(token), token));
+  ["marathon-room-adapter.js", "marathon-input-contract.js", "marathon-character-skill-contract.js", "marathon-combat-contract.js", "marathon-trail-geometry.js", "trail-map", "track-effects", "--world-grid", "--track-rail", "--track-road", "track-world", "track-hud", "TRACK_WORLD_WIDTH", "TRACK_CAMERA_X_ANCHOR = 0.5", "TRACK_CAMERA_Y_ANCHOR = 0.5", "TRACK_WORLD_WIDTH = 7600", "START_LINE_PROGRESS", "START_GATE_PROGRESS", "ROAD_LANE_HALF_WIDTH_PX", "laneOffsetPx", "advanceLocalPlayerMovement", "advanceWaitingBotPack", "botsMoved", "LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND", "LOCAL_SPRINT_PROGRESS_PER_SECOND", "SOFT_PASS_RADIUS", "SOFT_PASS_BODY_RADIUS_PX", "SOFT_COLLISION_LANE_PUSH_PX", "calculateSoftPassPressure", "calculateSoftPassSideOffset", "calculateSoftCollisionImpulse", "applySoftCollisionImpulse", "LOCAL_FINISH_PROGRESS", "createLocalFinishRanking", "SINGULARITY_RACE_START_COUNTDOWN_MS", "SINGULARITY_RACE_CONTROL_STORAGE_KEY", "startLocalCountdown", "track-countdown", "start-gate", "updateTrackCamera", "eventToTrackWorldPercent", "runnerVisualPoint", "smoothRunnerVisualPoint", "runnerVisuals", "resolveRestoredMarathonVisualStep", "createSingularityRunnerAvatarNode", "setInterval(advanceActionPreview, 60)", "vector-effect: non-scaling-stroke", "stroke-width: 580px", "stroke-width: 460px", "var(--track-rail)", "var(--track-road)", "player-focus-ring", "race-standings", "advanceLocalBotPack", "RAIL_COLLISION_GAP", "resolveSingleRailCollisions", "advanceLocalPlayerProgress", "runner-avatar.is-colliding", "runner-nameplate", "event.code === \"KeyT\"", "focusChatInput", "FEATURED_SKIN_IDS", "PROFILE_SKIN_LIMIT", "kaguya", "singularity-fan", "robot", "gpichan", "pepe-runner", "moderator-armband", "yalrkun", "lakers-wile", "sam-altman", "demis-hassabis", "action-character", "checkpoint-strip"].forEach((token) => assert.ok(singularityHtml.includes(token), token));
+  ["action-packets", "channel-tabs", "marathon-dev-chat-transport.js", "marathon-netcode-contract.js", "marathon-websocket-dev-loop.js", "createRestoredMarathonWebSocketDevServerMock", "advanceConnectedDevSnapshotFeed", "netcode-budget", "server_snapshot", "ping_sample", "reconcile_guard", "anti_teleport", "relay_guard", "admin-page-link", "adminLaunch", "PROFILE_STORAGE_KEY", "profile-skin-grid", "data-screen=\"profile\"", "enterQueue", "enterMapPreview", "enterRaceScreen", "debug-only", "getSingularitySkillDisplayName", "singularity-race-flow.js", "singularity-race-runner-view.js", "singularity-race-queue.js", "singularity-race-track.js", "singularity-race-local-sim.js", "singularity-race-dev-online.js", "singularity-race-control.js", "SINGULARITY_RACE_SCREENS", ".shell[data-screen=\"lobby\"] .brand p", ".shell[data-screen=\"lobby\"] .chat-panel", ".shell[data-screen=\"lobby\"] #preview-button", ".shell[data-screen=\"queue\"] .room-panel", ".shell[data-screen=\"queue\"] .channel-tabs", ".shell[data-screen=\"mapPreview\"] .chat-panel", ".shell[data-screen=\"mapPreview\"] .slot-grid", ".shell[data-screen=\"mapPreview\"] #track-runners", "updateMapPreviewCamera", "queue-actions", "맵 미리보기", "state.screen === SINGULARITY_RACE_SCREENS.QUEUE", ".shell[data-screen=\"race\"] .room-panel", ".shell[data-screen=\"race\"] .chat-panel", ".shell[data-screen=\"race\"] .track-panel .panel-header", ".shell[data-screen=\"race\"] .action-hud", ".shell[data-screen=\"race\"] .checkpoint-strip", ".shell[data-screen=\"race\"] .track-progress-pill", ".shell[data-screen=\"race\"] .start-gate::after", "race-mobile-controls", "race-queue-toggle", "race-chat-toggle", "race-start-status", "race-queue-open", "race-chat-open", "renderRaceMobileControls", "state.raceQueueOpen", "관리자 대기중", "race-input-controls", "race-dpad", "race-action-button", "race-skill-button", "race-chat-action-button", "VIRTUAL_MOVE_KEYS", "setVirtualMoveKey", "releaseVirtualMoveKeys", "triggerVirtualSkillButton"].forEach((token) => assert.ok(singularityHtml.includes(token), token));
   ["SINGULARITY_RACE_FLOW_ORDER", "MAP_PREVIEW", "getSingularityRacePreviewActionLabel", "validateSingularityRaceFlowContract", "맵 미리보기", "대기열로 돌아가기"]
     .forEach((token) => assert.ok(flowSource.includes(token), token));
   ["createSingularityRunnerAvatarNode", "createSingularityRunnerSlotNode", "rankSingularityRunnerEntries", "validateSingularityRaceRunnerViewContract", "빈 자리", "달리는 중", "온라인 대기"]
@@ -146,7 +95,7 @@ function assertMarathonDocs() {
   ["casino-dealer", "table-gambler", "office-worker"].forEach((token) => assert.ok(!singularityHtml.includes(token), token));
   ["presets.slice(0, 12)", "progress: 4 + (index * RAIL_COLLISION_GAP)", "START_GRID_COLUMNS", "enterRoomLobby", "data-screen=\"room\"", "state.screen === \"room\"", "state.screen === \"room\" ? state.runners.slice(0, 8)", "게임 화면 보기", "준비 완료", "Soft pass", "Gate locked", "FINISH READY", "channelDisplayLabel", "isVisibleChatMessage", "singularity-race-track-view.js"]
     .forEach((token) => assert.ok(!singularityHtml.includes(token), token));
-  ["marathon-channel-adapter.js", "marathon-dev-chat-transport.js", "marathon-dev-room-transport.js", "방장 페이지", "admin-direct-game-link", "singularity-race.html?devOnline=1&amp;adminLaunch=1", "host-camera", "runner-watch-list", "room-list", "전체 맵 감시카메라", "admin-start-button", "singularity-race-control.js", "createSingularityRaceStartCountdownCommand", "플레이어 보기", "roomDisplayName", "senderName"].forEach((token) => assert.ok(adminHtml.includes(token), token));
+  ["marathon-channel-adapter.js", "marathon-dev-chat-transport.js", "marathon-dev-room-transport.js", "marathon-room-policy.js", "방장 페이지", "admin-direct-game-link", "singularity-race.html?devOnline=1&amp;adminLaunch=1", "host-camera", "runner-watch-list", "room-list", "전체 맵 감시카메라", "admin-start-button", "spectator-capacity-options", "관전자 정원", "singularity-race-control.js", "createSingularityRaceStartCountdownCommand", "플레이어 보기", "roomDisplayName", "senderName"].forEach((token) => assert.ok(adminHtml.includes(token), token));
   ["connection gate", "active room", "visible channels", "stored messages", "room packets", "ROOM MONITOR"].forEach((token) => assert.ok(!adminHtml.includes(token), token));
   assertSingularityRaceMovementTuning(singularityHtml);
   assert.ok(read(indexPath).includes("plans/restored-marathon-stadium.md"));
@@ -200,6 +149,22 @@ function assertMarathonCoreRace(marathon, trailGeometry) {
   assert.equal(blockedJoin.ok, false, "31st runner must be blocked.");
   assert.ok(blockedJoin.errors.includes("runner limit reached"));
   assert.equal(marathon.canJoinRestoredMarathonRoom(fullRoom, "spectator").ok, true, "spectators should not consume runner slots.");
+  const racingRoom = marathon.createRestoredMarathonRoom({ phase: "racing", participants: participants.slice(0, 3) });
+  assert.equal(marathon.canJoinRestoredMarathonRoom(racingRoom, "player").ok, false, "runner mid-race join should be blocked.");
+  assert.equal(marathon.canJoinRestoredMarathonRoom(racingRoom, "spectator").ok, true, "spectator mid-race join should be allowed.");
+  const spectatorFullRoom = marathon.createRestoredMarathonRoom({
+    maxSpectators: 2,
+    participants: [
+      ...participants.slice(0, 1),
+      marathon.createRestoredMarathonParticipant({ participantId: "spectator:1", type: "spectator" }),
+      marathon.createRestoredMarathonParticipant({ participantId: "spectator:2", type: "spectator" })
+    ]
+  });
+  const spectatorBlocked = marathon.canJoinRestoredMarathonRoom(spectatorFullRoom, "spectator");
+  assert.equal(spectatorBlocked.ok, false, "spectator cap should be enforced separately.");
+  assert.ok(spectatorBlocked.errors.includes("spectator limit reached"));
+  assert.equal(marathon.countRestoredMarathonRunners(spectatorFullRoom.participants), 1, "spectators must not count as runners.");
+  assert.equal(marathon.countRestoredMarathonSpectators(spectatorFullRoom.participants), 2, "spectator count should be explicit.");
   assertMarathonProgressAndRanking(marathon, course);
   assertMarathonTrailGeometry(trailGeometry);
 }
@@ -251,8 +216,8 @@ function assertMarathonEnvelopeAndPacket(marathon, ranking) {
 (async () => {
   [
     contractPath, inputPath, characterSkillPath, combatPath, trailGeometryPath, viewPath, raceSkinPath, flowPath, runnerViewPath, trackPath, queuePath, localSimPath, devOnlinePath, raceControlPath,
-    adapterPath, channelPath, chatTransportPath, roomTransportPath, netcodePath,
-    serverTransportPath, serverRoomAdapterPath, websocketDevServerPath
+    adapterPath, roomPolicyPath, channelPath, chatTransportPath, roomTransportPath, netcodePath, serverLoopPath, websocketDevLoopPath,
+    serverTransportPath, serverRoomAdapterPath, serverSessionPath, serverProviderPath, websocketDevServerPath, websocketDevServerValidationPath
   ].forEach((filePath) => assert(fs.existsSync(filePath), `${path.relative(root, filePath)} is required.`));
   assertPureSource();
 
@@ -264,24 +229,40 @@ function assertMarathonEnvelopeAndPacket(marathon, ranking) {
   const view = await import(pathToFileURL(viewPath).href);
   const flow = await import(pathToFileURL(flowPath).href), runnerView = await import(pathToFileURL(runnerViewPath).href), track = await import(pathToFileURL(trackPath).href), queue = await import(pathToFileURL(queuePath).href), localSim = await import(pathToFileURL(localSimPath).href), devOnline = await import(pathToFileURL(devOnlinePath).href), raceControl = await import(pathToFileURL(raceControlPath).href);
   const adapter = await import(pathToFileURL(adapterPath).href);
+  const roomPolicy = await import(pathToFileURL(roomPolicyPath).href);
   const channelAdapter = await import(pathToFileURL(channelPath).href);
   const chatTransport = await import(pathToFileURL(chatTransportPath).href);
   const roomTransport = await import(pathToFileURL(roomTransportPath).href);
   const netcode = await import(pathToFileURL(netcodePath).href);
+  const serverLoop = await import(pathToFileURL(serverLoopPath).href);
+  const websocketDevLoop = await import(pathToFileURL(websocketDevLoopPath).href);
   const serverTransport = await import(pathToFileURL(serverTransportPath).href);
-  const websocketDevServer = await import(pathToFileURL(websocketDevServerPath).href);
+  const serverSession = await import(pathToFileURL(serverSessionPath).href);
+  const serverProvider = await import(pathToFileURL(serverProviderPath).href);
+  const websocketDevServerValidation = await import(pathToFileURL(websocketDevServerValidationPath).href);
   assertValidationOk(marathon.validateRestoredMarathonContract());
   assertMarathonActionContracts(input, characterSkill, combat);
   assert.equal(marathon.RESTORED_MARATHON_MAX_RUNNERS, 30, "online room must be prepared for 30 runners.");
   assertMarathonCoreRace(marathon, trailGeometry);
 
   assertMarathonRoomAdapter(adapter, marathon, serverTransport);
+  assertValidationOk(roomPolicy.validateRestoredMarathonRoomPolicyContract());
   assertValidationOk(channelAdapter.validateRestoredMarathonChannelContract());
   assertValidationOk(chatTransport.validateRestoredMarathonDevChatTransportContract());
   assertValidationOk(roomTransport.validateRestoredMarathonDevRoomTransportContract(serverTransport.createRestoredMarathonTransportEnvelope));
   assertValidationOk(netcode.validateRestoredMarathonNetcodeContract());
+  assertValidationOk(serverLoop.validateRestoredMarathonServerLoopContract());
+  assertValidationOk(websocketDevLoop.validateRestoredMarathonWebSocketDevLoopContract());
   assertValidationOk(serverTransport.validateRestoredMarathonServerTransportContract());
-  assertValidationOk(websocketDevServer.validateRestoredMarathonWebSocketDevServerMockContract());
+  assertValidationOk(serverSession.validateRestoredMarathonServerSessionContract(channelAdapter.createRestoredMarathonChannelSet()));
+  assertValidationOk(serverProvider.validateRestoredMarathonServerProviderAdapterContract(() => serverTransport.createRestoredMarathonServerTransportSnapshot({
+    provider: "websocket",
+    status: "connected",
+    endpointId: "ws:provider-test",
+    clientId: "client:provider-test",
+    capabilities: { rooms: true, chat: true, input: true, snapshots: true }
+  })));
+  assertValidationOk(websocketDevServerValidation.validateRestoredMarathonWebSocketDevServerMockContract());
   assertValidationOk(view.validateRestoredMarathonStadiumView());
   [raceSkin.validateSingularityRaceSkinPresetContract(), flow.validateSingularityRaceFlowContract(), runnerView.validateSingularityRaceRunnerViewContract(), track.validateSingularityRaceTrackContract(), queue.validateSingularityRaceQueueContract(), localSim.validateSingularityRaceLocalSimContract(), devOnline.validateSingularityRaceDevOnlineContract(), raceControl.validateSingularityRaceControlContract()].forEach(assertValidationOk);
   assert.deepEqual([...flow.SINGULARITY_RACE_FLOW_ORDER], ["profile", "lobby", "queue", "mapPreview", "race"]);

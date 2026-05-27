@@ -46,6 +46,10 @@
       font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
     }
 
+    body[data-screen="race"] {
+      overflow: hidden;
+    }
+
     button,
     input {
       font: inherit;
@@ -243,22 +247,36 @@
       display: none;
     }
 
+    .shell[data-screen="race"] {
+      width: 100vw;
+      height: 100vh;
+      min-height: 100vh;
+      padding: 0;
+      overflow: hidden;
+    }
+
     .shell[data-screen="race"] .lobby-grid {
       grid-template-columns: minmax(0, 1fr);
+      height: 100vh;
+      gap: 0;
     }
 
     .shell[data-screen="race"] .track-panel {
       grid-column: 1;
       grid-row: 1;
-      min-height: calc(100vh - 18px);
+      height: 100vh;
+      min-height: 100vh;
       border: 0;
       background: transparent;
       box-shadow: none;
     }
 
     .shell[data-screen="race"] .track-scene {
-      min-height: calc(100vh - 18px);
+      height: 100vh;
+      min-height: 100vh;
       margin: 0;
+      border: 0;
+      border-radius: 0;
     }
 
     .shell[data-screen="race"] .start-gate::after {
@@ -287,6 +305,10 @@
 
     .shell[data-screen="race"].race-queue-open .race-input-controls,
     .shell[data-screen="race"].race-chat-open .race-input-controls {
+      display: none;
+    }
+
+    .shell.is-spectator .race-input-controls {
       display: none;
     }
 
@@ -1068,6 +1090,134 @@
       pointer-events: none;
     }
 
+    .race-result-panel {
+      position: absolute;
+      left: 50%;
+      bottom: 96px;
+      z-index: 230;
+      display: none;
+      width: min(360px, calc(100% - 24px));
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid rgba(74, 91, 84, 0.22);
+      border-radius: 8px;
+      background: rgba(255, 255, 252, 0.94);
+      color: #17231e;
+      box-shadow: 0 18px 46px rgba(16, 19, 27, 0.18);
+      transform: translateX(-50%);
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+    }
+
+    .shell[data-screen="race"].race-finished .race-result-panel {
+      display: grid;
+    }
+
+    .shell[data-screen="race"].race-finished .race-input-controls {
+      display: none;
+    }
+
+    .race-result-panel strong,
+    .race-result-panel span {
+      min-width: 0;
+      line-height: 1.3;
+    }
+
+    .race-result-panel strong {
+      font-size: 17px;
+      font-weight: 1000;
+    }
+
+    .race-result-panel span {
+      color: #435043;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .race-result-list {
+      display: grid;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .race-result-list li {
+      display: flex;
+      min-width: 0;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border: 1px solid rgba(74, 91, 84, 0.14);
+      border-radius: 8px;
+      background: rgba(232, 255, 237, 0.44);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .race-result-list em {
+      overflow: hidden;
+      font-style: normal;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .race-minimap {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 220;
+      display: none;
+      width: 138px;
+      height: 94px;
+      padding: 7px;
+      border: 1px solid rgba(74, 91, 84, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 252, 0.88);
+      box-shadow: 0 12px 30px rgba(16, 19, 27, 0.16);
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .shell[data-screen="race"] .race-minimap {
+      display: block;
+    }
+
+    .race-minimap svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .minimap-rail {
+      fill: none;
+      stroke: rgba(97, 115, 107, 0.45);
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .minimap-road {
+      fill: none;
+      stroke: rgba(251, 251, 242, 0.96);
+      stroke-width: 4.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .minimap-save {
+      fill: rgba(255, 216, 108, 0.95);
+      stroke: rgba(74, 91, 84, 0.65);
+      stroke-width: 0.9;
+    }
+
+    .minimap-player {
+      fill: #42c879;
+      stroke: #ffffff;
+      stroke-width: 1.2;
+      filter: drop-shadow(0 2px 4px rgba(16, 19, 27, 0.28));
+    }
+
     .track-progress-pill {
       position: absolute;
       top: 12px;
@@ -1195,7 +1345,7 @@
       background: transparent;
       box-shadow: none;
       filter: drop-shadow(0 7px 7px rgba(16, 19, 27, 0.38));
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) rotate(var(--track-counter-rotation, 0rad));
       transition: left 80ms linear, top 80ms linear, filter 120ms ease, opacity 120ms ease;
     }
 
@@ -1257,9 +1407,9 @@
     }
 
     @keyframes runner-bump {
-      0% { transform: translate(-50%, -50%) scale(1); }
-      45% { transform: translate(-50%, -54%) scale(1.08); }
-      100% { transform: translate(-50%, -50%) scale(1); }
+      0% { transform: translate(-50%, -50%) rotate(var(--track-counter-rotation, 0rad)) scale(1); }
+      45% { transform: translate(-50%, -54%) rotate(var(--track-counter-rotation, 0rad)) scale(1.08); }
+      100% { transform: translate(-50%, -50%) rotate(var(--track-counter-rotation, 0rad)) scale(1); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1679,6 +1829,7 @@
 
           <div class="controls">
             <button class="primary" id="ready-button" type="button">로비 입장</button>
+            <button class="secondary" id="spectator-button" type="button">관전 입장</button>
             <button class="ghost debug-only" id="fill-button" type="button">29명 연습 러너 채우기</button>
           </div>
 
@@ -1722,7 +1873,13 @@
             <div class="track-effects" id="track-effects" aria-hidden="true"></div>
             <div id="track-runners"></div>
           </div>
+          <div class="race-minimap" id="race-minimap" aria-label="미니맵"></div>
           <div class="track-hud" id="track-hud" aria-hidden="true"></div>
+          <div class="race-result-panel" id="race-result-panel" aria-live="polite">
+            <strong id="race-result-title">완주 완료</strong>
+            <span id="race-result-copy">최종 기록을 정리하고 있습니다.</span>
+            <ol class="race-result-list" id="race-result-list"></ol>
+          </div>
         </div>
         <div class="race-mobile-controls" id="race-mobile-controls" aria-label="모바일 경기 조작">
           <button class="race-control-button" id="race-queue-toggle" type="button">대기열 보기</button>
@@ -1809,6 +1966,9 @@
       validateRestoredMarathonRoomAdapter
     } from "./src/restored/online/marathon-room-adapter.js";
     import {
+      readRestoredMarathonRoomPolicy
+    } from "./src/restored/online/marathon-room-policy.js";
+    import {
       createInitialRestoredMarathonChannelMessages,
       createRestoredMarathonChannelSet,
       filterVisibleRestoredMarathonChannels,
@@ -1817,6 +1977,13 @@
     import {
       createRestoredMarathonDevChatTransport
     } from "./src/restored/online/marathon-dev-chat-transport.js";
+    import {
+      createRestoredMarathonWebSocketDevServerMock
+    } from "./src/restored/online/marathon-websocket-dev-server-mock.js";
+    import {
+      advanceRestoredMarathonWebSocketDevLoop,
+      createRestoredMarathonWebSocketDevLoopState
+    } from "./src/restored/online/marathon-websocket-dev-loop.js";
     import {
       chooseRestoredMarathonNetworkLane,
       createRestoredMarathonNetcodeProfile,
@@ -1895,6 +2062,10 @@
       createSingularityStartPaddockPosition
     } from "./src/restored/games/singularity-race-local-sim.js";
     import {
+      createSingularityRaceAnchoredCamera,
+      resolveSingularityRaceScreenPointToTrackPercent
+    } from "./src/restored/games/singularity-race-camera.js";
+    import {
       createSingularityConnectedRelayEnvelope,
       createSingularityDevRoomPacketTransport,
       createSingularityRoomPressureReport,
@@ -1903,6 +2074,7 @@
     import {
       SINGULARITY_RACE_CONTROL_STORAGE_KEY,
       SINGULARITY_RACE_START_COUNTDOWN_MS,
+      getSingularityRaceControlPhase,
       openSingularityRaceControlBroadcast,
       parseSingularityRaceControlCommand,
       readSingularityRaceControlCommand,
@@ -1936,6 +2108,9 @@
     const RAIL_MAX_PROGRESS = 100;
     const LOCAL_FINISH_PROGRESS = 99.5;
     const PLAYER_COLLISION_STALL_MS = 360;
+    const RACE_HUD_RENDER_INTERVAL_MS = 220;
+    const RACE_STANDINGS_RENDER_INTERVAL_MS = 700;
+    const RACE_SLOT_RENDER_INTERVAL_MS = 700;
     const STORAGE_KEY = "singularity-race:lobby-skin";
     const PROFILE_STORAGE_KEY = "singularity-race:profile:v1";
     const FEATURED_SKIN_IDS = Object.freeze(["kaguya", "singularity-fan", "robot", "gpichan", "pepe-runner", "moderator-armband", "yalrkun", "lakers-wile", "sam-altman", "demis-hassabis"]);
@@ -1951,6 +2126,8 @@
     const devOnlineEnabled = queryParams.get("devOnline") === "1";
     const adminLaunchEnabled = queryParams.get("adminLaunch") === "1";
     const debugUiEnabled = queryParams.get("debug") === "1";
+    const DEV_ROOM_ID = "room:singularity-race:dev-001";
+    const roomPolicy = readRestoredMarathonRoomPolicy(window.localStorage, DEV_ROOM_ID);
     if (queryParams.get("resetProfile") === "1") {
       window.localStorage.removeItem(PROFILE_STORAGE_KEY);
       window.localStorage.removeItem(STORAGE_KEY);
@@ -1958,14 +2135,15 @@
     const roomAdapter = createMarathonRoomAdapterForMode({
       devOnline: devOnlineEnabled,
       clientId: "client:singularity-race-dev",
-      serverTimeMs: 1000
+      serverTimeMs: 1000,
+      maxSpectators: roomPolicy.maxSpectators
     });
     const adapterValidation = validateRestoredMarathonRoomAdapter(roomAdapter);
     const connectedLobbyOpen = adapterValidation.ok && canOpenConnectedMarathonLobby(roomAdapter);
     const channelSet = roomAdapter.channels?.length
       ? roomAdapter.channels
       : createRestoredMarathonChannelSet({ roomId: "room:singularity-race:local-preview" });
-    const visibleChannels = filterVisibleRestoredMarathonChannels(channelSet, "player");
+    const initialVisibleChannels = filterVisibleRestoredMarathonChannels(channelSet, "player");
     const chatTransport = createRestoredMarathonDevChatTransport({
       channels: channelSet,
       role: "player",
@@ -1995,6 +2173,7 @@
       raceSkillButton: document.querySelector("#race-skill-button"),
       raceChatActionButton: document.querySelector("#race-chat-action-button"),
       fillButton: document.querySelector("#fill-button"),
+      spectatorButton: document.querySelector("#spectator-button"),
       roomTitle: document.querySelector("#room-panel-title"),
       roomCopy: document.querySelector("#room-panel-copy"),
       roomBadge: document.querySelector("#room-panel-badge"),
@@ -2020,6 +2199,11 @@
       netcodeBudget: document.querySelector("#netcode-budget"),
       trackWorld: document.querySelector("#track-world"),
       trackHud: document.querySelector("#track-hud"),
+      raceMinimap: document.querySelector("#race-minimap"),
+      raceResultPanel: document.querySelector("#race-result-panel"),
+      raceResultTitle: document.querySelector("#race-result-title"),
+      raceResultCopy: document.querySelector("#race-result-copy"),
+      raceResultList: document.querySelector("#race-result-list"),
       actionCharacter: document.querySelector("#action-character"),
       actionSkill: document.querySelector("#action-skill"),
       actionHp: document.querySelector("#action-hp"),
@@ -2049,25 +2233,33 @@
       nickname: savedProfile?.nickname || "YOU",
       selectedSkin: initialSkin,
       ready: false,
+      participantType: "player",
       previewTick: 0,
       connectedSession: null,
       connectedPackets: [],
       lastConnectedSnapshotSequence: 0,
+      connectedInputSequence: 0,
       netcodePressure: null,
       trackCamera: { x: 0, y: 0 },
       raceQueueOpen: false,
       raceChatOpen: false,
       runnerVisuals: new Map(),
       lastVisualFrameMs: 0,
-      activeChannel: visibleChannels[0]?.channelId || "lobby:singularity-race:public",
+      renderCache: {
+        lastHudMs: 0,
+        lastStandingsMs: 0,
+        lastSlotsMs: 0,
+        minimapPlayerNode: null
+      },
+      activeChannel: initialVisibleChannels[0]?.channelId || "lobby:singularity-race:public",
       runners: createRunners(adminLaunchEnabled ? MAX_RUNNERS : 1, initialSkin, false),
       action: createActionRaceState(),
-      messages: [
-        { author: "SYSTEM", text: "특이점레이스 로컬 로비가 열렸습니다.", type: "system" },
-        { author: "SYSTEM", text: "채팅과 스킨 선택은 지금 바로 동작합니다.", type: "system" }
-      ]
+      messages: []
     };
     let roomPacketTransport = null;
+    let connectedDevServer = null;
+    let connectedDevLoopState = null;
+    let connectedDevClients = [];
     let unsubscribeRoomPackets = () => {};
     let raceControlBroadcast = openSingularityRaceControlBroadcast(window);
     let lastRaceControlCommandId = "";
@@ -2105,6 +2297,10 @@
         return;
       }
       if (state.screen === SINGULARITY_RACE_SCREENS.MAP_PREVIEW) enterQueue("map_return");
+    });
+
+    elements.spectatorButton.addEventListener("click", () => {
+      enterSpectatorMode();
     });
 
     elements.previewButton.addEventListener("click", () => {
@@ -2179,10 +2375,12 @@
       });
     }
 
-    function joinDevConnectedRoom(source) {
+    function joinDevConnectedRoom(source, participantType = "player") {
       if (state.connectedSession) return;
+      const spectator = participantType === "spectator";
       const result = joinConnectedMarathonRoom(roomAdapter, {
-        participantId: "runner:you",
+        participantId: spectator ? "spectator:you" : "runner:you",
+        participantType,
         nickname: state.nickname,
         skinPreset: state.selectedSkin,
         sequence: state.connectedPackets.length + 1
@@ -2192,23 +2390,59 @@
         renderAll();
         return;
       }
+      state.participantType = participantType;
       const snapshot = createConnectedMarathonStateSnapshot(result.room, {
         participantId: result.session.playerId,
         sequence: result.joinResult.sequence + 1,
         serverTimeMs: result.joinResult.serverTimeMs
       });
+      const devSnapshot = setupConnectedDevSnapshotRuntime(result.session.roomId);
       state.connectedSession = result.session;
       state.connectedPackets = [result.joinRequest, result.joinResult, snapshot].map(toConnectedRelayEnvelope);
-      state.runners = result.room.participants.map(mapParticipantToRunner);
+      if (devSnapshot) state.connectedPackets.push(devSnapshot);
+      state.runners = createRunners(MAX_RUNNERS, state.selectedSkin, false);
       state.lastConnectedSnapshotSequence = 0;
       applyConnectedStateSnapshot(snapshot);
+      if (devSnapshot) applyConnectedStateSnapshot(devSnapshot);
       openConnectedRoomPacketRelay(result.session.roomId, state.connectedPackets);
-      state.activeChannel = result.session.roomId;
+      state.activeChannel = spectator ? findChannelIdByType("room") : result.session.roomId;
       state.ready = false;
       if (source === "admin_direct") setScreen("race");
+      if (source === "spectator") setScreen("race");
       if (source === "button") setScreen("queue");
-      pushSystem(source === "admin_direct" ? "방장 페이지에서 개발 방으로 바로 입장했습니다." : "개발 연결 방 입장이 확인되었습니다.");
+      syncLateRaceControlForConnectedSession(source);
+      pushSystem(spectator ? "관전자로 입장했습니다. 채팅과 플레이어 보기가 가능합니다." : (source === "admin_direct" ? "방장 페이지에서 개발 방으로 바로 입장했습니다." : "개발 연결 방 입장이 확인되었습니다."));
       renderAll();
+    }
+
+    function enterSpectatorMode() {
+      if (!connectedLobbyOpen) {
+        pushSystem("관전 입장은 온라인 방 연결 후 가능합니다. 개발 확인은 ?devOnline=1에서 열립니다.");
+        renderAll();
+        return;
+      }
+      joinDevConnectedRoom("spectator", "spectator");
+    }
+
+    function findChannelIdByType(type) {
+      return channelSet.find((channel) => channel.type === type)?.channelId || state.activeChannel;
+    }
+
+    function getCurrentChatRole() {
+      return state.participantType === "spectator" ? "spectator" : "player";
+    }
+
+    function getVisibleChatChannels() {
+      return filterVisibleRestoredMarathonChannels(channelSet, getCurrentChatRole());
+    }
+
+    function syncLateRaceControlForConnectedSession(source) {
+      const command = readSingularityRaceControlCommand(window.localStorage, state.connectedSession?.roomId);
+      if (getSingularityRaceControlPhase(command, Date.now()) !== "running") return;
+      setScreen("race");
+      state.action.raceStarted = true;
+      startConnectedDevServerRace(Date.now());
+      if (source === "spectator") pushSystem("진행 중인 경기에 관전자로 중도 입장했습니다.");
     }
 
     elements.chatForm.addEventListener("submit", (event) => {
@@ -2217,9 +2451,9 @@
       if (!text) return;
       const appended = chatTransport.submitMessage(state.messages, {
         channelId: state.activeChannel,
-        senderId: "player:you",
-        senderType: "player",
-        displayName: "YOU",
+        senderId: state.participantType === "spectator" ? "spectator:you" : "player:you",
+        senderType: state.participantType === "spectator" ? "spectator" : "player",
+        displayName: state.participantType === "spectator" ? `${state.nickname} 관전` : state.nickname,
         text
       });
       if (appended.ok) {
@@ -2234,6 +2468,16 @@
     function setTrackWorldSize() {
       elements.trackWorld.style.setProperty("--track-world-width", `${TRACK_WORLD_WIDTH}px`);
       elements.trackWorld.style.setProperty("--track-world-height", `${TRACK_WORLD_HEIGHT}px`);
+    }
+
+    function setTrackWorldRaceSize() {
+      elements.trackWorld.style.width = `${TRACK_WORLD_WIDTH}px`;
+      elements.trackWorld.style.height = `${TRACK_WORLD_HEIGHT}px`;
+    }
+
+    function setTrackWorldPreviewSize() {
+      elements.trackWorld.style.width = "100%";
+      elements.trackWorld.style.height = "100%";
     }
 
     function prioritizeRaceSkinPresets(skinPresets) {
@@ -2376,6 +2620,7 @@
       state.action.countdownStartedAtMs = 0;
       state.action.countdownEndsAtMs = 0;
       state.action.raceStarted = true;
+      if (state.connectedSession) startConnectedDevServerRace(now);
       setScreen("race");
       setRaceCue("start", "GO", state.runners[0]?.progress || START_LINE_PROGRESS, "you");
         pushSystem("출발 게이트가 열렸습니다.");
@@ -2432,6 +2677,51 @@
       };
     }
 
+    function setupConnectedDevSnapshotRuntime(roomId) {
+      if (!devOnlineEnabled || !roomId) return null;
+      const spectator = state.participantType === "spectator";
+      connectedDevServer = createRestoredMarathonWebSocketDevServerMock({
+        roomId,
+        clock: () => Date.now(),
+        course: {
+          distanceMeters: 900,
+          checkpointMeters: [0, 180, 360, 540, 720, 900]
+        },
+        packetLimit: 720
+      });
+      connectedDevClients = [];
+      for (let index = 0; index < MAX_RUNNERS; index += 1) {
+        const participantId = spectator ? `runner:bot-${index + 1}` : (index === 0 ? "runner:you" : `runner:bot-${index}`);
+        const connected = connectedDevServer.connectClient({
+          clientId: !spectator && index === 0 ? "client:singularity-race-lobby" : `client:singularity-race-bot:${index + 1}`
+        });
+        const joined = connectedDevServer.joinRoom(connected.transport, {
+          participantId,
+          nickname: !spectator && index === 0 ? state.nickname : BOT_NAMES[index % BOT_NAMES.length],
+          sequence: index + 2,
+          mapVersion: "baegeum-city-v2-map-001"
+        });
+        if (joined.ok) connectedDevClients.push({ index, participantId, transport: connected.transport, sequence: 10 });
+      }
+      const loopStartMs = Date.now();
+      connectedDevLoopState = createRestoredMarathonWebSocketDevLoopState({
+        roomId,
+        lastTickAtMs: loopStartMs,
+        lastSnapshotAtMs: loopStartMs,
+        snapshotIndex: 1000
+      });
+      const snapshot = connectedDevServer.createStateSnapshot(roomId, { sequence: 1000, elapsedMs: 50 });
+      return snapshot.ok ? snapshot.snapshot : null;
+    }
+
+    function startConnectedDevServerRace(now = Date.now()) {
+      if (!connectedDevServer || !state.connectedSession || state.action.connectedServerRaceStarted) return false;
+      const started = connectedDevServer.startRace(connectedDevClients[0]?.transport, state.connectedSession.roomId, { serverTimeMs: now });
+      if (!started.ok) return false;
+      state.action.connectedServerRaceStarted = true;
+      return true;
+    }
+
     function createActionRaceState() {
       const reward = assignRestoredMarathonCheckpointCharacter({
         participantId: "runner:you",
@@ -2456,7 +2746,12 @@
         countdownStartedAtMs: 0,
         countdownEndsAtMs: 0,
         countdownAnnounced: false,
+        connectedServerRaceStarted: false,
         finishedLocalPreview: false,
+        raceFinished: false,
+        playerFinished: false,
+        finalResult: null,
+        finishAnnounced: false,
         lastLocalRank: 1,
         lastCollisionCueMs: 0,
         packetLog: [
@@ -2478,6 +2773,8 @@
       if (!["KeyW", "KeyA", "KeyS", "KeyD", "ShiftLeft", "ShiftRight", "KeyE"].includes(event.code)) return;
       if (state.screen !== SINGULARITY_RACE_SCREENS.RACE) return;
       event.preventDefault();
+      if (state.participantType === "spectator") return;
+      if (state.action.finalResult) return;
       state.action.keys[event.code] = true;
       if (state.connectedSession) {
         publishConnectedInputRequest(event.code === "KeyE");
@@ -2504,6 +2801,8 @@
 
     function handleTrackPointerDown(event) {
       if (state.screen !== SINGULARITY_RACE_SCREENS.RACE) return;
+      if (state.participantType === "spectator") return;
+      if (state.action.finalResult) return;
       if (state.connectedSession) {
         requestConnectedAttack(event);
         return;
@@ -2580,6 +2879,7 @@
     }
 
     function requestConnectedAttack(event) {
+      if (state.participantType === "spectator") return;
       const { x, y } = eventToTrackWorldPercent(event);
       const aimProgress = estimateRestoredMarathonTrailProgressFromPoint(x, y);
       const player = state.runners[0];
@@ -2602,21 +2902,29 @@
       if (!state.action.lastTickMs) state.action.lastTickMs = now;
       const elapsedSeconds = Math.min(0.25, (now - state.action.lastTickMs) / 1000);
       state.action.lastTickMs = now;
+      if (state.action.raceFinished && !state.connectedSession) {
+        renderActionPreviewFrame(now);
+        return;
+      }
       if (isCountdownActive(now)) {
         if (!state.connectedSession) advanceWaitingBotPack(elapsedSeconds, now);
+        if (state.connectedSession) advanceConnectedDevSnapshotFeed(now);
         advanceLocalPlayerMovement(createRestoredMarathonInputFrame({
           participantId: "runner:you",
           keys: state.action.keys,
           sequence: Math.floor(now / 180)
         }), elapsedSeconds, "staging");
-        renderAll();
+        renderActionPreviewFrame(now);
         return;
       }
       if (finishCountdownIfReady(now)) {
         renderAll();
         return;
       }
-      if (state.connectedSession) return;
+      if (state.connectedSession) {
+        if (advanceConnectedDevSnapshotFeed(now)) renderActionPreviewFrame(now);
+        return;
+      }
       const frame = createRestoredMarathonInputFrame({
         participantId: "runner:you",
         keys: state.action.keys,
@@ -2630,7 +2938,7 @@
         botsMoved = advanceWaitingBotPack(elapsedSeconds, now);
       }
       if (now < state.action.stallUntilMs) {
-        if (state.action.raceStarted || botsMoved) renderAll();
+        if (state.action.raceStarted || botsMoved) renderActionPreviewFrame(now);
         return;
       }
       const moved = advanceLocalPlayerMovement(frame, elapsedSeconds, "movement");
@@ -2639,7 +2947,7 @@
         updateActionCheckpoint();
       }
       updateLocalRankCue();
-      if (state.action.raceStarted || moved || botsMoved) renderAll();
+      if (state.action.raceStarted || moved || botsMoved) renderActionPreviewFrame(now);
     }
 
     function advanceLocalBotPack(elapsedSeconds) {
@@ -2703,6 +3011,7 @@
     }
 
     function requestConnectedSkill() {
+      if (state.participantType === "spectator") return;
       pushActionPacket(
         createRestoredMarathonSkillEnvelope({
           participantId: "runner:you",
@@ -2748,31 +3057,114 @@
     function maybeMarkLocalFinish() {
       const player = state.runners[0];
       if (!player || player.progress < LOCAL_FINISH_PROGRESS || state.action.finishedLocalPreview) return;
-      state.action.finishedLocalPreview = true;
       state.runners[0] = {
         ...player,
         progress: Math.max(player.progress, LOCAL_FINISH_PROGRESS)
       };
-      setRaceCue("finish", "완주", state.runners[0].progress, "you");
-      pushActionPacket(
-        createRestoredMarathonTransportEnvelope("race_finalized", {
-          serverOwned: true,
-          finishedParticipantId: "runner:you",
-          progressPercent: Math.round(state.runners[0].progress * 10) / 10,
-          ranking: createLocalFinishRanking()
-        }, { ...createActionPacketOptions(), clientId: "server:local-preview" }),
-        "완주 / 서버 확정 대기"
-      );
-      pushSystem("완주 지점에 도착했습니다. 최종 순위는 실제 서버에서 확정합니다.");
+      finalizeRaceResult({
+        source: "local",
+        title: "완주 완료",
+        copy: "로컬 미리보기 기록입니다. 실제 온라인에서는 서버가 최종 순위를 확정합니다.",
+        ranking: createLocalFinishRanking(),
+        finishedParticipantId: "runner:you",
+        progressPercent: Math.round(state.runners[0].progress * 10) / 10,
+        raceFinished: true,
+        publishPacket: true
+      });
+    }
+
+    function finalizeRaceResult(options = {}) {
+      const ranking = normalizeRaceResultRanking(options.ranking || createLocalFinishRanking(), options.finishedParticipantId || "runner:you");
+      const finishedParticipantId = options.finishedParticipantId || "runner:you";
+      const playerRow = ranking.find((row) => row.participantId === finishedParticipantId)
+        || ranking.find((row) => row.participantId === "runner:you")
+        || ranking[0]
+        || null;
+      state.action.finishedLocalPreview = true;
+      state.action.playerFinished = Boolean(playerRow?.finished || options.playerFinished || options.raceFinished);
+      state.action.raceFinished = Boolean(options.raceFinished);
+      state.action.keys = {};
+      for (const button of elements.virtualMoveButtons) button.classList.remove("is-held");
+      state.action.finalResult = Object.freeze({
+        source: options.source || "local",
+        title: options.title || (state.action.raceFinished ? "경기 종료" : "완주 완료"),
+        copy: options.copy || (state.action.raceFinished ? "최종 순위가 확정되었습니다." : "완주 기록을 정리하고 있습니다."),
+        finishedParticipantId,
+        playerRank: playerRow?.rank || null,
+        progressPercent: options.progressPercent ?? playerRow?.progressPercent ?? null,
+        ranking: Object.freeze(ranking.slice(0, 5)),
+        finalizedAtMs: Date.now()
+      });
+      const player = state.runners[0];
+      if (player) setRaceCue("finish", "완주", player.progress, "you");
+      if (options.publishPacket) {
+        pushActionPacket(
+          createRestoredMarathonTransportEnvelope("race_finalized", {
+            serverOwned: true,
+            finishedParticipantId,
+            progressPercent: state.action.finalResult.progressPercent,
+            ranking
+          }, { ...createActionPacketOptions(), clientId: "server:local-preview" }),
+          "완주 / 서버 확정 대기"
+        );
+      }
+      if (!state.action.finishAnnounced) {
+        state.action.finishAnnounced = true;
+        pushSystem(state.action.raceFinished
+          ? "완주했습니다. 결과 화면에서 순위를 확인할 수 있습니다."
+          : "완주했습니다. 서버가 나머지 기록을 집계하고 있습니다.");
+      }
     }
 
     function createLocalFinishRanking() {
       return rankSingularityRunnerEntries(state.runners).map((entry) => ({
         rank: entry.rank,
         participantId: `runner:${entry.runner.id}`,
+        displayName: entry.runner.name || entry.runner.id,
         progressPercent: Math.round((Number(entry.runner.progress) || 0) * 10) / 10,
         finished: entry.runner.id === "you" || (Number(entry.runner.progress) || 0) >= LOCAL_FINISH_PROGRESS
       }));
+    }
+
+    function createConnectedFinishRanking(payload = {}) {
+      const participants = (Array.isArray(payload.participants) ? payload.participants : [])
+        .filter((participant) => isConnectedRunnerParticipant(participant));
+      const ranking = [...participants].sort((left, right) => {
+        const leftFinished = left.finishedAtMs !== null && left.finishedAtMs !== undefined;
+        const rightFinished = right.finishedAtMs !== null && right.finishedAtMs !== undefined;
+        if (leftFinished && rightFinished) return Number(left.finishedAtMs) - Number(right.finishedAtMs);
+        if (leftFinished) return -1;
+        if (rightFinished) return 1;
+        return connectedParticipantProgress(right) - connectedParticipantProgress(left);
+      });
+      return ranking.map((participant, index) => ({
+        rank: index + 1,
+        participantId: participant.participantId,
+        displayName: participant.displayName || participant.participantId,
+        progressPercent: Math.round(connectedParticipantProgress(participant) * 10) / 10,
+        finished: participant.finishedAtMs !== null && participant.finishedAtMs !== undefined,
+        finishedAtMs: participant.finishedAtMs ?? null
+      }));
+    }
+
+    function normalizeRaceResultRanking(ranking, finishedParticipantId) {
+      return ranking.map((row, index) => ({
+        rank: Number(row.rank) || index + 1,
+        participantId: row.participantId || `runner:${index + 1}`,
+        displayName: row.displayName || row.participantId || `Runner ${index + 1}`,
+        progressPercent: Math.round((Number(row.progressPercent) || 0) * 10) / 10,
+        finished: Boolean(row.finished || row.participantId === finishedParticipantId),
+        finishedAtMs: row.finishedAtMs ?? null
+      })).sort((left, right) => left.rank - right.rank);
+    }
+
+    function isConnectedRunnerParticipant(participant = {}) {
+      if (participant.type) return participant.type === "player" || participant.type === "bot";
+      return String(participant.participantId || "").startsWith("runner:");
+    }
+
+    function connectedParticipantProgress(participant = {}) {
+      return Number.isFinite(Number(participant.progressPercent)) ? Number(participant.progressPercent) : 0;
     }
 
     function updateLocalRankCue() {
@@ -2787,7 +3179,7 @@
       return {
         clientId: "client:singularity-race-lobby",
         roomId: state.connectedSession?.roomId || "room:singularity-race:local-preview",
-        sequence: state.connectedPackets.length + state.action.packetLog.length + 1
+        sequence: ++state.connectedInputSequence
       };
     }
 
@@ -2801,11 +3193,12 @@
     }
 
     function publishConnectedInputRequest(skillPressed) {
+      if (state.participantType === "spectator") return;
       const frame = createRestoredMarathonInputFrame({
         participantId: "runner:you",
         keys: state.action.keys,
         skillPressed,
-        sequence: state.connectedPackets.length + 1
+        sequence: state.connectedInputSequence + 1
       });
       pushActionPacket(
         createRestoredMarathonInputEnvelope({
@@ -2817,6 +3210,62 @@
         }, createActionPacketOptions()),
         frame.mode
       );
+    }
+
+    function createConnectedDevInput(client, now, frameMode = "bot") {
+      client.sequence += 1;
+      const frame = client.participantId === "runner:you"
+        ? createRestoredMarathonInputFrame({
+          participantId: client.participantId,
+          keys: state.action.keys,
+          sequence: client.sequence
+        })
+        : {
+          participantId: client.participantId,
+          pace: "sprint",
+          mode: "sprint",
+          direction: { x: 1, y: ((client.index % 3) - 1) * 0.12 }
+        };
+      return createRestoredMarathonInputEnvelope({
+        participantId: client.participantId,
+        pace: frame.pace,
+        mode: frame.mode || frameMode,
+        direction: frame.direction,
+        raceTimeMs: now
+      }, {
+        clientId: client.transport.clientId,
+        roomId: state.connectedSession.roomId,
+        sequence: client.sequence,
+        serverTimeMs: now
+      });
+    }
+
+    function advanceConnectedDevSnapshotFeed(now = Date.now()) {
+      if (!connectedDevServer || !connectedDevLoopState || !state.connectedSession) return false;
+      const inputs = state.action.connectedServerRaceStarted
+        && !state.action.raceFinished
+        ? connectedDevClients.map((client) => createConnectedDevInput(client, now))
+        : [];
+      const advanced = advanceRestoredMarathonWebSocketDevLoop(connectedDevServer, connectedDevLoopState, {
+        nowMs: now,
+        transports: connectedDevClients.map((client) => client.transport),
+        inputs
+      });
+      connectedDevLoopState = advanced.state;
+      let changed = false;
+      for (const snapshot of advanced.snapshots) {
+        changed = publishConnectedServerSnapshot(snapshot) || changed;
+      }
+      return changed;
+    }
+
+    function publishConnectedServerSnapshot(snapshot) {
+      if (!snapshot || !roomPacketTransport) return applyConnectedStateSnapshot(snapshot);
+      const result = roomPacketTransport.submitPacket(state.connectedPackets, snapshot, { reason: "dev_state_snapshot" });
+      if (!result.ok) return false;
+      state.connectedPackets = result.packets;
+      state.netcodePressure = result.pressure || createRoomPressureReport();
+      return applyConnectedStateSnapshot(snapshot);
     }
 
     function publishConnectedPacket(envelope, detail) {
@@ -2866,7 +3315,23 @@
       state.runners = [...merged.runners];
       state.lastConnectedSnapshotSequence = Math.max(state.lastConnectedSnapshotSequence, sequence, merged.sequence);
       if (payload.phase === "racing" || payload.phase === "finished") state.action.raceStarted = true;
-      if (payload.phase === "finished") state.action.finishedLocalPreview = true;
+      const localParticipantId = state.connectedSession?.playerId || "runner:you";
+      const localSnapshot = payload.participants.find((participant) => participant.participantId === localParticipantId);
+      const localFinished = localSnapshot?.finishedAtMs !== null && localSnapshot?.finishedAtMs !== undefined;
+      if (payload.phase === "finished" || localFinished) {
+        const raceFinished = payload.phase === "finished";
+        finalizeRaceResult({
+          source: "server",
+          title: raceFinished ? "경기 종료" : "완주 완료",
+          copy: raceFinished ? "서버가 최종 순위를 확정했습니다." : "완주했습니다. 나머지 러너 기록을 집계 중입니다.",
+          ranking: createConnectedFinishRanking(payload),
+          finishedParticipantId: localParticipantId,
+          progressPercent: localSnapshot?.progressPercent,
+          raceFinished,
+          playerFinished: localFinished,
+          publishPacket: false
+        });
+      }
       return true;
     }
 
@@ -2900,6 +3365,7 @@
           renderSlots();
           renderActionHud();
           renderRaceStandings();
+          renderRaceResultPanel();
         }
         renderConnectedGate();
         renderConnectedPackets();
@@ -3111,6 +3577,8 @@
 
     function setVirtualMoveKey(code, pressed) {
       if (!VIRTUAL_MOVE_KEYS.includes(code)) return;
+      if (state.participantType === "spectator") return;
+      if (state.action.finalResult) return;
       if (pressed && (state.screen !== SINGULARITY_RACE_SCREENS.RACE || state.raceQueueOpen || state.raceChatOpen)) return;
       state.action.keys[code] = Boolean(pressed);
       const button = elements.virtualMoveButtons.find((node) => node.dataset.key === code);
@@ -3133,6 +3601,12 @@
 
     function triggerVirtualSkillButton() {
       if (state.screen !== SINGULARITY_RACE_SCREENS.RACE) return;
+      if (state.action.finalResult) return;
+      if (state.participantType === "spectator") {
+        pushSystem("관전자는 스킬을 사용할 수 없습니다.");
+        renderAll();
+        return;
+      }
       if (state.connectedSession) {
         publishConnectedInputRequest(true);
         requestConnectedSkill();
@@ -3143,19 +3617,13 @@
     }
 
     function renderAll() {
-      state.runners[0] = {
-        ...state.runners[0],
-        name: state.nickname,
-        skin: state.selectedSkin,
-        ready: state.ready
-      };
-      elements.shell.dataset.screen = state.screen;
-      elements.shell.classList.toggle("race-queue-open", state.screen === SINGULARITY_RACE_SCREENS.RACE && state.raceQueueOpen);
-      elements.shell.classList.toggle("race-chat-open", state.screen === SINGULARITY_RACE_SCREENS.RACE && state.raceChatOpen);
+      syncPlayerIdentity();
+      syncScreenState();
       renderMetrics();
       renderRaceMobileControls();
       renderProfileSkins();
       renderTrack();
+      renderRaceResultPanel();
       renderSlots();
       renderActionHud();
       renderRaceStandings();
@@ -3165,11 +3633,61 @@
       renderConnectedGate();
       renderConnectedPackets();
       renderNetcodeBudget();
+      const now = Date.now();
+      state.renderCache.lastHudMs = now;
+      state.renderCache.lastStandingsMs = now;
+      state.renderCache.lastSlotsMs = now;
+    }
+
+    function renderActionPreviewFrame(now = Date.now()) {
+      if (state.screen !== SINGULARITY_RACE_SCREENS.RACE) {
+        renderAll();
+        return;
+      }
+      syncPlayerIdentity();
+      syncScreenState();
+      renderRaceMobileControls();
+      renderTrack();
+      renderRaceResultPanel();
+      if (now - state.renderCache.lastHudMs >= RACE_HUD_RENDER_INTERVAL_MS || isCountdownActive(now)) {
+        renderFlowMetrics();
+        renderActionHud();
+        state.renderCache.lastHudMs = now;
+      }
+      if (now - state.renderCache.lastStandingsMs >= RACE_STANDINGS_RENDER_INTERVAL_MS) {
+        renderRaceStandings();
+        state.renderCache.lastStandingsMs = now;
+      }
+      if (state.raceQueueOpen && now - state.renderCache.lastSlotsMs >= RACE_SLOT_RENDER_INTERVAL_MS) {
+        renderSlots();
+        state.renderCache.lastSlotsMs = now;
+      }
+    }
+
+    function syncPlayerIdentity() {
+      if (state.participantType === "spectator") return;
+      state.runners[0] = {
+        ...state.runners[0],
+        name: state.nickname,
+        skin: state.selectedSkin,
+        ready: state.ready
+      };
+    }
+
+    function syncScreenState() {
+      elements.shell.dataset.screen = state.screen;
+      document.body.dataset.screen = state.screen;
+      elements.shell.classList.toggle("is-spectator", state.participantType === "spectator");
+      elements.shell.classList.toggle("race-queue-open", state.screen === SINGULARITY_RACE_SCREENS.RACE && state.raceQueueOpen);
+      elements.shell.classList.toggle("race-chat-open", state.screen === SINGULARITY_RACE_SCREENS.RACE && state.raceChatOpen);
+      elements.shell.classList.toggle("race-finished", state.screen === SINGULARITY_RACE_SCREENS.RACE && Boolean(state.action.finalResult));
     }
 
     function renderFlowMetrics() {
       elements.readyButton.textContent = getSingularityRacePrimaryActionLabel(state.screen);
       elements.readyButton.classList.toggle("is-ready", false);
+      elements.spectatorButton.textContent = state.participantType === "spectator" ? "관전 중" : "관전 입장";
+      elements.spectatorButton.disabled = Boolean(state.connectedSession);
       elements.fillButton.disabled = Boolean(state.connectedSession);
       elements.previewButton.textContent = getSingularityRacePreviewActionLabel(state.screen);
       elements.roomTitle.textContent = getSingularityRaceRoomTitle(state.screen);
@@ -3190,6 +3708,7 @@
     }
 
     function renderRaceMobileControls() {
+      const spectator = state.participantType === "spectator";
       elements.raceQueueToggle.textContent = state.raceQueueOpen ? "대기열 닫기" : "대기열 보기";
       elements.raceQueueToggle.setAttribute("aria-pressed", String(state.raceQueueOpen));
       elements.raceChatToggle.textContent = state.raceChatOpen ? "채팅창 닫기" : "채팅창 열기";
@@ -3197,6 +3716,17 @@
       elements.raceChatActionButton.setAttribute("aria-pressed", String(state.raceChatOpen));
       for (const button of elements.virtualMoveButtons) {
         button.classList.toggle("is-held", Boolean(state.action.keys[button.dataset.key]));
+        button.disabled = spectator;
+      }
+      if (spectator) {
+        elements.raceStartStatus.innerHTML = "관전 중<span>채팅 가능</span>";
+        elements.raceSkillButton.disabled = true;
+        return;
+      }
+      if (state.action.finalResult) {
+        elements.raceStartStatus.innerHTML = "완주 완료<span>결과 확인</span>";
+        elements.raceSkillButton.disabled = true;
+        return;
       }
       if (state.action.raceStarted) {
         elements.raceStartStatus.innerHTML = "플레이 중<span>경기 진행중</span>";
@@ -3282,10 +3812,13 @@
     function eventToTrackWorldPercent(event) {
       const rect = elements.trackScene.getBoundingClientRect();
       const camera = state.trackCamera || { x: 0, y: 0 };
-      return {
-        x: clampNumber(((event.clientX - rect.left + camera.x) / TRACK_WORLD_WIDTH) * 100, 0, 100),
-        y: clampNumber(((event.clientY - rect.top + camera.y) / TRACK_WORLD_HEIGHT) * 100, 0, 100)
-      };
+      return resolveSingularityRaceScreenPointToTrackPercent({
+        screenX: event.clientX - rect.left,
+        screenY: event.clientY - rect.top,
+        camera,
+        worldWidth: TRACK_WORLD_WIDTH,
+        worldHeight: TRACK_WORLD_HEIGHT
+      });
     }
 
     function updateTrackCamera() {
@@ -3293,22 +3826,48 @@
         updateMapPreviewCamera();
         return;
       }
+      setTrackWorldRaceSize();
       const player = state.runners[0];
       if (!player) return;
       const viewportWidth = elements.trackScene.clientWidth || TRACK_WORLD_WIDTH;
       const viewportHeight = elements.trackScene.clientHeight || TRACK_WORLD_HEIGHT;
       const playerPixel = trackPointToPixels(runnerVisualPoint(player, 0));
+      if (state.screen === SINGULARITY_RACE_SCREENS.RACE) {
+        updateRaceFollowCamera(player, playerPixel, viewportWidth, viewportHeight);
+        return;
+      }
       const maxX = Math.max(0, TRACK_WORLD_WIDTH - viewportWidth);
       const maxY = Math.max(0, TRACK_WORLD_HEIGHT - viewportHeight);
       const x = clampNumber(playerPixel.x - (viewportWidth * TRACK_CAMERA_X_ANCHOR), 0, maxX);
       const y = clampNumber(playerPixel.y - (viewportHeight * TRACK_CAMERA_Y_ANCHOR), 0, maxY);
-      state.trackCamera = { x, y };
+      state.trackCamera = { mode: "clamped", x, y, scale: 1, angleRad: 0 };
+      elements.trackWorld.style.setProperty("--track-counter-rotation", "0rad");
       elements.trackWorld.style.transform = `translate3d(${-x}px, ${-y}px, 0)`;
     }
 
     function updateMapPreviewCamera() {
-      state.trackCamera = { x: 0, y: 0 };
+      setTrackWorldPreviewSize();
+      state.trackCamera = { mode: "preview", x: 0, y: 0, scale: 1, angleRad: 0 };
+      elements.trackWorld.style.setProperty("--track-counter-rotation", "0rad");
       elements.trackWorld.style.transform = "translate3d(0, 0, 0)";
+    }
+
+    function updateRaceFollowCamera(player, playerPixel, viewportWidth, viewportHeight) {
+      state.trackCamera = createSingularityRaceAnchoredCamera({
+        progress: player.progress,
+        playerPixel,
+        viewportWidth,
+        viewportHeight,
+        worldWidth: TRACK_WORLD_WIDTH,
+        worldHeight: TRACK_WORLD_HEIGHT,
+        previousAngleRad: state.trackCamera?.angleRad || 0,
+        options: {
+          anchorXRatio: TRACK_CAMERA_X_ANCHOR,
+          anchorYRatio: TRACK_CAMERA_Y_ANCHOR
+        }
+      });
+      elements.trackWorld.style.setProperty("--track-counter-rotation", `${state.trackCamera.counterRotationRad}rad`);
+      elements.trackWorld.style.transform = state.trackCamera.transform;
     }
 
     function clampNumber(value, min, max) {
@@ -3336,6 +3895,14 @@
     }
 
     function renderTrack() {
+      if (state.screen === SINGULARITY_RACE_SCREENS.MAP_PREVIEW) {
+        elements.trackRunners.replaceChildren();
+        state.runnerVisuals.clear();
+        renderTrackEffects();
+        renderRaceMinimap();
+        updateTrackCamera();
+        return;
+      }
       const existing = new Map([...elements.trackRunners.children].map((node) => [node.dataset.runnerId, node]));
       const activeIds = new Set();
       const visualTiming = createRunnerVisualTiming();
@@ -3358,6 +3925,7 @@
         }
       }
       renderTrackEffects();
+      renderRaceMinimap();
       updateTrackCamera();
     }
 
@@ -3382,6 +3950,11 @@
     }
 
     function renderTrackEffects() {
+      if (state.screen === SINGULARITY_RACE_SCREENS.MAP_PREVIEW) {
+        elements.trackEffects.replaceChildren();
+        elements.trackHud.replaceChildren();
+        return;
+      }
       const player = state.runners[0];
       if (!player) return;
       const playerPoint = runnerVisualPoint(player, 0);
@@ -3403,6 +3976,85 @@
       const countdown = createSingularityTrackCountdownNode(createCountdownLabel());
       if (countdown) hudNodes.push(countdown);
       elements.trackHud.replaceChildren(...hudNodes);
+    }
+
+    function renderRaceMinimap() {
+      if (!elements.raceMinimap) return;
+      if (state.screen !== SINGULARITY_RACE_SCREENS.RACE) {
+        elements.raceMinimap.replaceChildren();
+        state.renderCache.minimapPlayerNode = null;
+        return;
+      }
+      const player = state.runners[0];
+      if (!player) {
+        elements.raceMinimap.replaceChildren();
+        state.renderCache.minimapPlayerNode = null;
+        return;
+      }
+      const playerPoint = runnerTrailPoint(player.progress);
+      if (!state.renderCache.minimapPlayerNode || !elements.raceMinimap.firstElementChild) {
+        const savePoints = listRestoredMarathonTrailSavePoints();
+        const svg = svgNode("svg", {
+          viewBox: "0 0 100 100",
+          preserveAspectRatio: "none",
+          role: "img",
+          "aria-label": "race minimap"
+        });
+        const playerDot = svgNode("circle", { class: "minimap-player", cx: playerPoint.x, cy: playerPoint.y, r: 2.6 });
+        const path = createRestoredMarathonTrailSvgPath(64);
+        svg.append(
+          svgNode("path", { class: "minimap-rail", d: path }),
+          svgNode("path", { class: "minimap-road", d: path }),
+          ...savePoints.map((savePoint) => svgNode("circle", {
+            class: "minimap-save",
+            cx: savePoint.x,
+            cy: savePoint.y,
+            r: 1.75
+          })),
+          playerDot
+        );
+        state.renderCache.minimapPlayerNode = playerDot;
+        elements.raceMinimap.replaceChildren(svg);
+        return;
+      }
+      state.renderCache.minimapPlayerNode.setAttribute("cx", String(playerPoint.x));
+      state.renderCache.minimapPlayerNode.setAttribute("cy", String(playerPoint.y));
+    }
+
+    function renderRaceResultPanel() {
+      const result = state.action.finalResult;
+      if (!result) {
+        elements.raceResultTitle.textContent = "완주 완료";
+        elements.raceResultCopy.textContent = "최종 기록을 정리하고 있습니다.";
+        elements.raceResultList.replaceChildren();
+        return;
+      }
+      elements.raceResultTitle.textContent = result.title;
+      elements.raceResultCopy.textContent = result.playerRank
+        ? `${result.copy} 내 순위 #${result.playerRank}`
+        : result.copy;
+      const rows = result.ranking.slice(0, 5).map((row) => {
+        const item = document.createElement("li");
+        const name = document.createElement("em");
+        const meta = document.createElement("b");
+        name.textContent = `#${row.rank} ${formatRaceResultName(row)}`;
+        meta.textContent = formatRaceResultMeta(row);
+        item.append(name, meta);
+        return item;
+      });
+      elements.raceResultList.replaceChildren(...rows);
+    }
+
+    function formatRaceResultName(row) {
+      if (row.participantId === "runner:you") return state.nickname || "YOU";
+      return row.displayName || row.participantId || "러너";
+    }
+
+    function formatRaceResultMeta(row) {
+      if (row.finishedAtMs !== null && row.finishedAtMs !== undefined) {
+        return `${Math.round(Number(row.finishedAtMs) / 1000)}초`;
+      }
+      return `${Math.round((Number(row.progressPercent) || 0) * 10) / 10}%`;
     }
 
     function trackCuePoint(cue) {
@@ -3428,6 +4080,18 @@
     }
 
     function renderActionHud() {
+      if (state.participantType === "spectator") {
+        elements.actionCharacter.textContent = "관전자";
+        elements.actionSkill.textContent = "채팅 / 선수 보기";
+        elements.actionHp.textContent = "-";
+        elements.actionHpBar.style.width = "0%";
+        elements.actionStatus.textContent = "관전 중";
+        elements.checkpointStrip.replaceChildren(...ACTION_CHECKPOINTS.map(
+          (checkpoint, index) => createSingularityCheckpointDotNode(checkpoint, index, false)
+        ));
+        elements.actionPackets.replaceChildren(...state.action.packetLog.slice(-5).map(createSingularityPacketRowNode));
+        return;
+      }
       const player = state.runners[0];
       const now = Date.now();
       const maxHp = player.maxHp || state.action.maxHp || 100;
@@ -3523,18 +4187,22 @@
       elements.connectedGate.classList.toggle("is-open", connectedLobbyOpen);
       elements.connectedButton.disabled = !connectedLobbyOpen || connected;
       elements.connectedButton.textContent = connected ? "개발 방 입장됨" : "개발 방 입장";
-      elements.roomCode.textContent = "최대 30명 / 방장 시작 대기";
+      elements.roomCode.textContent = summary
+        ? `선수 ${summary.players}/${summary.maxPlayers} / 관전자 ${summary.spectators}/${summary.maxSpectators}`
+        : "최대 30명 / 관전자 입장 가능";
       elements.connectionSignal.classList.toggle("is-connected", connected);
       if (!adapterValidation.ok) {
         elements.connectedStatus.textContent = `연결 설정 오류: ${adapterValidation.errors.join(", ")}`;
         return;
       }
       if (connected) {
-        elements.connectedStatus.textContent = `개발 방 연결됨: ${state.connectedSession.roomId} / ${state.connectedSession.protocolVersion} / 중계 ${state.connectedPackets.length}`;
+        elements.connectedStatus.textContent = state.participantType === "spectator"
+          ? `관전 연결됨: ${state.connectedSession.roomId} / 채팅 가능`
+          : `개발 방 연결됨: ${state.connectedSession.roomId} / ${state.connectedSession.protocolVersion} / 중계 ${state.connectedPackets.length}`;
         return;
       }
       elements.connectedStatus.textContent = connectedLobbyOpen && summary
-        ? `${summary.displayName} 개발 모드 열림: ${summary.players}/${summary.maxPlayers}명`
+        ? `${summary.displayName} 개발 모드 열림: 선수 ${summary.players}/${summary.maxPlayers} / 관전자 ${summary.spectators}/${summary.maxSpectators}`
         : "개발 연결은 ?devOnline=1에서만 열립니다.";
     }
 
@@ -3583,6 +4251,10 @@
     }
 
     function renderChannelTabs() {
+      const visibleChannels = getVisibleChatChannels();
+      if (!visibleChannels.some((channel) => channel.channelId === state.activeChannel)) {
+        state.activeChannel = visibleChannels[0]?.channelId || state.activeChannel;
+      }
       elements.channelTabs.replaceChildren(...visibleChannels.map((channel) =>
         createSingularityChannelTabNode(channel, state.activeChannel, (channelId) => {
           state.activeChannel = channelId;

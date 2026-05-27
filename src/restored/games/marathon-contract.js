@@ -3,6 +3,8 @@ import { createRestoredMarathonTrailSaveCheckpointMeters } from "./marathon-trai
 export const RESTORED_MARATHON_CONTRACT_VERSION = "restored-marathon-001";
 
 export const RESTORED_MARATHON_MAX_RUNNERS = 30;
+export const RESTORED_MARATHON_DEFAULT_MAX_SPECTATORS = 32;
+export const RESTORED_MARATHON_MAX_SPECTATORS = 100;
 
 export const RESTORED_MARATHON_AUTHORITY = Object.freeze({ LOCAL_PREVIEW: "local_preview", SERVER_REQUIRED: "server_required" });
 export const RESTORED_MARATHON_PHASES = Object.freeze(["lobby", "countdown", "racing", "finished", "abandoned"]);
@@ -78,6 +80,10 @@ export function countRestoredMarathonRunners(participants = []) {
   return participants.filter((item) => isRunnerType(item.type)).length;
 }
 
+export function countRestoredMarathonSpectators(participants = []) {
+  return participants.filter((item) => item.type === "spectator").length;
+}
+
 export function createRestoredMarathonRoom(options = {}) {
   const course = createRestoredMarathonCourse(options.course);
   const participants = Object.freeze((options.participants || []).map(createRestoredMarathonParticipant));
@@ -86,6 +92,7 @@ export function createRestoredMarathonRoom(options = {}) {
     displayName: options.displayName || "Baegeum 30 Runner Marathon",
     phase: RESTORED_MARATHON_PHASES.includes(options.phase) ? options.phase : "lobby",
     maxRunners: clamp(options.maxRunners ?? RESTORED_MARATHON_MAX_RUNNERS, 1, RESTORED_MARATHON_MAX_RUNNERS),
+    maxSpectators: clamp(options.maxSpectators ?? RESTORED_MARATHON_DEFAULT_MAX_SPECTATORS, 0, RESTORED_MARATHON_MAX_SPECTATORS),
     course,
     mapVersion: options.mapVersion || "baegeum-city-v2-map-001",
     protocolVersion: RESTORED_MARATHON_CONTRACT_VERSION,
@@ -99,9 +106,16 @@ export function canJoinRestoredMarathonRoom(roomInput, participantType = "player
   const room = createRestoredMarathonRoom(roomInput);
   const type = PARTICIPANT_TYPES.includes(participantType) ? participantType : "player";
   const errors = [];
-  if (room.phase !== "lobby") errors.push("room is not accepting runners");
-  if (isRunnerType(type) && countRestoredMarathonRunners(room.participants) >= room.maxRunners) errors.push("runner limit reached");
   if (room.protocolVersion !== RESTORED_MARATHON_CONTRACT_VERSION) errors.push("protocol mismatch");
+  if (isRunnerType(type)) {
+    if (room.phase !== "lobby") errors.push("room is not accepting runners");
+    if (countRestoredMarathonRunners(room.participants) >= room.maxRunners) errors.push("runner limit reached");
+  } else if (type === "spectator") {
+    if (!["lobby", "countdown", "racing"].includes(room.phase)) errors.push("room is not accepting spectators");
+    if (countRestoredMarathonSpectators(room.participants) >= room.maxSpectators) errors.push("spectator limit reached");
+  } else if (type === "admin" && room.phase === "abandoned") {
+    errors.push("room is abandoned");
+  }
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 
@@ -210,7 +224,9 @@ export function validateRestoredMarathonContract() {
   const course = createRestoredMarathonCourse();
   const room = createRestoredMarathonRoom();
   if (RESTORED_MARATHON_MAX_RUNNERS !== 30) errors.push("marathon max runners must stay 30");
+  if (RESTORED_MARATHON_DEFAULT_MAX_SPECTATORS !== 32) errors.push("default spectators should match the online lobby contract");
   if (room.maxRunners > RESTORED_MARATHON_MAX_RUNNERS) errors.push("room max runners exceeds contract limit");
+  if (room.maxSpectators > RESTORED_MARATHON_MAX_SPECTATORS) errors.push("room max spectators exceeds contract limit");
   if (course.checkpointMeters[0] !== 0) errors.push("course must start with checkpoint 0");
   if (course.checkpointMeters[course.checkpointMeters.length - 1] !== course.distanceMeters) {
     errors.push("course must end with finish checkpoint");

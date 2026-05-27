@@ -230,6 +230,45 @@
       font-size: 12px;
     }
 
+    .spectator-policy {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(115, 217, 238, 0.06);
+    }
+
+    .spectator-policy-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .capacity-options {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .capacity-option {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--text);
+      font-weight: 900;
+    }
+
+    .capacity-option.is-active {
+      border-color: rgba(126, 224, 143, 0.74);
+      background: rgba(126, 224, 143, 0.14);
+      color: var(--green);
+    }
+
     .camera-panel {
       display: grid;
       grid-template-rows: auto minmax(420px, 1fr) auto;
@@ -525,6 +564,14 @@
         <div class="body">
           <div class="notice" id="admin-gate">개발 방을 여는 중입니다.</div>
           <div class="room-list" id="room-list" aria-label="방 목록"></div>
+          <div class="spectator-policy" aria-label="관전자 정원">
+            <div class="spectator-policy-head">
+              <span>관전자 정원</span>
+              <span id="spectator-capacity-label">0 / 32명</span>
+            </div>
+            <div class="capacity-options" id="spectator-capacity-options"></div>
+            <p class="muted" id="spectator-policy-note">중도입장은 관전자로만 받습니다.</p>
+          </div>
           <div class="quick-actions" aria-label="방장 조작">
             <button class="button is-primary" id="admin-start-button" type="button">10초 카운트다운 시작</button>
             <button class="button is-warn" id="camera-all-button" type="button">전체 보기</button>
@@ -608,6 +655,11 @@
       validateRestoredMarathonRoomAdapter
     } from "./src/restored/online/marathon-room-adapter.js";
     import {
+      listRestoredMarathonSpectatorCapOptions,
+      readRestoredMarathonRoomPolicy,
+      writeRestoredMarathonRoomPolicy
+    } from "./src/restored/online/marathon-room-policy.js";
+    import {
       createInitialRestoredMarathonChannelMessages,
       createRestoredMarathonChannelSet,
       filterVisibleRestoredMarathonChannels,
@@ -639,12 +691,20 @@
 
     const MAX_RUNNERS = 30;
     const COURSE_METERS = 42195;
+    const DEFAULT_DEV_ROOM_ID = "room:singularity-race:dev-001";
     const devOnlineEnabled = new URLSearchParams(window.location.search).get("devOnline") === "1";
-    const adapter = createMarathonRoomAdapterForMode({ devOnline: devOnlineEnabled, clientId: "client:admin-host", serverTimeMs: 1000 });
+    const initialRoomPolicy = readRestoredMarathonRoomPolicy(window.localStorage, DEFAULT_DEV_ROOM_ID);
+    const adapter = createMarathonRoomAdapterForMode({
+      devOnline: devOnlineEnabled,
+      clientId: "client:admin-host",
+      serverTimeMs: 1000,
+      maxSpectators: initialRoomPolicy.maxSpectators
+    });
     const adapterValidation = validateRestoredMarathonRoomAdapter(adapter);
     const connected = adapterValidation.ok && canOpenConnectedMarathonLobby(adapter);
     const rooms = getConnectedMarathonRoomSummaries(adapter);
-    const activeRoomId = rooms[0]?.roomId || "room:singularity-race:dev-001";
+    const activeRoomId = rooms[0]?.roomId || DEFAULT_DEV_ROOM_ID;
+    const roomPolicy = readRestoredMarathonRoomPolicy(window.localStorage, activeRoomId, initialRoomPolicy);
     const channels = adapter.channels?.length ? adapter.channels : createRestoredMarathonChannelSet({ roomId: activeRoomId });
     const visibleChannels = filterVisibleRestoredMarathonChannels(channels, connected ? "admin" : "spectator");
     const roomPacketTransport = connected ? createRestoredMarathonDevRoomTransport({
@@ -671,6 +731,9 @@
     const elements = {
       gate: document.querySelector("#admin-gate"),
       roomList: document.querySelector("#room-list"),
+      spectatorCapacityLabel: document.querySelector("#spectator-capacity-label"),
+      spectatorCapacityOptions: document.querySelector("#spectator-capacity-options"),
+      spectatorPolicyNote: document.querySelector("#spectator-policy-note"),
       startButton: document.querySelector("#admin-start-button"),
       startStatus: document.querySelector("#admin-start-status"),
       cameraAll: document.querySelector("#camera-all-button"),
@@ -698,6 +761,7 @@
       activeChannel: (connected ? visibleChannels.find((channel) => channel.type === "admin") : visibleChannels[0])?.channelId || "lobby:singularity-race:public",
       messages: chatTransport.seedMessages(createInitialRestoredMarathonChannelMessages(channels)),
       packets: roomPacketTransport ? roomPacketTransport.loadPackets([]) : [],
+      roomPolicy,
       runners: []
     };
 
@@ -717,6 +781,20 @@
     elements.cameraAll.addEventListener("click", () => {
       state.selectedRunnerId = "";
       render();
+    });
+
+    elements.spectatorCapacityOptions.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-spectator-cap]");
+      if (!button) return;
+      const maxSpectators = Number(button.dataset.spectatorCap);
+      state.roomPolicy = writeRestoredMarathonRoomPolicy(window.localStorage, {
+        ...state.roomPolicy,
+        roomId: activeRoomId,
+        maxSpectators
+      });
+      elements.startStatus.textContent = `관전자 정원을 ${state.roomPolicy.maxSpectators}명으로 저장했습니다.`;
+      renderRooms();
+      renderSpectatorPolicy();
     });
 
     elements.form.addEventListener("submit", (event) => {
@@ -775,6 +853,7 @@
     function render() {
       renderGate();
       renderRooms();
+      renderSpectatorPolicy();
       renderCamera();
       renderRunnerList();
       renderChannelTabs();
@@ -794,14 +873,22 @@
     }
 
     function renderRooms() {
-      const roomCards = (rooms.length ? rooms : [{ roomId: activeRoomId, displayName: "개발 방 001", players: 0, maxPlayers: MAX_RUNNERS }]).map((room) => {
+      const roomCards = (rooms.length ? rooms : [{
+        roomId: activeRoomId,
+        displayName: "개발 방 001",
+        players: 0,
+        maxPlayers: MAX_RUNNERS,
+        spectators: 0,
+        maxSpectators: state.roomPolicy.maxSpectators
+      }]).map((room) => {
         const row = document.createElement("div");
         row.className = "room-card is-active";
         const title = document.createElement("strong");
         title.textContent = roomDisplayName(room);
         const meta = document.createElement("div");
         meta.className = "room-meta";
-        meta.innerHTML = `<span>선수 ${state.runners.length}/${room.maxPlayers || MAX_RUNNERS}</span><span>${connected ? "보기 가능" : "닫힘"}</span>`;
+        const maxSpectators = state.roomPolicy.maxSpectators;
+        meta.innerHTML = `<span>선수 ${room.players || 0}/${room.maxPlayers || MAX_RUNNERS}</span><span>관전자 ${room.spectators || 0}/${maxSpectators}</span><span>${connected ? "보기 가능" : "닫힘"}</span>`;
         const action = document.createElement("a");
         action.className = "room-action is-primary";
         action.href = "./singularity-race.html?devOnline=1&adminLaunch=1";
@@ -816,6 +903,23 @@
       if (!room) return "개발 방 001";
       if (room.roomId === activeRoomId || room.displayName === "Singularity Race Dev Room 001") return "개발 방 001";
       return room.displayName || "개발 방 001";
+    }
+
+    function renderSpectatorPolicy() {
+      const room = rooms[0] || {};
+      const spectatorCount = room.spectators || 0;
+      elements.spectatorCapacityLabel.textContent = `${spectatorCount} / ${state.roomPolicy.maxSpectators}명`;
+      elements.spectatorPolicyNote.textContent = state.roomPolicy.maxSpectators === 0
+        ? "관전자 중도입장을 닫았습니다."
+        : "경기 중 새 입장은 선수 대신 관전자로만 받습니다.";
+      elements.spectatorCapacityOptions.replaceChildren(...listRestoredMarathonSpectatorCapOptions().map((cap) => {
+        const button = document.createElement("button");
+        button.className = `capacity-option${cap === state.roomPolicy.maxSpectators ? " is-active" : ""}`;
+        button.type = "button";
+        button.dataset.spectatorCap = String(cap);
+        button.textContent = cap === 0 ? "닫기" : `${cap}명`;
+        return button;
+      }));
     }
 
     function refreshRunners() {

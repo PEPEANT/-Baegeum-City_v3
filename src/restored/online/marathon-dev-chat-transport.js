@@ -154,6 +154,7 @@ export function validateRestoredMarathonDevChatTransportContract() {
   const adminTransport = createRestoredMarathonDevChatTransport({
     channels, role: "admin", clientId: "client:admin:test", storage, broadcastFactory, clock: () => 101
   });
+  const spectatorTransport = createRestoredMarathonDevChatTransport({ channels, role: "spectator", clientId: "client:spectator:test", storage, broadcastFactory, clock: () => 102 });
   let relayedCount = 0;
   const unsubscribe = adminTransport.subscribe((messages) => {
     relayedCount = messages.length;
@@ -162,24 +163,17 @@ export function validateRestoredMarathonDevChatTransportContract() {
   const lobby = channels.find((item) => item.type === "lobby");
   const admin = channels.find((item) => item.type === "admin");
   if (!seeded.every((item) => item.channelId)) errors.push("seed messages must be channelized");
-  const sent = transport.submitMessage(seeded, {
-    channelId: lobby.channelId,
-    senderId: "player:test",
-    senderType: "player",
-    text: "hello"
-  });
+  const sent = transport.submitMessage(seeded, { channelId: lobby.channelId, senderId: "player:test", senderType: "player", text: "hello" });
   if (!sent.ok) errors.push(`player lobby send should pass: ${sent.reason}`);
-  const blocked = transport.submitMessage(sent.messages, {
-    channelId: admin.channelId,
-    senderId: "player:test",
-    senderType: "player",
-    text: "nope"
-  });
+  const blocked = transport.submitMessage(sent.messages, { channelId: admin.channelId, senderId: "player:test", senderType: "player", text: "nope" });
   if (blocked.ok) errors.push("player admin send must be blocked");
-  if (transport.loadMessages().length !== sent.messages.length) errors.push("transport must reload saved messages");
+  const room = channels.find((item) => item.type === "room");
+  const spectatorSent = spectatorTransport.submitMessage(sent.messages, { channelId: room.channelId, senderId: "spectator:test", senderType: "spectator", text: "watching" });
+  if (!spectatorSent.ok) errors.push(`spectator room send should pass: ${spectatorSent.reason}`);
+  if (transport.loadMessages().length !== spectatorSent.messages.length) errors.push("transport must reload saved messages");
   unsubscribe();
-  if (relayedCount !== sent.messages.length) errors.push("broadcast relay must notify another local client");
-  let history = sent.messages;
+  if (relayedCount !== spectatorSent.messages.length) errors.push("broadcast relay must notify another local client");
+  let history = spectatorSent.messages;
   for (let index = 0; index < 510; index += 1) history = transport.submitMessage(history, { channelId: lobby.channelId, senderId: "player:test", senderType: "player", text: `m${index}` }).messages;
   if (transport.loadMessages().length !== 500) errors.push("dev chat history should retain the latest 500 messages");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });

@@ -3,7 +3,7 @@ export const RESTORED_MARATHON_SERVER_TRANSPORT_VERSION = "restored-marathon-ser
 export const RESTORED_MARATHON_SERVER_TRANSPORT_STATUSES = Object.freeze(["unavailable", "connecting", "connected", "disconnected_grace", "expired"]);
 export const RESTORED_MARATHON_SERVER_TRANSPORT_PROVIDERS = Object.freeze(["none", "websocket", "firebase", "dev_mock"]);
 export const RESTORED_MARATHON_SERVER_AUTH_MODES = Object.freeze(["none", "session", "firebase-auth", "custom-token"]);
-export const RESTORED_MARATHON_SERVER_PACKET_TYPES = Object.freeze(["hello", "hello_result", "join_request", "join_result", "chat_send", "chat_delivered", "input_update", "skill_use", "attack_action", "checkpoint_reward", "respawn_notice", "state_snapshot", "race_finalized", "disconnect_notice"]);
+export const RESTORED_MARATHON_SERVER_PACKET_TYPES = Object.freeze(["hello", "hello_result", "join_request", "join_result", "chat_send", "chat_delivered", "chat_history", "input_update", "skill_use", "attack_action", "checkpoint_reward", "respawn_notice", "state_snapshot", "race_finalized", "disconnect_notice"]);
 
 const DEFAULT_CAPABILITIES = Object.freeze({ rooms: false, chat: false, input: false, snapshots: false, admin: false });
 
@@ -159,45 +159,28 @@ export function validateRestoredMarathonServerTransportContract() {
   const errors = [];
   const unavailable = createUnavailableRestoredMarathonServerTransport();
   if (canUseRestoredMarathonServerTransport(unavailable)) errors.push("unavailable transport must stay closed");
-  const wsConfig = createRestoredMarathonServerTransportConfig({
-    provider: "websocket",
-    endpointId: "ws:local-dev",
-    authMode: "session",
-    capabilities: { rooms: true, chat: true, input: true, snapshots: true }
-  });
+  const wsConfig = createRestoredMarathonServerTransportConfig({ provider: "websocket", endpointId: "ws:local-dev", authMode: "session",
+    capabilities: { rooms: true, chat: true, input: true, snapshots: true } });
   if (!validateRestoredMarathonServerTransportConfig(wsConfig).ok) errors.push("websocket config should validate");
   const secretConfig = validateRestoredMarathonServerTransportConfig({ ...wsConfig, apiKey: "do-not-store" });
   if (secretConfig.ok) errors.push("transport config must reject embedded secrets");
-  const connected = createRestoredMarathonServerTransportSnapshot({
-    provider: "websocket",
-    status: "connected",
-    endpointId: "ws:local-dev",
-    clientId: "client:test",
-    roomId: "room:singularity-race:dev-001",
-    capabilities: { rooms: true, chat: true, input: true, snapshots: true }
-  });
+  const connected = createRestoredMarathonServerTransportSnapshot({ provider: "websocket", status: "connected", endpointId: "ws:local-dev",
+    clientId: "client:test", roomId: "room:singularity-race:dev-001", capabilities: { rooms: true, chat: true, input: true, snapshots: true } });
   if (!canUseRestoredMarathonServerTransport(connected)) errors.push("connected transport should be usable");
-  const chatEnvelope = createRestoredMarathonChatSendEnvelope({
-    id: "message:1",
-    channelId: "lobby:singularity-race:public",
-    senderId: "player:test",
-    text: "hello"
-  }, { clientId: connected.clientId, roomId: connected.roomId, sequence: 2 });
+  const chatEnvelope = createRestoredMarathonChatSendEnvelope({ id: "message:1", channelId: "lobby:singularity-race:public",
+    senderId: "player:test", text: "hello" }, { clientId: connected.clientId, roomId: connected.roomId, sequence: 2 });
   if (!validateRestoredMarathonTransportEnvelope(chatEnvelope).ok) errors.push("chat envelope should validate");
-  const inputEnvelope = createRestoredMarathonInputEnvelope({
-    participantId: "runner:test",
-    pace: "push",
-    raceTimeMs: 1000
-  }, { clientId: connected.clientId, roomId: connected.roomId, sequence: 3 });
+  const inputEnvelope = createRestoredMarathonInputEnvelope({ participantId: "runner:test", pace: "push", raceTimeMs: 1000 },
+    { clientId: connected.clientId, roomId: connected.roomId, sequence: 3 });
   if (!validateRestoredMarathonTransportEnvelope(inputEnvelope).ok) errors.push("input envelope should validate");
-  const skillEnvelope = createRestoredMarathonSkillEnvelope({
-    participantId: "runner:test",
-    characterId: "runner:dororong",
-    skillId: "skill:steady-boost"
-  }, { clientId: connected.clientId, roomId: connected.roomId, sequence: 4 });
+  const skillEnvelope = createRestoredMarathonSkillEnvelope({ participantId: "runner:test", characterId: "runner:dororong", skillId: "skill:steady-boost" },
+    { clientId: connected.clientId, roomId: connected.roomId, sequence: 4 });
   if (!validateRestoredMarathonTransportEnvelope(skillEnvelope).ok) errors.push("skill envelope should validate");
   const badChat = validateRestoredMarathonTransportEnvelope({ ...chatEnvelope, payload: { text: "missing channel" } });
   if (badChat.ok) errors.push("chat_send must require channel and message id");
+  const historyEnvelope = createRestoredMarathonTransportEnvelope("chat_history", { serverOwned: true, messages: [] },
+    { clientId: "server:test", roomId: connected.roomId, sequence: 6 });
+  if (!validateRestoredMarathonTransportEnvelope(historyEnvelope).ok) errors.push("server chat history envelope should validate");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 

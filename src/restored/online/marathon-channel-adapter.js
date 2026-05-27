@@ -24,7 +24,7 @@ export function createRestoredMarathonChannelSet(options = {}) {
   const slug = roomId.replace(/^room:/, "");
   return Object.freeze([
     channel("lobby:singularity-race:public", "lobby", "로비", "public", ["player", "spectator", "admin"]),
-    channel(`room:${slug}`, "room", "레이스 룸", "participants", ["player", "admin"]),
+    channel(`room:${slug}`, "room", "레이스 룸", "participants", ["player", "spectator", "admin"]),
     channel(`spectator:${slug}`, "spectator", "관전자", "public", ["player", "spectator", "admin"]),
     channel(`admin:${slug}`, "admin", "관리자", "admin", ["admin"]),
     channel("system:singularity-race:notice", "system", "공지", "public", ["admin"])
@@ -45,7 +45,7 @@ export function canUseRestoredMarathonChannel(channelInput, role = "player", mod
   if (mode === "send") return channel.canSend.includes(normalizedRole);
   if (normalizedRole === "admin") return true;
   if (channel.visibility === "admin") return false;
-  if (channel.visibility === "participants") return normalizedRole === "player";
+  if (channel.visibility === "participants") return normalizedRole === "player" || normalizedRole === "spectator";
   return true;
 }
 
@@ -121,8 +121,13 @@ export function validateRestoredMarathonChannelContract() {
   if (!filterVisibleRestoredMarathonChannels(channels, "admin").some((item) => item.type === "admin")) {
     errors.push("admin must see admin channel");
   }
+  if (!filterVisibleRestoredMarathonChannels(channels, "spectator").some((item) => item.type === "room")) {
+    errors.push("spectator must see shared race room chat");
+  }
   const blocked = appendLocalRestoredMarathonMessage([], channels, { channelId: findByType(channels, "admin").channelId, text: "x" }, "player");
   if (blocked.ok) errors.push("player must not send admin messages");
+  const spectatorRoom = appendLocalRestoredMarathonMessage([], channels, { channelId: findByType(channels, "room").channelId, senderType: "spectator", text: "watching" }, "spectator");
+  if (!spectatorRoom.ok) errors.push("spectator must send shared race room messages");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 

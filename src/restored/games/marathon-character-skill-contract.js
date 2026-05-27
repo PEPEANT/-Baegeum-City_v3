@@ -2,6 +2,7 @@ export const RESTORED_MARATHON_CHARACTER_SKILL_CONTRACT_VERSION = "restored-mara
 export const RESTORED_MARATHON_CHARACTER_SKILL_VERSION = RESTORED_MARATHON_CHARACTER_SKILL_CONTRACT_VERSION;
 
 export const RESTORED_MARATHON_CHARACTER_RARITIES = Object.freeze(["common", "rare", "chaos", "legend"]);
+export const RESTORED_MARATHON_CHARACTER_GRADES = Object.freeze(["D", "C", "B", "A", "S"]);
 export const RESTORED_MARATHON_SKILL_TARGETS = Object.freeze(["self", "nearby", "cone", "trail", "global"]);
 
 const SKILLS = Object.freeze([
@@ -57,9 +58,15 @@ export function createRestoredMarathonCheckpointRewardPlan(stageCount = 9) {
   return Object.freeze(Array.from({ length: count }, (_, index) => Object.freeze({
     checkpointIndex: index + 1,
     unlocksCharacter: true,
+    maxGrade: maxGradeForCheckpoint(index + 1),
     legendEligible: index + 1 >= 8,
     authority: "server_required"
   })));
+}
+
+export function listRestoredMarathonCharacterGradePool(checkpointIndex = 1) {
+  const maxRank = gradeRank(maxGradeForCheckpoint(checkpointIndex));
+  return Object.freeze(RESTORED_MARATHON_MEME_CHARACTER_CATALOG.filter((item) => gradeRank(item.grade) <= maxRank));
 }
 
 export function createRestoredMarathonSkillUse(options = {}) {
@@ -92,7 +99,12 @@ export function validateRestoredMarathonCharacterSkillContract() {
   const reward = assignRestoredMarathonCheckpointCharacter({ participantId: "runner:test", checkpointIndex: 4, seed: "fixed" });
   const plan = createRestoredMarathonCheckpointRewardPlan(12);
   if (plan.length !== 12 || !plan[11].legendEligible) errors.push("N-stage reward plan should scale");
+  if (plan[0].maxGrade !== "D" || plan[11].maxGrade !== "S") errors.push("D to S reward grades should scale");
   if (!reward.character.characterId || !reward.skill.skillId) errors.push("checkpoint reward must assign a character and skill");
+  for (const grade of RESTORED_MARATHON_CHARACTER_GRADES) {
+    if (!RESTORED_MARATHON_MEME_CHARACTER_CATALOG.some((item) => item.grade === grade)) errors.push(`${grade} grade needs a character`);
+  }
+  if (!listRestoredMarathonCharacterGradePool(9).some((item) => item.grade === "S")) errors.push("late stages should unlock S grade");
   const rare = RESTORED_MARATHON_MEME_CHARACTER_CATALOG.find((item) => item.rarity === "rare");
   const use = createRestoredMarathonSkillUse({ participantId: "runner:test", characterId: rare.characterId });
   if (!use.allowed || !use.consumesCharge) errors.push("rare skill should be one-use capable");
@@ -107,29 +119,49 @@ function skill(skillId, label, target, cooldownSeconds, maxCharges, durationSeco
 }
 
 function character(characterId, label, rarity, skillId, speedRating, note) {
-  return Object.freeze({ characterId, label, rarity, skillId, speedRating, note });
+  return Object.freeze({ characterId, label, rarity, grade: gradeForCharacter(characterId, rarity), skillId, speedRating, note });
 }
 
 function characterPoolForCheckpoint(checkpointIndex) {
-  if (checkpointIndex >= 8) return RESTORED_MARATHON_MEME_CHARACTER_CATALOG;
-  if (checkpointIndex >= 4) return RESTORED_MARATHON_MEME_CHARACTER_CATALOG.filter((item) => item.rarity !== "legend");
-  return RESTORED_MARATHON_MEME_CHARACTER_CATALOG.filter((item) => item.rarity === "common" || item.rarity === "rare");
+  return listRestoredMarathonCharacterGradePool(checkpointIndex);
 }
 
 function weightedPick(pool, seed) {
-  const total = pool.reduce((sum, item) => sum + weightForRarity(item.rarity), 0);
+  const total = pool.reduce((sum, item) => sum + weightForGrade(item.grade), 0);
   let roll = hashText(seed) % total;
   for (const item of pool) {
-    roll -= weightForRarity(item.rarity);
+    roll -= weightForGrade(item.grade);
     if (roll < 0) return item;
   }
   return pool[0];
 }
 
-function weightForRarity(rarity) {
-  if (rarity === "legend") return 1;
-  if (rarity === "chaos") return 4;
-  if (rarity === "rare") return 8;
+function gradeForCharacter(characterId, rarity) {
+  if (characterId === "runner:meme-summoner") return "S";
+  if (characterId === "runner:gallery-warden" || characterId === "runner:dopamine-sprinter") return "A";
+  if (rarity === "rare") return "B";
+  if (characterId === "runner:keyboard-warrior") return "C";
+  return "D";
+}
+
+function maxGradeForCheckpoint(checkpointIndex) {
+  if (checkpointIndex >= 8) return "S";
+  if (checkpointIndex >= 6) return "A";
+  if (checkpointIndex >= 4) return "B";
+  if (checkpointIndex >= 2) return "C";
+  return "D";
+}
+
+function gradeRank(grade) {
+  const index = RESTORED_MARATHON_CHARACTER_GRADES.indexOf(String(grade || "D").toUpperCase());
+  return index < 0 ? 0 : index;
+}
+
+function weightForGrade(grade) {
+  if (grade === "S") return 1;
+  if (grade === "A") return 4;
+  if (grade === "B") return 8;
+  if (grade === "C") return 12;
   return 16;
 }
 
