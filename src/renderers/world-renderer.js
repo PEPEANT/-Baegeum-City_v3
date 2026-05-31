@@ -113,10 +113,10 @@ export class WorldRenderer {
     }
   }
   drawObstacles(obstacles) {
-    drawCityBoundaryObstacles(this.ctx, obstacles);
     for (const item of obstacles) {
       if (item.kind !== "city-boundary") this.roundRect(item, item.kind === "base-wall" ? "#52564b" : "#68675e", "#3b3a34", 5);
     }
+    drawCityBoundaryObstacles(this.ctx, obstacles);
   }
   drawBuildings(buildings, nearby) {
     for (const building of buildings) {

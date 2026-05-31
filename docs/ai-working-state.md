@@ -1,5 +1,101 @@
 # AI Working State
 
+Date: 2026-05-31
+Observed: Singularity Race automatic gates were green and the user asked to move on if no further fix was needed. The work queue's next safe map-editor slice was construction UX, specifically placement-only building shell name/color editing.
+Changed: Added a world editor building-shell edit panel for selected `building_shell` obstacles. The panel writes `shellName` and `shellColor` only, renders those visual fields as a lightweight overlay, and keeps size editing separate from venue metadata. Updated the build-palette/editor-entry smokes and docs so building shells still do not gain doors, channels, interiors, economy, game type, venue id, or online room id fields.
+Verified: `node tools/smoke-world-editor-build-palette.cjs`, `node tools/smoke-editor-entry.cjs`, and `node tools/check-size.cjs` passed. Browser verification on `http://127.0.0.1:4173/editor.html` confirmed an existing building shell opens the name/color panel, the color swatches activate, and no venue-owned field is exposed by the panel path. Text-entry automation was limited by the Browser virtual clipboard, but the pure helper/draft smoke covers `shellName` persistence.
+Blocked: None for the code path. A human can still do the final manual name typing check directly in the editor because automated typing into the in-app browser input was blocked by the browser tool.
+Next: Continue with venue metadata editing only as a separate `venue_anchor` slice, or visually tune baegeum/dice shell frontage without converting shells into enterable venues.
+Do not: Store doors, channels, interiors, economy, game type, venue id, or online room id on `building_shell` objects.
+
+Date: 2026-05-31
+Observed: After the movement-axis tuning, the user asked to do the final wrap and move on if complete. The automatic gate was already green, so the next feasible check was whether mobile controls actually move the player rather than only rendering correctly.
+Changed: No gameplay code changed in this pass. Verified the current race page and mobile joystick input path in the in-app browser.
+Verified: `git diff --check` and `npm run check` passed. Browser reload on the current race URL showed 30 runners, player runner, minimap, hidden result panel, no console errors, `rotate(0rad)`, and `--track-counter-rotation: 0rad`. In a `390x844` mobile viewport, dragging the joystick right changed the player `left` from `22.32%` to `22.3928%`, then dragging up changed `top` from `91%` to `90.8333%`, with console error count 0.
+Blocked: None for automated finalization. Human held-key PC/mobile feel is still the only remaining subjective acceptance gate.
+Next: Treat Singularity Race 0.1 automatic validation as passed. If the human accepts the feel, move to the next feature slice outside movement/camera; if not, tune only the `150/210px/s` lane speed pair.
+Do not: Reopen camera rotation, change the WASD axis contract, or add new race mechanics before the human feel pass.
+
+Date: 2026-05-31
+Observed: The user approved fixing the WASD feel hypothesis after code review confirmed `A/D` drives trail `progress` and `W/S` drives `laneOffsetPx`, with the old lane speeds reading much slower in pixel space than forward progress on the fixed camera.
+Changed: Increased active lane movement from `74/88px/s` to `150/210px/s`, aligned the connected prediction defaults and dev server lane handling to the same normal/sprint lane speeds, and added a progression smoke guard that compares lane speed against progress-axis pixel speed across multiple route samples.
+Verified: Browser reload of the current race URL showed 30 runners, the player runner, minimap, no console errors, hidden result panel, `rotate(0rad)`, and `--track-counter-rotation: 0rad`. `node tools/check-restored-marathon-contract.cjs`, `node tools/smoke-singularity-race-progression.cjs`, `node tools/smoke-singularity-race-server-load.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: Automated browser controls still cannot replace a real held-key feel pass, so the exact comfort of `150/210px/s` needs one human PC/mobile run.
+Next: Manually test fixed-camera race movement around lane edges and turns. If `W/S` now feels too sensitive, tune only the lane speed pair in a small follow-up.
+Do not: Change the `A/D = progress`, `W/S = laneOffsetPx` contract or re-enable camera rotation while checking this movement-feel pass.
+
+Date: 2026-05-31
+Observed: The user asked for a final verification pass and to move on if no issues were found. The current race URL was already on `singularity-race.html?devOnline=1&adminLaunch=1&roomId=room:singularity-race:dev-002`.
+Changed: No gameplay code changed in this pass. Verified the current race surface again on desktop and mobile-sized browser viewports after the fixed-camera guard.
+Verified: Browser reload on the current desktop race page showed 30 runners, a player runner, minimap, no console errors, `rotate(0rad)`, and `--track-counter-rotation: 0rad`. Mobile viewport `390x844` showed chat, minimap, queue button, gear button, joystick, sprint, attack, skill, and chat buttons visible; opening the gear panel kept it on-screen with no console errors and fixed camera rotation still at 0. `git diff --check` and `npm run check` passed.
+Blocked: Automated browser control still cannot replace a real held-key 3-run PC feel pass, but the automatic code/UI gates are green.
+Next: Treat the automatic final gate as passed and move to the next human-facing step: one real PC run and one mobile run for feel confirmation, or start the next feature slice if the human accepts the current feel.
+Do not: Reopen camera rotation work unless fixed-camera play exposes a specific remaining problem.
+
+Date: 2026-05-31
+Observed: The user asked whether Singularity Race should auto-flip, weakly rotate, or keep the camera fully fixed while uphill/curve movement and wall-edge feel are still being stabilized. Rechecking the code showed normal play was already using `fixed`, not the older `soft-follow` default, so the safest 0.1 decision is to keep camera rotation off and guard against accidental reactivation.
+Changed: Kept the normal race camera fixed, capped optional `soft-follow`/`road-follow` rotation to 35 degrees, and strengthened `tools/smoke-singularity-race-camera.cjs` so it verifies the default camera mode is fixed, default rotation stays zero across curve/finish progress, optional rotation stays mild, and `singularity-race.html` does not opt into rotating modes. Updated the marathon plan camera note with the 35-degree experiment cap.
+Verified: Browser reload of `singularity-race.html?devOnline=1&adminLaunch=1&roomId=room:singularity-race:dev-002` confirmed the race track transform contains `rotate(0rad)`, `--track-counter-rotation` is `0rad`, and console error count is 0. `node tools/smoke-singularity-race-camera.cjs`, `node tools/check-restored-marathon-contract.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: None for the camera guard. Manual PC 3-run and mobile 1-run feel checks are still separate playtest gates.
+Next: Keep camera rotation off while checking remaining wall/edge movement feel; only revisit weak `soft-follow` after fixed-camera PC movement feels stable.
+Do not: Add 90/180-degree auto-flip camera behavior or re-enable rotating default camera before the movement/collision pass is accepted.
+
+Date: 2026-05-31
+Observed: Stage 2 browser play verification used the current in-app browser plus a same-tab admin flow. The host page created a 30-runner bot pack and start command, the player direct-launch race screen loaded without console errors, the gate disappeared after countdown, and repeated Shift+D input moved the player through multiple course segments. Full automated finish remained inefficient because the browser API sends short key taps rather than a sustained held sprint.
+Changed: Strengthened `tools/smoke-singularity-race-progression.cjs` so the result restart guard now checks that connected preview session, action state, and stale runner motion are cleared before re-entry.
+Verified: Browser admin/player flow had no console errors during room start, countdown, and extended player movement. `node tools/smoke-singularity-race-progression.cjs`, `node tools/check-restored-marathon-contract.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: Automated browser control did not complete a whole manual-feel race because it cannot hold Shift+D continuously like a human. A human/manual browser pass is still the best final judgment for PC 3-run feel.
+Next: If the player reports no wall/edge sticking after manual play, treat Singularity Race 0.1 as close enough and move to mobile one-run verification. If sticking remains, tune only lane/forward/collision constants in one small slice.
+Do not: Treat the in-app tap-loop as equivalent to a real held-key playtest, or add more race mechanics before manual PC feel is confirmed.
+
+Date: 2026-05-31
+Observed: Continued the staged Singularity Race 0.1 hardening after the user approved splitting risky work into small bug-fix steps. Browser lobby and room entry were error-free, but the road-boundary motion guard was still inline-only and the result panel lacked an explicit return/restart loop.
+Changed: Extracted the road-boundary held-key movement guard to `src/restored/games/singularity-race-runner-motion.js` with pure validation cases for finish/start/lane edges, wired the HTML through that helper, documented it, and added a `다시 대기` result button that clears current race/action/session preview state before returning to lobby/queue. The progression smoke now guards result restart tokens.
+Verified: Browser reload of the current `singularity-race.html?devOnline=1&roomId=room:singularity-race:dev-001` had no console errors. `node tools/check-restored-marathon-contract.cjs`, `node tools/smoke-singularity-race-progression.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed.
+Blocked: Full PC 3-run and mobile 1-run manual completion are still not done inside the in-app browser. The next risky work should wait for actual play feel feedback.
+Next: Play one real PC race from room start through finish and press `다시 대기`; only tune lane/forward speed or collision constants if road-edge sticking still feels wrong.
+Do not: Bundle camera rotation, mobile joystick tuning, and speed/collision constant changes into the same slice.
+
+Date: 2026-05-31
+Observed: Rechecked the Singularity Race feel hypothesis. The priority order is still correct: PC WASD and road-edge/sticking feel first, then camera, animation polish, mobile, and finish/restart checks. The smallest confirmed gap was that player running state could still be driven by held input even when the runner had no visible movement at a road/lane boundary.
+Changed: Updated the race runner motion gate so the local player only keeps the run cycle from actual visible movement or from a still-possible movement direction. Added a marathon contract token guard for the new boundary-motion helper.
+Verified: `node tools/check-restored-marathon-contract.cjs`, `node tools/smoke-singularity-race-progression.cjs`, `node tools/smoke-singularity-race-render-budget.cjs`, `git diff --check`, browser reload of `singularity-race.html?devOnline=1&roomId=room:singularity-race:dev-001` with no console errors, and `npm run check` passed.
+Blocked: Browser host/player dual-tab play was limited by the in-app browser session keeping a single active tab, so the 3-run manual completion pass still needs a real interactive browser pass.
+Next: Continue with the next small feel slice: direct PC play pass for road-edge/lane clamp, then tune actual lane/forward speed only if the new no-movement animation guard is not enough.
+Do not: Treat held keys alone as proof the runner is moving at road boundaries, or jump to camera/mobile tuning before PC boundary feel is confirmed.
+
+Date: 2026-05-31
+Observed: Work prep found the existing Singularity Race working tree had shifted the player track world size to the shared `RESTORED_MARATHON_WORLD_WIDTH` import, while the marathon contract check still expected the old inline `TRACK_WORLD_WIDTH = 9200` token in `singularity-race.html`.
+Changed: Updated `tools/check-restored-marathon-contract.cjs` to guard the imported shared width constant instead of the removed inline literal.
+Verified: `node tools/check-restored-marathon-contract.cjs` and `npm run check` passed.
+Blocked: None for workspace preparation. Browser play verification was not run because this was only a check-guard prep fix.
+Next: Continue from the existing Singularity Race worktree or run a browser play check on `singularity-race.html` / `singularity-race-admin.html` before further race-feel tuning.
+Do not: Reintroduce player/admin world-size drift or duplicate the marathon world size as an unrelated inline literal.
+
+Date: 2026-05-28
+Observed: Runner sprites still felt too static while moving because all skins shared one small run-cycle rhythm.
+Changed: Added lightweight per-skin run-style tagging in `singularity-race-runner-view.js` and CSS run animations for stride, quick, bounce/hop, robot, glide, and heavy movement. This keeps the existing static skin assets but makes robots step mechanically, meme runners bounce, and smoother human skins glide/lean while running.
+Verified: `node tools/check-restored-marathon-contract.cjs`, `node tools/check-size.cjs`, and `node tools/smoke-singularity-race-render-budget.cjs` passed. Browser automation opened the race screen and confirmed the selected Kaguya runner had `data-run-style="glide"` and used the `runner-run-glide` animation while moving.
+Blocked: This is still CSS motion, not true multi-frame sprite animation. Final character-specific frame sheets can replace or extend these run styles later.
+Next: Keep this as the cheap running-feel layer while playtesting; only add real frame sheets for favorite skins once final art direction is stable.
+Do not: Add large per-character animation assets or per-frame DOM overlays before the core route and online movement are stable.
+
+Date: 2026-05-28
+Observed: In the redesigned Singularity Race route, lateral lane movement felt too fast compared with forward progress, and chat did not surface immediately above the runner when a player talked.
+Changed: Slowed `W/S` lane movement, increased forward run/sprint feel, aligned the server sprint pace with the new client sprint prediction, and added local runner-head chat bubbles with capped text plus cooldown/burst guards for chat spam. The runner DOM helper now owns the chat bubble span so track rendering reuses existing avatar nodes instead of creating extra overlay rows.
+Verified: `node tools/check-restored-marathon-contract.cjs`, `node tools/smoke-singularity-race-progression.cjs`, `node tools/smoke-singularity-race-camera.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm.cmd run check` passed. Browser automation created a dev room, opened the race screen, submitted chat, confirmed the runner bubble displayed a 42-character clipped message, and confirmed rapid follow-up chat was blocked with the input left intact.
+Blocked: None for this movement/chat-feel slice.
+Next: Continue playtesting the new course with real start/turn segments and tune the forward/lane speed again only after live feel feedback.
+Do not: Let side-lane movement become faster than forward racing, or put chat bubble rendering into a separate per-frame DOM overlay.
+
+Date: 2026-05-28
+Observed: The current Singularity Race course had become a mostly straight/log-curve run, and the first maze replacement still felt too arbitrary compared with the human's new draft.
+Changed: Replaced the single active trail geometry with the draft-shaped stadium route: lower long straight start, folded right-side maze corridors, upper long finish straight, and three save/reward stages. The player/admin/full-map renderers draw the finish marker from the active geometry instead of a hardcoded old finish line. The default race camera is fixed/non-rotating, with soft/road-follow rotation kept only as optional guarded modes.
+Verified: `node tools/smoke-singularity-race-camera.cjs`, `node tools/check-restored-marathon-contract.cjs`, `node tools/check-size.cjs`, `node tools/smoke-singularity-race-progression.cjs`, `node tools/smoke-singularity-race-render-budget.cjs`, `git diff --check`, and `npm.cmd run check` passed. Browser automation confirmed the admin map and player race screen render the draft-shaped path with three save labels and `rotate(0rad)`.
+Blocked: None for this map redesign slice.
+Next: Tune route pacing, start-pack spacing, and later gravity/event zones only after live play confirms the new draft-shaped course feels fun.
+Do not: Re-enable default camera rotation on the maze course or add multiple map choices before the single redesigned map feels good.
+
 Date: 2026-05-28
 Observed: Bug review found that `adminLaunch=1` could still show the race surface without any created dev room, the player page always preferred the first dev room instead of the host-selected room link, and dev chat/control storage still had global keys that could leak across room delete/recreate loops.
 Changed: Gated direct race launch behind an actually open dev room, added `roomId` to admin game links and player room selection, ordered the dev adapter around the requested room, moved race-control and test-bot commands to room-scoped storage keys, split room-scoped chat storage into `marathon-dev-chat-storage.js`, and cleared room packets/chat/control keys when a dev room is created or deleted.

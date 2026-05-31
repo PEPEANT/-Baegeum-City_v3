@@ -1257,6 +1257,25 @@
       white-space: nowrap;
     }
 
+    .race-result-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .race-result-actions button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 8px;
+      padding: 0 14px;
+      background: #1d2b25;
+      color: #f8fff9;
+      font-size: 12px;
+      font-weight: 950;
+      cursor: pointer;
+      box-shadow: 0 8px 16px rgba(16, 19, 27, 0.18);
+    }
+
     .race-minimap {
       position: absolute;
       top: 12px;
@@ -1489,6 +1508,11 @@
       width: 34px;
       height: 34px;
       --runner-facing-scale: 1;
+      --runner-run-animation: runner-run-cycle;
+      --runner-run-duration: 0.32s;
+      --runner-sprint-duration: 0.22s;
+      --runner-shadow-tight: 0.72;
+      --runner-shadow-wide: 1.08;
       padding: 0;
       border: 0;
       border-radius: 50%;
@@ -1531,9 +1555,56 @@
       --runner-facing-scale: -1;
     }
 
+    .runner-avatar[data-run-style="quick"] {
+      --runner-run-animation: runner-run-quick;
+      --runner-run-duration: 0.28s;
+      --runner-sprint-duration: 0.19s;
+      --runner-shadow-tight: 0.64;
+      --runner-shadow-wide: 1.16;
+    }
+
+    .runner-avatar[data-run-style="bounce"],
+    .runner-avatar[data-run-style="hop"] {
+      --runner-run-animation: runner-run-bounce;
+      --runner-run-duration: 0.34s;
+      --runner-sprint-duration: 0.22s;
+      --runner-shadow-tight: 0.58;
+      --runner-shadow-wide: 1.22;
+    }
+
+    .runner-avatar[data-run-style="robot"] {
+      --runner-run-animation: runner-run-robot;
+      --runner-run-duration: 0.26s;
+      --runner-sprint-duration: 0.18s;
+      --runner-shadow-tight: 0.8;
+      --runner-shadow-wide: 1;
+    }
+
+    .runner-avatar[data-run-style="glide"] {
+      --runner-run-animation: runner-run-glide;
+      --runner-run-duration: 0.36s;
+      --runner-sprint-duration: 0.25s;
+      --runner-shadow-tight: 0.7;
+      --runner-shadow-wide: 1.1;
+    }
+
+    .runner-avatar[data-run-style="heavy"] {
+      --runner-run-animation: runner-run-heavy;
+      --runner-run-duration: 0.38s;
+      --runner-sprint-duration: 0.26s;
+      --runner-shadow-tight: 0.86;
+      --runner-shadow-wide: 1.08;
+    }
+
     .runner-avatar.is-stunned {
       filter:
         drop-shadow(0 0 7px rgba(98, 206, 255, 0.84))
+        drop-shadow(0 5px 5px rgba(16, 19, 27, 0.34));
+    }
+
+    .runner-avatar.is-attacking {
+      filter:
+        drop-shadow(0 0 7px rgba(255, 216, 108, 0.78))
         drop-shadow(0 5px 5px rgba(16, 19, 27, 0.34));
     }
 
@@ -1548,11 +1619,11 @@
     }
 
     .runner-avatar.is-running img {
-      animation: runner-run-cycle 0.32s steps(2, end) infinite;
+      animation: var(--runner-run-animation) var(--runner-run-duration) steps(2, end) infinite;
     }
 
     .runner-avatar.is-sprinting img {
-      animation-duration: 0.22s;
+      animation-duration: var(--runner-sprint-duration);
     }
 
     .runner-avatar.is-running::before {
@@ -1572,6 +1643,30 @@
 
     .runner-avatar.is-stunned img {
       animation: runner-stun-pulse 0.18s steps(2, end) infinite;
+    }
+
+    .runner-avatar.is-attacking img {
+      animation: runner-attack-lunge 0.34s ease-out both;
+    }
+
+    .runner-attack-swipe {
+      position: absolute;
+      left: 53%;
+      top: 5px;
+      width: 27px;
+      height: 18px;
+      border-top: 3px solid rgba(255, 216, 108, 0.92);
+      border-right: 3px solid rgba(255, 216, 108, 0.92);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(0) scaleX(var(--runner-facing-scale, 1)) rotate(10deg);
+      transform-origin: left center;
+      z-index: 3;
+    }
+
+    .runner-avatar.is-attacking .runner-attack-swipe {
+      animation: runner-attack-swipe 0.34s ease-out both;
     }
 
     .runner-avatar.is-reward-skin {
@@ -1632,6 +1727,40 @@
       filter: drop-shadow(0 0 5px var(--runner-reward-color));
     }
 
+    .runner-chat-bubble {
+      position: absolute;
+      left: 50%;
+      bottom: calc(100% + 8px);
+      max-width: 156px;
+      padding: 5px 8px;
+      border: 1px solid rgba(74, 91, 84, 0.2);
+      border-radius: 8px;
+      background: rgba(255, 255, 252, 0.94);
+      color: #17231e;
+      font-size: 11px;
+      font-weight: 850;
+      line-height: 1.2;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateX(-50%) translateY(4px);
+      box-shadow: 0 6px 14px rgba(16, 19, 27, 0.18);
+      z-index: 4;
+    }
+
+    .runner-chat-bubble.has-text {
+      opacity: 1;
+      animation: runner-chat-pop 180ms ease-out both;
+    }
+
+    .runner-avatar.is-player .runner-chat-bubble {
+      border-color: rgba(120, 219, 147, 0.55);
+      background: rgba(232, 255, 237, 0.96);
+    }
+
     .runner-nameplate {
       position: absolute;
       left: 50%;
@@ -1680,9 +1809,39 @@
       100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) skewX(-2deg) scaleX(1.03); }
     }
 
+    @keyframes runner-run-quick {
+      0% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-2deg) skewX(-3deg) scaleX(1.04); }
+      50% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-2px) rotate(2deg) skewX(3deg) scaleX(0.98); }
+      100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-2deg) skewX(-3deg) scaleX(1.04); }
+    }
+
+    @keyframes runner-run-bounce {
+      0% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-1deg) scaleX(1.06) scaleY(0.96); }
+      45% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-5px) rotate(2deg) scaleX(0.96) scaleY(1.06); }
+      100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-1deg) scaleX(1.06) scaleY(0.96); }
+    }
+
+    @keyframes runner-run-robot {
+      0% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(0deg); }
+      50% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-1px) rotate(4deg); }
+      100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(0deg); }
+    }
+
+    @keyframes runner-run-glide {
+      0% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) translateX(-1px) skewX(-5deg) scaleX(1.02); }
+      50% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-2px) translateX(1px) skewX(4deg) scaleX(0.99); }
+      100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) translateX(-1px) skewX(-5deg) scaleX(1.02); }
+    }
+
+    @keyframes runner-run-heavy {
+      0% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-1deg) scaleX(1.04) scaleY(0.98); }
+      50% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-2px) rotate(1deg) scaleX(0.98) scaleY(1.03); }
+      100% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(-1deg) scaleX(1.04) scaleY(0.98); }
+    }
+
     @keyframes runner-foot-shadow {
-      0%, 100% { transform: translateX(-50%) scaleX(0.72); opacity: 0.48; }
-      50% { transform: translateX(-50%) scaleX(1.08); opacity: 0.72; }
+      0%, 100% { transform: translateX(-50%) scaleX(var(--runner-shadow-tight)); opacity: 0.48; }
+      50% { transform: translateX(-50%) scaleX(var(--runner-shadow-wide)); opacity: 0.72; }
     }
 
     @keyframes runner-contact-flash {
@@ -1696,6 +1855,28 @@
       50% { transform: scaleX(var(--runner-facing-scale, 1)) translateY(-1px) rotate(3deg); opacity: 1; }
     }
 
+    @keyframes runner-attack-lunge {
+      0% { transform: translateX(0) scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(0deg) scale(1); }
+      35% { transform: translateX(calc(5px * var(--runner-facing-scale, 1))) scaleX(var(--runner-facing-scale, 1)) translateY(-2px) rotate(-7deg) scale(1.08); }
+      62% { transform: translateX(calc(3px * var(--runner-facing-scale, 1))) scaleX(var(--runner-facing-scale, 1)) translateY(1px) rotate(4deg) scale(0.98); }
+      100% { transform: translateX(0) scaleX(var(--runner-facing-scale, 1)) translateY(0) rotate(0deg) scale(1); }
+    }
+
+    @keyframes runner-attack-swipe {
+      0% {
+        opacity: 0;
+        transform: translateX(0) scaleX(var(--runner-facing-scale, 1)) scale(0.62) rotate(-24deg);
+      }
+      35% {
+        opacity: 1;
+        transform: translateX(calc(12px * var(--runner-facing-scale, 1))) scaleX(var(--runner-facing-scale, 1)) scale(1.08) rotate(8deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(calc(22px * var(--runner-facing-scale, 1))) scaleX(var(--runner-facing-scale, 1)) scale(0.88) rotate(32deg);
+      }
+    }
+
     @keyframes runner-reward-pulse {
       0%, 100% { box-shadow: 0 0 0 4px var(--runner-reward-soft), 0 0 12px var(--runner-reward-color); }
       50% { box-shadow: 0 0 0 8px rgba(255, 255, 255, 0), 0 0 22px var(--runner-reward-color); }
@@ -1706,10 +1887,18 @@
       100% { opacity: 1; transform: scale(1) translateY(0); }
     }
 
+    @keyframes runner-chat-pop {
+      0% { opacity: 0; transform: translateX(-50%) translateY(8px) scale(0.94); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .player-focus-ring,
       .track-countdown,
       .track-cue,
+      .runner-chat-bubble.has-text,
+      .runner-avatar.is-attacking img,
+      .runner-avatar.is-attacking .runner-attack-swipe,
       .runner-avatar img,
       .runner-avatar::before,
       .runner-avatar.is-reward-skin,
@@ -2205,6 +2394,9 @@
             <strong id="race-result-title">완주 완료</strong>
             <span id="race-result-copy">최종 기록을 정리하고 있습니다.</span>
             <ol class="race-result-list" id="race-result-list"></ol>
+            <div class="race-result-actions">
+              <button id="race-result-restart" type="button">다시 대기</button>
+            </div>
           </div>
         </div>
         <div class="race-mobile-controls" id="race-mobile-controls" aria-label="모바일 경기 조작">
@@ -2339,6 +2531,9 @@
     } from "./src/restored/games/marathon-combat-contract.js";
     import {
       RESTORED_MARATHON_TRAIL_SAVE_POINTS,
+      RESTORED_MARATHON_WORLD_WIDTH,
+      RESTORED_MARATHON_WORLD_HEIGHT,
+      calculateRestoredMarathonSpeedScale,
       createRestoredMarathonTrailSaveCheckpointMeters,
       createRestoredMarathonTrailSvgPath,
       estimateRestoredMarathonTrailProgressFromPoint,
@@ -2391,7 +2586,11 @@
       advanceSingularityRaceLocalPrediction
     } from "./src/restored/games/singularity-race-prediction.js";
     import {
+      hasPotentialSingularityPlayerMovement
+    } from "./src/restored/games/singularity-race-runner-motion.js";
+    import {
       createSingularityRaceAnchoredCamera,
+      lerpSingularityRaceCameraCenter,
       resolveSingularityRaceScreenPointToTrackPercent
     } from "./src/restored/games/singularity-race-camera.js";
     import {
@@ -2416,8 +2615,8 @@
     } from "./src/restored/games/singularity-race-control.js";
 
     const MAX_RUNNERS = 30;
-    const TRACK_WORLD_WIDTH = 9200;
-    const TRACK_WORLD_HEIGHT = 3600;
+    const TRACK_WORLD_WIDTH = RESTORED_MARATHON_WORLD_WIDTH;
+    const TRACK_WORLD_HEIGHT = RESTORED_MARATHON_WORLD_HEIGHT;
     const TRACK_CAMERA_X_ANCHOR = 0.5;
     const TRACK_CAMERA_Y_ANCHOR = 0.5;
     const TRACK_CAMERA_DEFAULT_ZOOM = 1;
@@ -2430,12 +2629,17 @@
     const START_GATE_OPEN_ANIMATION_MS = 900;
     const START_PADDOCK_MAX_PROGRESS = START_GATE_PROGRESS - START_GATE_CLEARANCE_PROGRESS;
     const ROAD_LANE_HALF_WIDTH_PX = 232;
-    const LOCAL_LANE_SPEED_PX_PER_SECOND = 104;
-    const LOCAL_LANE_SPRINT_SPEED_PX_PER_SECOND = 126;
-    const LOCAL_STAGING_RUN_PROGRESS_PER_SECOND = 1.15;
-    const LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND = 2.7;
-    const LOCAL_RUN_PROGRESS_PER_SECOND = 0.72;
-    const LOCAL_SPRINT_PROGRESS_PER_SECOND = 1.85;
+    const LOCAL_LANE_SPEED_PX_PER_SECOND = 150;
+    const LOCAL_LANE_SPRINT_SPEED_PX_PER_SECOND = 210;
+    const LOCAL_STAGING_RUN_PROGRESS_PER_SECOND = 1.0;
+    const LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND = 2.05;
+    const LOCAL_RUN_PROGRESS_PER_SECOND = 0.62;
+    const LOCAL_SPRINT_PROGRESS_PER_SECOND = 1.75;
+    const CHAT_BUBBLE_MAX_LENGTH = 42;
+    const CHAT_BUBBLE_VISIBLE_MS = 3600;
+    const CHAT_SEND_COOLDOWN_MS = 900;
+    const CHAT_SPAM_WINDOW_MS = 8000;
+    const CHAT_SPAM_MAX_MESSAGES = 5;
     const SOFT_PASS_RADIUS = 1.2;
     const SOFT_PASS_BODY_RADIUS_PX = 78;
     const SOFT_PASS_MIN_SPEED_FACTOR = 0.62;
@@ -2574,6 +2778,7 @@
       raceResultTitle: document.querySelector("#race-result-title"),
       raceResultCopy: document.querySelector("#race-result-copy"),
       raceResultList: document.querySelector("#race-result-list"),
+      raceResultRestart: document.querySelector("#race-result-restart"),
       actionCharacter: document.querySelector("#action-character"),
       actionSkill: document.querySelector("#action-skill"),
       actionHp: document.querySelector("#action-hp"),
@@ -2618,6 +2823,10 @@
       raceOptionsOpen: false,
       runnerVisuals: new Map(),
       runnerMotion: new Map(),
+      runnerChatBubbles: new Map(),
+      recentChatSentAtMs: [],
+      lastChatSentAtMs: 0,
+      lastChatBlockedNoticeAtMs: 0,
       lastVisualFrameMs: 0,
       renderCache: {
         lastHudMs: 0,
@@ -2756,6 +2965,10 @@
       focusChatInput();
     });
 
+    elements.raceResultRestart.addEventListener("click", () => {
+      restartRaceAfterResult();
+    });
+
     elements.fillButton.addEventListener("click", () => {
       pushSystem("테스트 봇은 방장 페이지에서만 넣거나 비울 수 있습니다.");
       renderAll();
@@ -2868,6 +3081,13 @@
       event.preventDefault();
       const text = elements.chatInput.value.trim().replace(/\s+/g, " ");
       if (!text) return;
+      const now = Date.now();
+      const chatGate = acceptChatSend(now);
+      if (!chatGate.ok) {
+        showChatBlockedNotice(chatGate.message, now);
+        renderMessages();
+        return;
+      }
       const appended = chatTransport.submitMessage(state.messages, {
         channelId: state.activeChannel,
         senderId: state.participantType === "spectator" ? "spectator:you" : "player:you",
@@ -2877,12 +3097,60 @@
       });
       if (appended.ok) {
         state.messages = appended.messages;
+        if (state.participantType !== "spectator") showRunnerChatBubble("you", text, now);
       } else {
-        pushSystem(`Chat blocked: ${appended.reason}`);
+        showChatBlockedNotice("채팅을 보낼 수 없습니다.", now);
       }
       elements.chatInput.value = "";
       renderAll();
     });
+
+    function acceptChatSend(now) {
+      const recent = state.recentChatSentAtMs
+        .filter((sentAtMs) => now - sentAtMs < CHAT_SPAM_WINDOW_MS);
+      state.recentChatSentAtMs = recent;
+      if (now - state.lastChatSentAtMs < CHAT_SEND_COOLDOWN_MS) {
+        return { ok: false, message: "채팅은 잠깐 쉬었다가 보낼 수 있습니다." };
+      }
+      if (recent.length >= CHAT_SPAM_MAX_MESSAGES) {
+        return { ok: false, message: "채팅이 너무 빠릅니다. 잠시 후 다시 보내주세요." };
+      }
+      state.lastChatSentAtMs = now;
+      state.recentChatSentAtMs.push(now);
+      return { ok: true };
+    }
+
+    function showChatBlockedNotice(text, now) {
+      if (now - state.lastChatBlockedNoticeAtMs < 1600) return;
+      state.lastChatBlockedNoticeAtMs = now;
+      pushSystem(text);
+    }
+
+    function showRunnerChatBubble(runnerId, text, now) {
+      const bubbleText = clampChatBubbleText(text);
+      if (!bubbleText) return;
+      state.runnerChatBubbles.set(runnerId, {
+        text: bubbleText,
+        untilMs: now + CHAT_BUBBLE_VISIBLE_MS
+      });
+    }
+
+    function getRunnerChatBubbleText(runnerId, now) {
+      const bubble = state.runnerChatBubbles.get(runnerId);
+      if (!bubble) return "";
+      if (Number(bubble.untilMs || 0) <= now) {
+        state.runnerChatBubbles.delete(runnerId);
+        return "";
+      }
+      return bubble.text || "";
+    }
+
+    function clampChatBubbleText(text) {
+      const normalized = String(text || "").trim().replace(/\s+/g, " ");
+      if (!normalized) return "";
+      if (normalized.length <= CHAT_BUBBLE_MAX_LENGTH) return normalized;
+      return `${normalized.slice(0, CHAT_BUBBLE_MAX_LENGTH - 3)}...`;
+    }
 
     function setTrackWorldSize() {
       elements.trackWorld.style.setProperty("--track-world-width", `${TRACK_WORLD_WIDTH}px`);
@@ -2985,6 +3253,34 @@
         state.runners = createRunners(1, state.selectedSkin, false);
       }
       pushSystem("경기장 화면으로 이동했습니다. 방장 시작을 기다립니다.");
+      renderAll();
+    }
+
+    function restartRaceAfterResult() {
+      if (!state.action.finalResult) return;
+      releaseVirtualMoveKeys(false);
+      unsubscribeRoomPackets();
+      unsubscribeRoomPackets = () => {};
+      roomPacketTransport = null;
+      connectedDevServer = null;
+      connectedDevLoopState = null;
+      connectedDevClients = [];
+      state.connectedSession = null;
+      state.connectedPackets = [];
+      state.lastConnectedSnapshotSequence = 0;
+      state.connectedInputSequence = 0;
+      state.netcodePressure = null;
+      state.action = createActionRaceState();
+      state.runnerVisuals.clear();
+      state.runnerMotion.clear();
+      state.runnerChatBubbles.clear();
+      state.lastVisualFrameMs = 0;
+      state.renderCache.minimapPlayerNode = null;
+      state.raceQueueOpen = false;
+      state.raceOptionsOpen = false;
+      state.runners = createRunners(Math.max(1, state.testBotTargetCount || 1), state.selectedSkin, false);
+      setScreen(connectedLobbyOpen ? SINGULARITY_RACE_SCREENS.LOBBY : SINGULARITY_RACE_SCREENS.QUEUE);
+      pushSystem("결과를 정리하고 대기 상태로 돌아왔습니다.");
       renderAll();
     }
 
@@ -3301,6 +3597,8 @@
         lastFacingDirection: "right",
         stallUntilMs: 0,
         attackCooldownUntilMs: 0,
+        attackVisualUntilMs: 0,
+        attackFacingDirection: "right",
         checkpointIndex: 0,
         hp: 100,
         maxHp: 100,
@@ -3419,6 +3717,8 @@
       });
       state.action.attackCooldownUntilMs = now + action.cooldownMs;
       state.action.stallUntilMs = Math.max(state.action.stallUntilMs, now + action.selfStallMs);
+      state.action.attackVisualUntilMs = now + Math.min(action.selfStallMs, 420);
+      state.action.attackFacingDirection = attackDirection < 0 ? "left" : "right";
       state.runners[0] = { ...player, collisionAtMs: now };
       if (!state.connectedSession) {
         pushActionPacket(
@@ -4210,7 +4510,9 @@
         ? (staging ? LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND : LOCAL_SPRINT_PROGRESS_PER_SECOND)
         : (staging ? LOCAL_STAGING_RUN_PROGRESS_PER_SECOND : LOCAL_RUN_PROGRESS_PER_SECOND);
       const lateralSpeed = sprinting ? LOCAL_LANE_SPRINT_SPEED_PX_PER_SECOND : LOCAL_LANE_SPEED_PX_PER_SECOND;
-      const forwardAmount = direction.x * forwardSpeed * elapsedSeconds;
+      const trailPoint = progressToRestoredMarathonTrailPoint(Number(player.progress) || START_LINE_PROGRESS);
+      const speedScale = calculateRestoredMarathonSpeedScale(trailPoint.tangent);
+      const forwardAmount = direction.x * forwardSpeed * speedScale * elapsedSeconds;
       const lateralAmount = direction.y * lateralSpeed * elapsedSeconds;
       const pressure = calculateSoftPassPressure(player.id, player.progress, player.laneOffsetPx || 0);
       const maxProgress = state.action.raceStarted ? RAIL_MAX_PROGRESS : START_PADDOCK_MAX_PROGRESS;
@@ -4686,6 +4988,7 @@
     function renderTrailMap() {
       const path = createRestoredMarathonTrailSvgPath();
       const savePoints = listRestoredMarathonTrailSavePoints();
+      const finishLine = trailMarkerLine(progressToRestoredMarathonTrailPoint(100), 4.4);
       elements.trailMap.replaceChildren(
         svgNode("path", { class: "trail-outline", d: path }),
         svgNode("path", { class: "trail-surface", d: path }),
@@ -4703,8 +5006,7 @@
             svgText(savePoint.index, labelPoint.x, labelPoint.y)
           ];
         }),
-        svgNode("line", { class: "trail-finish-line", x1: 89.5, y1: 4, x2: 96, y2: 4 }),
-        svgNode("line", { class: "trail-finish-line", x1: 92.75, y1: 1.5, x2: 92.75, y2: 6.5 })
+        svgNode("line", { class: "trail-finish-line", ...finishLine })
       );
     }
 
@@ -4872,6 +5174,15 @@
       };
     }
 
+    function trailMarkerLine(point, half = 3.8) {
+      return {
+        x1: Math.max(2, Math.min(98, point.x - (point.normal?.x || 0) * half)),
+        y1: Math.max(2, Math.min(98, point.y - (point.normal?.y || 1) * half)),
+        x2: Math.max(2, Math.min(98, point.x + (point.normal?.x || 0) * half)),
+        y2: Math.max(2, Math.min(98, point.y + (point.normal?.y || 1) * half))
+      };
+    }
+
     function svgNode(tagName, attributes) {
       const node = document.createElementNS("http://www.w3.org/2000/svg", tagName);
       for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value));
@@ -4901,6 +5212,8 @@
         const point = smoothRunnerVisualPoint(runner, index, visualTiming.elapsedMs);
         const motion = updateRunnerMotionState(runner, point, visualTiming);
         const stunned = isRunnerStunned(runner, visualTiming.now);
+        const attacking = runner.id === "you" && Number(state.action.attackVisualUntilMs || 0) > visualTiming.now;
+        const facing = attacking ? state.action.attackFacingDirection || motion.facing : motion.facing;
         const colliding = runner.collisionAtMs && visualTiming.now - runner.collisionAtMs < 520;
         const rewardSkinActive = isRunnerRewardSkinActive(runner, visualTiming.now);
         const rewardSkinGrade = rewardSkinActive ? String(runner.rewardSkinGrade || "").toLowerCase() : "";
@@ -4909,9 +5222,10 @@
         avatar.className = [
           "runner-avatar",
           runner.id === "you" ? "is-player" : "",
-          motion.facing === "left" ? "is-facing-left" : "",
+          facing === "left" ? "is-facing-left" : "",
           motion.running ? "is-running" : "is-idle",
           motion.sprinting ? "is-sprinting" : "",
+          attacking ? "is-attacking" : "",
           stunned ? "is-stunned" : "",
           colliding ? "is-colliding" : "",
           rewardSkinActive ? "is-reward-skin" : "",
@@ -4927,7 +5241,9 @@
         avatar.style.left = `${point.x}%`;
         avatar.style.top = `${point.y}%`;
         avatar.style.zIndex = String(4 + Math.round(runner.progress * 10));
-        updateSingularityRunnerAvatarNode(avatar, runner, getSingularityRaceSkinDataUrl(runner.skin, "side"));
+        updateSingularityRunnerAvatarNode(avatar, runner, getSingularityRaceSkinDataUrl(runner.skin, "side"), {
+          chatBubbleText: getRunnerChatBubbleText(runner.id, visualTiming.now)
+        });
         elements.trackRunners.append(avatar);
       }
       for (const [runnerId, node] of existing) {
@@ -4960,8 +5276,10 @@
       const elapsedSeconds = Math.max(0.016, (timing.elapsedMs || 60) / 1000);
       const distance = previous ? Math.hypot(point.x - previous.x, point.y - previous.y) : 0;
       const speed = distance / elapsedSeconds;
-      const movingByInput = runner.id === "you" && (hasMovementKeyHeld() || hasRecentMovementInput(timing.now));
-      const moving = runner.id === "you" ? movingByInput : distance > 0.006;
+      const movedVisibly = distance > 0.006;
+      const movingByInput = runner.id === "you"
+        && (movedVisibly || (hasRecentMovementInput(timing.now) && hasPotentialPlayerMovement(runner)));
+      const moving = runner.id === "you" ? movingByInput : movedVisibly;
       const facing = resolveRunnerFacing(runner, previous);
       const lastMovedAtMs = moving ? timing.now : previous?.lastMovedAtMs || 0;
       const running = state.screen === SINGULARITY_RACE_SCREENS.RACE
@@ -4987,6 +5305,15 @@
 
     function hasMovementKeyHeld() {
       return VIRTUAL_MOVE_KEYS.some((code) => Boolean(state.action.keys[code]));
+    }
+
+    function hasPotentialPlayerMovement(runner) {
+      return hasPotentialSingularityPlayerMovement(runner, state.action.keys, {
+        minProgress: state.action.raceStarted ? RAIL_MIN_PROGRESS : START_PADDOCK_MIN_PROGRESS,
+        maxProgress: state.action.raceStarted ? RAIL_MAX_PROGRESS : START_PADDOCK_MAX_PROGRESS,
+        laneHalfWidthPx: ROAD_LANE_HALF_WIDTH_PX,
+        startProgress: START_LINE_PROGRESS
+      });
     }
 
     function hasRecentMovementInput(now = Date.now()) {

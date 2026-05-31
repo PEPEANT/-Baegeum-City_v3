@@ -1,4 +1,6 @@
-import { progressToRestoredMarathonTrailPoint } from "./marathon-trail-geometry.js";
+import { progressToRestoredMarathonTrailPoint, RESTORED_MARATHON_WORLD_WIDTH, RESTORED_MARATHON_WORLD_HEIGHT } from "./marathon-trail-geometry.js";
+
+const CAMERA_SMOOTH_SPEED = 12;
 
 export const SINGULARITY_RACE_CAMERA_MODES = Object.freeze({
   FIXED: "fixed",
@@ -7,10 +9,10 @@ export const SINGULARITY_RACE_CAMERA_MODES = Object.freeze({
 });
 
 export const DEFAULT_SINGULARITY_RACE_CAMERA_OPTIONS = Object.freeze({
-  mode: SINGULARITY_RACE_CAMERA_MODES.SOFT_FOLLOW,
+  mode: SINGULARITY_RACE_CAMERA_MODES.FIXED,
   rotationStartProgress: 42,
   rotationFullProgress: 86,
-  maxRotationDegrees: 72,
+  maxRotationDegrees: 35,
   rotationSmoothing: 0.18,
   maxRotationStepRad: 0.045,
   anchorXRatio: 0.5,
@@ -56,6 +58,15 @@ export function createSingularityRaceAnchoredCamera({
       `translate3d(${-playerPixel.x}px, ${-playerPixel.y}px, 0)`
     ].join(" ")
   });
+}
+
+export function lerpSingularityRaceCameraCenter(smoothed, target, deltaSeconds) {
+  if (!smoothed) return { x: target.x, y: target.y };
+  const t = 1 - Math.exp(-CAMERA_SMOOTH_SPEED * Math.min(deltaSeconds, 0.25));
+  return {
+    x: smoothed.x + (target.x - smoothed.x) * t,
+    y: smoothed.y + (target.y - smoothed.y) * t
+  };
 }
 
 export function calculateSingularityRaceCameraTargetRotation(progress, {
@@ -114,8 +125,18 @@ export function resolveSingularityRaceScreenPointToTrackPercent({
 
 export function validateSingularityRaceCameraContract() {
   const errors = [];
+  if (DEFAULT_SINGULARITY_RACE_CAMERA_OPTIONS.mode !== SINGULARITY_RACE_CAMERA_MODES.FIXED) {
+    errors.push("default race camera mode must stay fixed for the 0.1 movement/collision pass");
+  }
+  if (DEFAULT_SINGULARITY_RACE_CAMERA_OPTIONS.maxRotationDegrees > 35) {
+    errors.push("optional camera rotation must stay capped before road-follow becomes public");
+  }
   const startAngle = calculateSingularityRaceCameraTargetRotation(4, { worldWidth: 7600, worldHeight: 2600 });
-  const curveAngle = calculateSingularityRaceCameraTargetRotation(90, { worldWidth: 7600, worldHeight: 2600 });
+  const curveAngle = calculateSingularityRaceCameraTargetRotation(70, {
+    worldWidth: 7600,
+    worldHeight: 2600,
+    options: { mode: SINGULARITY_RACE_CAMERA_MODES.SOFT_FOLLOW }
+  });
   const camera = createSingularityRaceAnchoredCamera({
     progress: 90,
     playerPixel: { x: 5000, y: 900 },
@@ -142,10 +163,15 @@ export function validateSingularityRaceCameraContract() {
   });
   if (Math.abs(startAngle) > 0.001) errors.push("start straight should stay unrotated");
   if (Math.abs(curveAngle) < 0.2) errors.push("curve section should rotate toward the road tangent");
+  if (Math.abs(camera.angleRad) > 0.001) errors.push("default race camera should stay fixed to avoid rotation jitter");
   if (!camera.transform.includes("rotate(") || !camera.transform.includes("scale(")) errors.push("anchored camera must expose CSS scale and rotate transforms");
   if (Math.abs(zoomed.scale - 1.4) > 0.001) errors.push("camera zoom should preserve requested scale");
   if (Math.abs(center.x - (5000 / 7600 * 100)) > 0.01) errors.push("screen center should map back to player x");
   if (Math.abs(center.y - (900 / 2600 * 100)) > 0.01) errors.push("screen center should map back to player y");
+  const lerpStart = lerpSingularityRaceCameraCenter(null, { x: 100, y: 200 }, 0.016);
+  if (lerpStart.x !== 100 || lerpStart.y !== 200) errors.push("lerp from null must snap to target");
+  const lerpSmooth = lerpSingularityRaceCameraCenter({ x: 0, y: 0 }, { x: 100, y: 200 }, 0.016);
+  if (lerpSmooth.x <= 0 || lerpSmooth.x >= 100) errors.push("lerp must approach target without overshoot");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 

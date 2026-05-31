@@ -1,6 +1,7 @@
 import { isBillboard } from "../data/billboard-ads.js";
 import { createWorldObjectId } from "../data/world-map-contract.js";
 import { buildingShellSizeLabel, cycleBuildingShellSize, isBuildingShell } from "./baegeum-world-editor-building-shells.js";
+import { initBuildingShellEditor, syncBuildingShellEditor } from "./baegeum-world-editor-building-shell-editor.js";
 import { isSelectionLayerLocked, isSelectionLocked, toggleSelectionLayerLock, toggleSelectionLock } from "./baegeum-world-editor-selection-lock.js";
 import { clone, labelFor, selectedItem } from "./baegeum-world-editor-utils.js";
 
@@ -12,6 +13,7 @@ export function initSelectionActions(ui, state, onChange) {
   ui.duplicateSelection.addEventListener("click", () => duplicateSelected(state, onChange));
   ui.deleteSelection.addEventListener("click", () => deleteSelected(state, onChange));
   ui.resizeBuildingShell.addEventListener("click", () => resizeBuildingShell(state, onChange));
+  initBuildingShellEditor(state, onChange);
 }
 
 export function syncSelectionActions(ui, state) {
@@ -34,6 +36,7 @@ export function syncSelectionActions(ui, state) {
   ui.resizeBuildingShell.hidden = !isBuildingShell(item);
   ui.resizeBuildingShell.disabled = !isBuildingShell(item);
   ui.resizeBuildingShell.textContent = isBuildingShell(item) ? `크기 ${buildingShellSizeLabel(item)}` : "크기";
+  syncBuildingShellEditor(state);
 }
 
 function lockSelected(state, onChange) {

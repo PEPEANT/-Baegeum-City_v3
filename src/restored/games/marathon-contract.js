@@ -18,7 +18,7 @@ const PACE_PROFILES = Object.freeze({
   recover: Object.freeze({ speedMetersPerSecond: 3.8, staminaPerSecond: 0.38 }),
   steady: Object.freeze({ speedMetersPerSecond: 5.2, staminaPerSecond: -0.04 }),
   push: Object.freeze({ speedMetersPerSecond: 6.4, staminaPerSecond: -0.14 }),
-  sprint: Object.freeze({ speedMetersPerSecond: 14.86, staminaPerSecond: -0.4 })
+  sprint: Object.freeze({ speedMetersPerSecond: 14.06, staminaPerSecond: -0.4 })
 });
 
 const DEFAULT_COURSE = Object.freeze({

@@ -19,12 +19,15 @@ async function main() {
   const netcode = await import(pathToFileURL(path.join(root, "src/restored/online/marathon-netcode-contract.js")));
   const localSim = await import(pathToFileURL(path.join(root, "src/restored/games/singularity-race-local-sim.js")));
   const prediction = await import(pathToFileURL(path.join(root, "src/restored/games/singularity-race-prediction.js")));
+  const trailGeometry = await import(pathToFileURL(path.join(root, "src/restored/games/marathon-trail-geometry.js")));
 
   const startProgress = readNumberConstant("START_LINE_PROGRESS");
   const finishProgress = readNumberConstant("LOCAL_FINISH_PROGRESS");
   const railMaxProgress = readNumberConstant("RAIL_MAX_PROGRESS");
   const runSpeed = readNumberConstant("LOCAL_RUN_PROGRESS_PER_SECOND");
   const sprintSpeed = readNumberConstant("LOCAL_SPRINT_PROGRESS_PER_SECOND");
+  const laneSpeed = readNumberConstant("LOCAL_LANE_SPEED_PX_PER_SECOND");
+  const laneSprintSpeed = readNumberConstant("LOCAL_LANE_SPRINT_SPEED_PX_PER_SECOND");
   const stagingRunSpeed = readNumberConstant("LOCAL_STAGING_RUN_PROGRESS_PER_SECOND");
   const stagingSprintSpeed = readNumberConstant("LOCAL_STAGING_SPRINT_PROGRESS_PER_SECOND");
   const gateClearance = readNumberConstant("START_GATE_CLEARANCE_PROGRESS");
@@ -44,6 +47,7 @@ async function main() {
   const runSecondsToFinish = Math.ceil((finishProgress - startProgress) / runSpeed);
   const sprintSecondsToFinish = Math.ceil((finishProgress - startProgress) / sprintSpeed);
   assertMovementSpeedFeel({ runSecondsToFinish, sprintSecondsToFinish, runSpeed, sprintSpeed, stagingRunSpeed, stagingSprintSpeed });
+  assertMovementAxisPixelFeel({ runSpeed, sprintSpeed, laneSpeed, laneSprintSpeed, trailGeometry });
   assert(gateClearance <= 0.12, "start paddock clamp should let runners stand close to the gate");
   assert(gateOpenAnimationMs >= 650, "start gate should visibly open instead of disappearing");
   assertServerSprintMatchesClient({ marathon, sprintSpeed });
@@ -77,7 +81,7 @@ async function main() {
     serverLaneOffsetPx: 0
   }, sprintFrame, 1, {
     sprintProgressPerSecond: sprintSpeed,
-    laneSprintSpeedPxPerSecond: 126,
+    laneSprintSpeedPxPerSecond: laneSprintSpeed,
     minProgress: 2.5,
     maxProgress: railMaxProgress,
     laneHalfWidthPx: 232,
@@ -92,6 +96,8 @@ async function main() {
   console.log(JSON.stringify({
     runSecondsToFinish,
     sprintSecondsToFinish,
+    laneSpeed,
+    laneSprintSpeed,
     serverEgressKbpsFor30: network.budget.serverEgressKbps,
     degradedLane: network.degradedLane.lane,
     spamDecision: network.spamDecision.reason
@@ -102,7 +108,12 @@ function assertRacePageContracts() {
   assert(pageSource.includes("race_finalized"), "local finish should rehearse server-owned finalization");
   assert(pageSource.includes("server:local-preview"), "local finish packet must be marked as server-preview owned");
   assert(pageSource.includes("race-result-panel"), "race screen needs a minimal finish result layer");
+  assert(pageSource.includes("race-result-restart"), "finish result layer should expose a restart/return button");
   assert(pageSource.includes("finalizeRaceResult"), "local and server finishes should share one result finalizer");
+  assert(pageSource.includes("restartRaceAfterResult"), "finish restart should clear race state before re-entry");
+  assert(pageSource.includes("state.connectedSession = null"), "finish restart should leave any connected preview session");
+  assert(pageSource.includes("state.action = createActionRaceState()"), "finish restart should reset action/race state");
+  assert(pageSource.includes("state.runnerMotion.clear()"), "finish restart should clear stale runner motion");
   assert(pageSource.includes("createConnectedFinishRanking"), "server-owned snapshots should drive connected race results");
 }
 
@@ -112,6 +123,41 @@ function assertMovementSpeedFeel(values) {
   assert(values.stagingRunSpeed >= 1, "start paddock movement must be visible before the race opens");
   assert(values.stagingSprintSpeed >= values.sprintSpeed, "start paddock sprint should not feel slower than active sprint");
   assert(values.sprintSpeed >= values.runSpeed * 2, "Shift sprint must feel clearly faster than normal running");
+}
+
+function assertMovementAxisPixelFeel(values) {
+  const samples = [5, 32, 50, 68, 92];
+  assert(values.laneSpeed >= 130 && values.laneSpeed <= 190, "W/S lane speed should be visible but not outrun forward movement");
+  assert(values.laneSprintSpeed >= 180 && values.laneSprintSpeed <= 260, "Shift+W/S lane speed should stay responsive without becoming the main sprint");
+  for (const progress of samples) {
+    const runPx = progressPixelsPerSecond(values.trailGeometry, progress, values.runSpeed);
+    const sprintPx = progressPixelsPerSecond(values.trailGeometry, progress, values.sprintSpeed);
+    assert(values.laneSpeed >= runPx * 0.55, `W/S lane speed should not feel dead at progress ${progress}`);
+    assert(values.laneSpeed <= runPx * 0.85, `W/S lane speed should stay below forward run at progress ${progress}`);
+    assert(values.laneSprintSpeed >= sprintPx * 0.25, `Shift+W/S should remain visible at progress ${progress}`);
+    assert(values.laneSprintSpeed <= sprintPx * 0.45, `Shift+W/S should stay below forward sprint at progress ${progress}`);
+  }
+}
+
+function progressPixelsPerSecond(trailGeometry, progress, progressSpeed) {
+  const current = trackPixelAtProgress(trailGeometry, progress);
+  const next = trackPixelAtProgress(trailGeometry, progress + 0.01);
+  const pixelsPerProgress = Math.hypot(next.x - current.x, next.y - current.y) / 0.01;
+  const trailPoint = trailGeometry.progressToRestoredMarathonTrailPoint(progress);
+  return pixelsPerProgress * progressSpeed * trailGeometry.calculateRestoredMarathonSpeedScale(trailPoint.tangent);
+}
+
+function trackPixelAtProgress(trailGeometry, progress) {
+  const point = trailGeometry.progressToRestoredMarathonMapPoint(progress, {
+    worldWidth: trailGeometry.RESTORED_MARATHON_WORLD_WIDTH,
+    worldHeight: trailGeometry.RESTORED_MARATHON_WORLD_HEIGHT,
+    laneOffsetPx: 0,
+    laneHalfWidthPx: 232
+  });
+  return {
+    x: point.x / 100 * trailGeometry.RESTORED_MARATHON_WORLD_WIDTH,
+    y: point.y / 100 * trailGeometry.RESTORED_MARATHON_WORLD_HEIGHT
+  };
 }
 
 function assertServerSprintMatchesClient({ marathon, sprintSpeed }) {

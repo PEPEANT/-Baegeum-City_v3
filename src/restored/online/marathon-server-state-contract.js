@@ -12,7 +12,8 @@ export const RESTORED_MARATHON_SERVER_STATE_VERSION = "restored-marathon-server-
 
 const PACES = Object.freeze(["recover", "steady", "push", "sprint"]);
 const DEFAULT_LANE_HALF_WIDTH_PX = 232;
-const DEFAULT_LANE_SPEED_PX_PER_SECOND = 126;
+const DEFAULT_LANE_SPEED_PX_PER_SECOND = 150;
+const DEFAULT_LANE_SPRINT_SPEED_PX_PER_SECOND = 210;
 
 export function startRestoredMarathonServerRoom(roomInput = {}, options = {}) {
   const room = createRestoredMarathonRoom(roomInput);
@@ -65,7 +66,9 @@ export function applyRestoredMarathonServerInputCommand(roomInput = {}, commandI
     sequence: command.sequence
   }, forwardElapsedMs, room.course);
   const laneHalfWidthPx = clampNumber(options.laneHalfWidthPx ?? DEFAULT_LANE_HALF_WIDTH_PX, 80, 1000);
-  const laneSpeedPxPerSecond = clampNumber(options.laneSpeedPxPerSecond ?? DEFAULT_LANE_SPEED_PX_PER_SECOND, 20, 400);
+  const baseLaneSpeedPxPerSecond = clampNumber(options.laneSpeedPxPerSecond ?? DEFAULT_LANE_SPEED_PX_PER_SECOND, 20, 400);
+  const sprintLaneSpeedPxPerSecond = clampNumber(options.laneSprintSpeedPxPerSecond ?? DEFAULT_LANE_SPRINT_SPEED_PX_PER_SECOND, 20, 400);
+  const laneSpeedPxPerSecond = command.pace === "sprint" ? sprintLaneSpeedPxPerSecond : baseLaneSpeedPxPerSecond;
   const laneOffsetPx = clampNumber(
     participant.laneOffsetPx + (command.direction.y * laneSpeedPxPerSecond * elapsedMs / 1000),
     -laneHalfWidthPx,
@@ -131,6 +134,8 @@ export function validateRestoredMarathonServerStateContract() {
   const sideOnly = applyRestoredMarathonServerInputEnvelope(first.room, input(2, "sprint", 1100, 0, 1), { elapsedMs: 1000, receivedAtMs: 1100 });
   if (!sideOnly.ok || sideOnly.participant.progressMeters !== first.participant.progressMeters) errors.push("side-only input must not advance marathon progress");
   if (sideOnly.participant.laneOffsetPx <= first.participant.laneOffsetPx) errors.push("side-only input should still move the runner across the road lane");
+  const sideSprint = advanceSideOnlySprint(first.room);
+  if (sideSprint.laneOffsetPx < 180) errors.push("server sprint lane input should stay responsive enough for fixed-camera play");
   const spectatorRoom = createRestoredMarathonRoom({ ...first.room, participants: [...first.room.participants, { participantId: "spectator:test", type: "spectator" }] });
   const spectatorMove = applyRestoredMarathonServerInputEnvelope(spectatorRoom, input(1, "sprint", 1200, 1, 0, "spectator:test"), { elapsedMs: 1000, receivedAtMs: 1200 });
   if (spectatorMove.ok || spectatorMove.reason !== "participant_cannot_move") errors.push("spectator input must not move server state");
@@ -152,6 +157,21 @@ export function validateRestoredMarathonServerStateContract() {
 
 function input(sequence, pace, raceTimeMs, x = 1, y = 0, participantId = "runner:test") {
   return Object.freeze({ roomId: "room:test", sequence, payload: { participantId, pace, raceTimeMs, direction: { x, y } } });
+}
+
+function advanceSideOnlySprint(roomInput) {
+  let room = roomInput;
+  let participant = null;
+  for (let sequence = 2; sequence <= 5; sequence += 1) {
+    const moved = applyRestoredMarathonServerInputEnvelope(room, input(sequence, "sprint", 1000 + (sequence * 250), 0, 1), {
+      elapsedMs: 250,
+      receivedAtMs: 1000 + (sequence * 250)
+    });
+    if (!moved.ok) return createRestoredMarathonParticipant(participant || {});
+    room = moved.room;
+    participant = moved.participant;
+  }
+  return participant || createRestoredMarathonParticipant();
 }
 
 function attack(sequence, attackerId, raceTimeMs) {

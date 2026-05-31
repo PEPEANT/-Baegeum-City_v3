@@ -5,6 +5,14 @@ const SIZE_STEPS = [
   { key: "standard", label: "기본", scale: 1 },
   { key: "large", label: "대형", scale: 1.15 }
 ];
+export const BUILDING_SHELL_COLOR_OPTIONS = Object.freeze([
+  { id: "slate", label: "Slate", value: "#58615a" },
+  { id: "green", label: "Green", value: "#4f735c" },
+  { id: "brick", label: "Brick", value: "#7a4d45" },
+  { id: "blue", label: "Blue", value: "#4e647d" },
+  { id: "gold", label: "Gold", value: "#7a6845" },
+  { id: "violet", label: "Violet", value: "#665878" }
+]);
 
 export function isBuildingShell(item) {
   return item?.kind === "building" && item.objectKind === "building_shell";
@@ -23,6 +31,32 @@ export function cycleBuildingShellSize(item) {
   resizeAroundCenter(item, base, next.scale);
   syncShellCollision(item);
   return { key: next.key, label: next.label, w: item.w, h: item.h };
+}
+
+export function buildingShellDisplayName(item) {
+  if (!isBuildingShell(item)) return "";
+  return cleanShellName(item.shellName) || cleanShellName(item.label) || cleanShellName(item.sign) || item.presetId || item.id || "building";
+}
+
+export function buildingShellColor(item) {
+  if (!isBuildingShell(item)) return "";
+  return normalizeShellColor(item.shellColor);
+}
+
+export function setBuildingShellName(item, value) {
+  if (!isBuildingShell(item)) return null;
+  const shellName = cleanShellName(value);
+  if (shellName) item.shellName = shellName;
+  else delete item.shellName;
+  return { shellName: item.shellName || "", label: buildingShellDisplayName(item) };
+}
+
+export function setBuildingShellColor(item, value) {
+  if (!isBuildingShell(item)) return null;
+  const shellColor = normalizeShellColor(value);
+  if (shellColor) item.shellColor = shellColor;
+  else delete item.shellColor;
+  return { shellColor: item.shellColor || "", label: colorLabel(item.shellColor) };
 }
 
 function nearestSizeStep(item, base = baseShellSize(item)) {
@@ -55,6 +89,19 @@ function syncShellCollision(item) {
   if (item.collision?.shape !== "rect") return;
   item.collision.w = item.w;
   item.collision.h = item.h;
+}
+
+function cleanShellName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, 24);
+}
+
+function normalizeShellColor(value) {
+  const color = String(value || "").trim().toLowerCase();
+  return /^#[0-9a-f]{6}$/u.test(color) ? color : "";
+}
+
+function colorLabel(value) {
+  return BUILDING_SHELL_COLOR_OPTIONS.find((option) => option.value === normalizeShellColor(value))?.label || "Custom";
 }
 
 function roundEven(value) {

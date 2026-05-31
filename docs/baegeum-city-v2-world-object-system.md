@@ -14,8 +14,8 @@
 - `src/data/world-placement-validation.js`는 새 오브젝트 배치 시 맵 경계, 보호구역, 건물/벽, 다른 충돌 오브젝트, 도로 점유를 검사한다.
 - 에디터에서 새로 배치한 장식물은 `presetId`, `objectLayer`, `collision`, `destructibleSpec`, `buildRules`를 함께 저장한다.
 - 에디터의 `도시` 인프라 카드와 `빈 상가`, `빈 카지노`, `골목 상가` 건물 카드 v0는 `objectLayer: "obstacle"`, `kind: "building"`, `objectKind: "building_shell"`로 저장되며, 입장/실내/경제 동작은 아직 만들지 않는다.
-- `building_shell` 크기 편집은 기존 `w/h`와 `collision.w/h`만 바꾸며, doors/channels/interior/economy/online 필드는 만들지 않는다.
-- 건물 쉘 스모크 검증은 `createWorldEditorDraft` 이후에도 건물 카드가 `obstacles`에 남고, `building:*` 계약 ID와 `building_shell` 분류를 유지하며, venue/economy 필드를 갖지 않는지 확인한다.
+- `building_shell` 크기 편집은 기존 `w/h`와 `collision.w/h`만 바꾸며, 이름/색 편집은 placement-only `shellName`과 `shellColor`만 바꾼다. doors/channels/interior/economy/online 필드는 만들지 않는다.
+- 건물 쉘 스모크 검증은 `createWorldEditorDraft` 이후에도 건물 카드가 `obstacles`에 남고, `building:*` 계약 ID와 `building_shell` 분류 및 `shellName`/`shellColor` 외형 필드를 유지하며, venue/economy 필드를 갖지 않는지 확인한다.
 - 광고판은 오브젝트 위치와 충돌은 그대로 두고, `adId`만 바꿔 광고 내용을 교체한다.
 - `collision`은 현재 물체가 실제로 막는 범위를 정의한다.
 - `destructibleSpec`은 체력, 파괴 원인, 파괴 후 충돌 처리, 잔해 프리셋을 정의한다.
@@ -155,12 +155,13 @@ objectRuntimeState = {
 - These cards are placement-only `building_shell` objects and must not carry doors, channels, interiors, economy, or online metadata.
 - City role placement now has a separate contract in `src/data/city-district-contract.js`. `src/tools/baegeum-world-editor-build.js` filters build presets with `canPlaceNewBuildingType(typeId, mapId)`. Existing baegeum casino anchors are only `legacy_preserved`, not permission to create new baegeum casino shells.
 - Building shell size editability currently cycles compact, standard, and large dimensions while preserving the object center and collision rectangle.
+- Building shell name/color editability uses `shellName` and `shellColor` as visual editor metadata only. These fields can be saved in world editor drafts, but they do not create venue anchors, doors, channels, interiors, economy, or online ownership.
 - Venue metadata edits now flow through `readStoredVenueMetadata`, `writeStoredVenueMetadata`, and `upsertStoredVenueMetadata`. Those APIs normalize stored drafts to editable venue-owned fields only, while channels, room IDs, doors, and building rects stay derived from the base `venue_anchor` contract.
 - `tools/smoke-venue-metadata-storage.cjs` covers this guardrail and is part of `npm run check`.
 
 ## 다음 단계
 
-1. 건물 카드 이름/색 편집성 또는 venue 메타데이터 편집을 붙이되 `building_shell`과 `venue_anchor` 경계를 유지한다.
+1. venue 메타데이터 편집을 월드 에디터에 붙이되 `building_shell`의 `shellName`/`shellColor` 외형 필드와 `venue_anchor`의 입장/채널/실내 계약 경계를 유지한다.
 2. 기존 Iron Line 장식물도 가능한 범위에서 `presetId` 기반으로 정규화한다.
 3. 카지노 테이블과 칩교환 창구를 `table`, `shop_shelf` 계열 오브젝트로 표현한다.
 4. 차량은 `vehicle_key:*`와 `license:driver` 요구 조건을 가진 `vehicle`로 붙인다.

@@ -1,3 +1,5 @@
+import { calculateRestoredMarathonSpeedScale, progressToRestoredMarathonTrailPoint } from "./marathon-trail-geometry.js";
+
 const DEFAULTS = Object.freeze({
   startLineProgress: 4,
   startPaddockMinProgress: 2.8,
@@ -34,7 +36,9 @@ export function advanceSingularityLocalBotPack(runners, options = {}) {
     const packBoost = runner.progress < playerProgress - 12 ? 0.035 : 0;
     const hpFactor = (runner.hp ?? 100) < 60 ? 0.72 : 1;
     const laneDrift = Math.sin((nowMs / 900) + index) * 10 * elapsedSeconds;
-    const nextProgress = Math.min(context.railMaxProgress, runner.progress + ((baseSpeed + packBoost) * hpFactor * elapsedSeconds));
+    const trailPoint = progressToRestoredMarathonTrailPoint(runner.progress);
+    const speedScale = calculateRestoredMarathonSpeedScale(trailPoint.tangent);
+    const nextProgress = Math.min(context.railMaxProgress, runner.progress + ((baseSpeed + packBoost) * hpFactor * speedScale * elapsedSeconds));
     const nextLaneOffsetPx = clampNumber((runner.laneOffsetPx || 0) + laneDrift, -context.roadLaneHalfWidthPx, context.roadLaneHalfWidthPx);
     moved = moved || didMove(runner, nextProgress, nextLaneOffsetPx);
     return { ...runner, progress: nextProgress, laneOffsetPx: nextLaneOffsetPx };

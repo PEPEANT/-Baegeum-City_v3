@@ -379,7 +379,8 @@
       stroke-width: 0.46;
     }
 
-    .save-line {
+    .save-line,
+    .finish-line {
       stroke: #11161c;
       stroke-width: 0.34;
     }
@@ -635,6 +636,7 @@
               <path class="track-wall" id="track-wall" d="" />
               <path class="track-road" id="track-road" d="" />
               <path class="track-line" id="track-line" d="" />
+              <line class="finish-line" id="finish-line" x1="0" y1="0" x2="0" y2="0" />
               <g id="save-points"></g>
             </svg>
           </div>
@@ -758,6 +760,7 @@
     import {
       createRestoredMarathonTrailSvgPath,
       listRestoredMarathonTrailSavePoints,
+      progressToRestoredMarathonTrailPoint,
       progressToRestoredMarathonMapPoint
     } from "./src/restored/games/marathon-trail-geometry.js";
     import {
@@ -852,6 +855,7 @@
       trackWall: document.querySelector("#track-wall"),
       trackRoad: document.querySelector("#track-road"),
       trackLine: document.querySelector("#track-line"),
+      finishLine: document.querySelector("#finish-line"),
       channelTabs: document.querySelector("#channel-tabs"),
       chatTitle: document.querySelector("#chat-title"),
       chatChannel: document.querySelector("#chat-channel"),
@@ -991,6 +995,8 @@
       elements.trackWall.setAttribute("d", path);
       elements.trackRoad.setAttribute("d", path);
       elements.trackLine.setAttribute("d", path);
+      const finishLine = trailMarkerLine(progressToRestoredMarathonTrailPoint(100), 4.4);
+      for (const [key, value] of Object.entries(finishLine)) elements.finishLine.setAttribute(key, value);
       elements.savePoints.replaceChildren(...listRestoredMarathonTrailSavePoints().map((point) => {
         const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -1007,6 +1013,15 @@
         group.append(line, label);
         return group;
       }));
+    }
+
+    function trailMarkerLine(point, half = 3.8) {
+      return {
+        x1: Math.max(2, Math.min(98, point.x - (point.normal?.x || 0) * half)),
+        y1: Math.max(2, Math.min(98, point.y - (point.normal?.y || 1) * half)),
+        x2: Math.max(2, Math.min(98, point.x + (point.normal?.x || 0) * half)),
+        y2: Math.max(2, Math.min(98, point.y + (point.normal?.y || 1) * half))
+      };
     }
 
     function render() {

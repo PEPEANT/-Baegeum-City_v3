@@ -329,7 +329,8 @@ button.dirty {
 }
 
 .selection-action-strip,
-.ad-palette {
+.ad-palette,
+.building-shell-editor {
   position: fixed;
   left: 14px;
   right: 350px;
@@ -370,6 +371,41 @@ button.dirty {
   display: grid;
   gap: 10px;
   padding: 12px;
+}
+
+.building-shell-editor {
+  bottom: 72px;
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) auto;
+  align-items: end;
+  gap: 10px;
+  padding: 10px;
+}
+
+.building-shell-editor label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.building-shell-color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.building-shell-color-button {
+  width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border-color: rgba(245, 241, 223, 0.24);
+  border-radius: 6px;
+}
+
+.building-shell-color-button.active {
+  border-color: rgba(255, 231, 146, 0.96);
+  box-shadow: 0 0 0 2px rgba(255, 231, 146, 0.16);
 }
 
 .ad-grid {
@@ -633,6 +669,13 @@ button.dirty {
     left: 10px;
     right: 10px;
     bottom: calc(46vh + 76px);
+  }
+
+  .building-shell-editor {
+    left: 10px;
+    right: 10px;
+    bottom: calc(46vh + 76px);
+    grid-template-columns: 1fr;
   }
 
   .ad-grid {

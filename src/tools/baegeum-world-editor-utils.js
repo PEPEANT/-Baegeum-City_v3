@@ -44,7 +44,7 @@ export function drawEditorOverlay(ctx, state) {
 export function labelFor(state, hit) {
   if (!hit) return "선택 없음";
   if (hit.type === "scenery") return state.map.scenery[hit.index]?.id || `장식물 ${hit.index + 1}`;
-  if (hit.type === "obstacle") return `${state.map.obstacles[hit.index]?.kind || "건물"} ${hit.index + 1}`;
+  if (hit.type === "obstacle") return obstacleLabel(state.map.obstacles[hit.index], hit.index);
   if (hit.type === "road-point") return `도로 ${hit.roadIndex + 1} 점 ${hit.pointIndex + 1}`;
   return `도로 ${hit.roadIndex + 1}`;
 }
@@ -83,6 +83,11 @@ function findScenery(state, point) {
     if (hitItem(items[index], point)) return { type: "scenery", index };
   }
   return null;
+}
+
+function obstacleLabel(item, index) {
+  if (item?.objectKind === "building_shell" && item.shellName) return item.shellName;
+  return `${item?.kind || "건물"} ${index + 1}`;
 }
 
 function findObstacle(state, point) {

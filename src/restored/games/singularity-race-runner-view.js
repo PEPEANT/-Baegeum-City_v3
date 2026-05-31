@@ -9,27 +9,66 @@ const SKILL_LABELS = Object.freeze({
   "skill:guard-roll": "가드 구르기"
 });
 
+const RUN_STYLE_BY_SKIN = Object.freeze({
+  kaguya: "glide",
+  "singularity-fan": "quick",
+  robot: "robot",
+  gpichan: "bounce",
+  "doomer-runner": "heavy",
+  "pepe-runner": "hop",
+  "doge-runner": "hop",
+  "ant-squad": "quick",
+  "moderator-armband": "quick",
+  yalrkun: "bounce",
+  "lakers-wile": "glide",
+  "sam-altman": "glide",
+  "demis-hassabis": "quick",
+  "ai-believer": "glide",
+  "server-crash": "robot",
+  "profit-fairy": "bounce",
+  "stoploss-warrior": "heavy"
+});
+
 export function createSingularityRunnerAvatarNode(runner) {
   const avatar = document.createElement("div");
   avatar.dataset.runnerId = runner.id;
   const image = document.createElement("img");
+  const chatBubble = document.createElement("span");
+  chatBubble.className = "runner-chat-bubble";
+  chatBubble.hidden = true;
+  const attackSwipe = document.createElement("span");
+  attackSwipe.className = "runner-attack-swipe";
   const nameplate = document.createElement("span");
   nameplate.className = "runner-nameplate";
-  avatar.append(image, nameplate);
+  avatar.append(chatBubble, image, attackSwipe, nameplate);
   return avatar;
 }
 
-export function updateSingularityRunnerAvatarNode(avatar, runner, skinSrc) {
+export function updateSingularityRunnerAvatarNode(avatar, runner, skinSrc, options = {}) {
   const image = avatar.querySelector("img");
+  const chatBubble = avatar.querySelector(".runner-chat-bubble");
   const nameplate = avatar.querySelector(".runner-nameplate");
+  avatar.dataset.skinId = String(runner.skin || "");
+  avatar.dataset.runStyle = String(options.runStyle || resolveSingularityRunnerRunStyle(runner.skin));
   if (image) {
     image.alt = `${runner.name} skin`;
     if (image.src !== skinSrc) image.src = skinSrc;
+  }
+  if (chatBubble) {
+    const bubbleText = String(options.chatBubbleText || "").trim();
+    chatBubble.textContent = bubbleText;
+    chatBubble.title = bubbleText;
+    chatBubble.hidden = !bubbleText;
+    chatBubble.classList.toggle("has-text", Boolean(bubbleText));
   }
   if (nameplate) {
     nameplate.textContent = runner.name;
     nameplate.title = runner.name;
   }
+}
+
+export function resolveSingularityRunnerRunStyle(skinId) {
+  return RUN_STYLE_BY_SKIN[String(skinId || "").trim()] || "stride";
 }
 
 export function createSingularityRunnerSlotNode(runner, index, options = {}) {
@@ -106,6 +145,8 @@ export function validateSingularityRaceRunnerViewContract() {
   if (getSingularityActionStatusLabel({ connected: true, debug: false }) !== "온라인 대기") {
     errors.push("connected player status must stay Korean");
   }
+  if (resolveSingularityRunnerRunStyle("robot") !== "robot") errors.push("robot needs a mechanical run style");
+  if (resolveSingularityRunnerRunStyle("gpichan") !== "bounce") errors.push("gpichan needs a bouncy run style");
   return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
 }
 

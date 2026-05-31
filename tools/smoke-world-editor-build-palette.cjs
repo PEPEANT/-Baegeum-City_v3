@@ -24,6 +24,7 @@ const CITY_PRESET_IDS = [
   assertRoleAwareGroups(modules.build);
   const building = assertBuildingShell(modules);
   assertBuildingShellResize(modules, building);
+  assertBuildingShellEdit(modules, building);
   assertDraftBuildingShell(modules, building);
   assertBuildingVariants(modules.build);
   assertCategoryOpenState(modules.build);
@@ -106,6 +107,8 @@ function assertDraftBuildingShell({ draft, contract }, building) {
   assert.equal(saved.scenery.length, 0);
   assert.equal(saved.obstacles[0].id, building.id);
   assert.equal(saved.obstacles[0].objectKind, "building_shell");
+  assert.equal(saved.obstacles[0].shellName, "남문 상가 1호");
+  assert.equal(saved.obstacles[0].shellColor, "#4f735c");
   assert.equal(saved.summary.contractIds, 1);
   assertNoVenueKeys(saved.obstacles[0], "draft building shell");
 }
@@ -122,6 +125,19 @@ function assertBuildingShellResize({ buildingShells }, building) {
   assert.equal(building.collision.w, building.w);
   assert.equal(building.collision.h, building.h);
   assertNoVenueKeys(building, "resized building shell");
+}
+
+function assertBuildingShellEdit({ buildingShells }, building) {
+  assert.equal(buildingShells.buildingShellDisplayName(building), building.presetId);
+  const named = buildingShells.setBuildingShellName(building, "남문 상가\n  1호");
+  assert.equal(named.shellName, "남문 상가 1호");
+  assert.equal(building.shellName, "남문 상가 1호");
+  const colored = buildingShells.setBuildingShellColor(building, "#4f735c");
+  assert.equal(colored.shellColor, "#4f735c");
+  assert.equal(buildingShells.buildingShellColor(building), "#4f735c");
+  assert.equal(building.doors, undefined);
+  assert.equal(building.channels, undefined);
+  assertNoVenueKeys(building, "edited building shell");
 }
 
 function assertBuildingVariants(build) {

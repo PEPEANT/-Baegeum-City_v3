@@ -1,9 +1,11 @@
+import { calculateRestoredMarathonSpeedScale, progressToRestoredMarathonTrailPoint } from "./marathon-trail-geometry.js";
+
 export const SINGULARITY_RACE_PREDICTION_VERSION = "singularity-race-prediction-001";
 
-const DEFAULT_RUN_PROGRESS_PER_SECOND = 0.38;
-const DEFAULT_SPRINT_PROGRESS_PER_SECOND = 1.05;
-const DEFAULT_LANE_SPEED_PX_PER_SECOND = 104;
-const DEFAULT_LANE_SPRINT_SPEED_PX_PER_SECOND = 126;
+const DEFAULT_RUN_PROGRESS_PER_SECOND = 0.62;
+const DEFAULT_SPRINT_PROGRESS_PER_SECOND = 1.75;
+const DEFAULT_LANE_SPEED_PX_PER_SECOND = 150;
+const DEFAULT_LANE_SPRINT_SPEED_PX_PER_SECOND = 210;
 const DEFAULT_MIN_PROGRESS = 2.5;
 const DEFAULT_MAX_PROGRESS = 100;
 const DEFAULT_LANE_HALF_WIDTH_PX = 232;
@@ -27,7 +29,9 @@ export function advanceSingularityRaceLocalPrediction(runnerInput = {}, frameInp
   const minProgress = finiteNumber(options.minProgress, DEFAULT_MIN_PROGRESS);
   const maxProgress = finiteNumber(options.maxProgress, DEFAULT_MAX_PROGRESS);
   const laneHalfWidthPx = positiveNumber(options.laneHalfWidthPx, DEFAULT_LANE_HALF_WIDTH_PX);
-  const progress = clampNumber(finiteNumber(runner.progress, minProgress) + direction.x * progressSpeed * elapsedSeconds, minProgress, maxProgress);
+  const trailPoint = progressToRestoredMarathonTrailPoint(finiteNumber(runner.progress, minProgress));
+  const speedScale = calculateRestoredMarathonSpeedScale(trailPoint.tangent);
+  const progress = clampNumber(finiteNumber(runner.progress, minProgress) + direction.x * progressSpeed * speedScale * elapsedSeconds, minProgress, maxProgress);
   const laneOffsetPx = clampNumber(finiteNumber(runner.laneOffsetPx, 0) + direction.y * laneSpeed * elapsedSeconds, -laneHalfWidthPx, laneHalfWidthPx);
   return reconcileSingularityRaceLocalPrediction({
     ...runner,

@@ -2,6 +2,7 @@ export function drawCityBoundaryObstacles(ctx, obstacles = []) {
   for (const item of obstacles || []) {
     if (item?.kind === "city-boundary") drawCityBoundaryObstacle(ctx, item);
   }
+  drawCustomizedBuildingShells(ctx, obstacles);
 }
 
 export function drawCityBoundaryObstacle(ctx, item) {
@@ -76,6 +77,52 @@ function normalizeRect(item) {
     w: Math.max(1, Number(item.w) || 1),
     h: Math.max(1, Number(item.h) || 1)
   };
+}
+
+function drawCustomizedBuildingShells(ctx, obstacles) {
+  for (const item of obstacles || []) {
+    if (!isCustomizedBuildingShell(item)) continue;
+    const rect = normalizeRect(item);
+    ctx.save();
+    if (validHex(item.shellColor)) drawShellColor(ctx, rect, item.shellColor);
+    if (item.shellName) drawShellName(ctx, rect, item.shellName);
+    ctx.restore();
+  }
+}
+
+function isCustomizedBuildingShell(item) {
+  return item?.kind === "building" && item.objectKind === "building_shell" && (validHex(item.shellColor) || Boolean(item.shellName));
+}
+
+function drawShellColor(ctx, rect, color) {
+  ctx.fillStyle = `${color}b8`;
+  ctx.strokeStyle = "rgba(255, 244, 196, 0.38)";
+  ctx.lineWidth = 2;
+  roundRect(ctx, rect.x + 4, rect.y + 4, Math.max(1, rect.w - 8), Math.max(1, rect.h - 8), 5);
+  ctx.fill();
+  ctx.stroke();
+}
+
+function drawShellName(ctx, rect, name) {
+  const label = String(name).slice(0, 24);
+  const x = rect.x + rect.w * 0.5;
+  const y = rect.y - 32;
+  ctx.font = "bold 19px 'Malgun Gothic', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  const width = Math.max(86, ctx.measureText(label).width + 24);
+  ctx.fillStyle = "rgba(22, 28, 24, 0.92)";
+  ctx.strokeStyle = "rgba(255, 215, 102, 0.82)";
+  ctx.lineWidth = 2;
+  roundRect(ctx, x - width / 2, y - 17, width, 34, 7);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#ffe186";
+  ctx.fillText(label, x, y + 1);
+}
+
+function validHex(value) {
+  return /^#[0-9a-f]{6}$/u.test(String(value || "").toLowerCase());
 }
 
 function roundRect(ctx, x, y, w, h, radius) {
