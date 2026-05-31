@@ -20,7 +20,8 @@ Conclusion: the restored build is ready to plan a real UI redesign, but implemen
 Current playable entry:
 
 ```text
-index.html -> baegeum-city-v2-dice.html
+index.html -> launcher, primary action -> singularity-race.html
+sub mode -> baegeum-city-v2-dice.html
 ```
 
 Current bottom nav is now the location-aware restored shell:

@@ -7,7 +7,8 @@ Conclusion: before the restored build adds partner illustrations, phone art, cas
 This document owns the pre-redesign asset workflow for the current player-facing build:
 
 ```text
-index.html -> baegeum-city-v2-dice.html
+index.html -> singularity-race-first launcher
+sub mode -> baegeum-city-v2-dice.html
 src/restored/assets/asset-manifest.js
 ```
 

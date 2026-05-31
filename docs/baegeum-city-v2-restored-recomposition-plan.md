@@ -7,7 +7,8 @@ Conclusion: the restored Dice City-derived HTML should stay playable, but every 
 This document owns the pre-redesign work for the current player-facing build:
 
 ```text
-index.html -> baegeum-city-v2-dice.html
+index.html -> singularity-race-first launcher
+sub mode -> baegeum-city-v2-dice.html
 ```
 
 `docs/baegeum-city-v2-restored-growth-architecture.md` owns the feature direction. This document owns the recomposition order that prevents that direction from becoming another single-file bottleneck.

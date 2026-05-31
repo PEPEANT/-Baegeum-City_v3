@@ -6,7 +6,7 @@
 
 사용자가 “다이스시티에서 배금도시로 제목만 갈아끼우고 v2로 하자”고 명확히 지시했기 때문에, 당분간 첫 화면은 `baegeum-city-v2-dice.html`을 따른다.
 
-- `index.html`은 restored HTML로 리다이렉트한다.
+- `index.html`은 특이점레이스를 1순위로 보여주는 런처이며, 기존 restored HTML은 `baegeum-city-v2-dice.html` 서브 모드로 남긴다.
 - 기존 `src/` 기반 도시 코어, 맵에디터, ledger/action 계약은 삭제하지 않고 보관한다.
 - restored HTML은 단일 로컬 게임으로 현금, 주식, 선물, 부동산, 카지노, 상점, 저장/복구를 직접 다룬다.
 - 이 빌드는 온라인-ready ledger/server-authority 규칙을 따르지 않는 예외이며, 현재는 재미와 만족도를 확인하기 위한 활성 플레이 빌드다.

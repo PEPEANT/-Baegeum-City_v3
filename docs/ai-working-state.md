@@ -1,6 +1,14 @@
 # AI Working State
 
 Date: 2026-05-31
+Observed: After committing and pushing the completed Singularity Race 0.1 stabilization patch, the user approved making Singularity Race the main project entry while keeping Baegeum City and Dice City as preserved sub modes.
+Changed: Replaced the root `index.html` redirect with a lightweight launcher that marks `data-primary-mode="singularity-race"`, puts `특이점레이스 시작` first, keeps the dev host entry visible, and leaves `baegeum-city-v2-dice.html`, dice-city, editor, and skin lab links as sub mode/tool entries. Added `tools/smoke-index-entry.cjs` to guard the new root entry and wired it into `npm run check`. Updated current-entry docs from `index.html -> baegeum-city-v2-dice.html` to the singularity-race-first launcher.
+Verified: `node tools/smoke-index-entry.cjs`, `node tools/check-size.cjs`, `git diff --check`, and `npm run check` passed. Browser verification on `http://127.0.0.1:4173/index.html?codex=launcher` showed `h1=특이점레이스`, `data-primary-mode=singularity-race`, primary link `./singularity-race.html`, the city hub sub-mode link, no `window.location.replace`, and zero console errors. Clicking the primary link opened `http://127.0.0.1:4173/singularity-race.html` with title `특이점레이스 로비` and zero console errors.
+Blocked: None.
+Next: Verify and commit this launcher slice separately, then continue Singularity Race 0.1 final entry/play loop work.
+Do not: Delete Baegeum City, Dice City, casino, city-core, or editor surfaces while making Singularity Race the main mode.
+
+Date: 2026-05-31
 Observed: Singularity Race automatic gates were green and the user asked to move on if no further fix was needed. The work queue's next safe map-editor slice was construction UX, specifically placement-only building shell name/color editing.
 Changed: Added a world editor building-shell edit panel for selected `building_shell` obstacles. The panel writes `shellName` and `shellColor` only, renders those visual fields as a lightweight overlay, and keeps size editing separate from venue metadata. Updated the build-palette/editor-entry smokes and docs so building shells still do not gain doors, channels, interiors, economy, game type, venue id, or online room id fields.
 Verified: `node tools/smoke-world-editor-build-palette.cjs`, `node tools/smoke-editor-entry.cjs`, and `node tools/check-size.cjs` passed. Browser verification on `http://127.0.0.1:4173/editor.html` confirmed an existing building shell opens the name/color panel, the color swatches activate, and no venue-owned field is exposed by the panel path. Text-entry automation was limited by the Browser virtual clipboard, but the pure helper/draft smoke covers `shellName` persistence.

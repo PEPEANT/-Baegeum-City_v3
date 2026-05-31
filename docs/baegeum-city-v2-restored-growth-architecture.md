@@ -7,7 +7,8 @@
 현재 플레이어-facing 빌드:
 
 ```text
-index.html -> baegeum-city-v2-dice.html
+index.html -> singularity-race-first launcher
+sub mode -> baegeum-city-v2-dice.html
 ```
 
 현재 복원판 특징:

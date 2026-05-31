@@ -7,7 +7,8 @@ Conclusion: the restored build should improve its UI first by naming stable surf
 This document owns the next planning layer for the active restored build:
 
 ```text
-index.html -> baegeum-city-v2-dice.html
+index.html -> singularity-race-first launcher
+sub mode -> baegeum-city-v2-dice.html
 ```
 
 Use it before broad UI redesign, online lobby work, ranking screens, partner chat expansion, or public chat work.
